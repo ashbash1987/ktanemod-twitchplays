@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html class="no-js"><!--<![endif]--><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Twitch Plays Keep Talking and Nobody Explodes</title>
+    <meta name="viewport" content="initial-scale=1"> 
+    <link href='https://fonts.googleapis.com/css?family=Special+Elite' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+<body>
+<div class="section">
+    <div class="page page-bg-05">
+        <div class="page-header">
+			<span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+			<img src="img/Glitch.svg" class="diagram" />
+		</div>
+        <div class="page-content">    	    
+            <h2>On the Subject of Twitch Plays</h2>
+            <p class="flavour-text">
+                Kappa, but not the greek letter this time.
+			</p>
+            <p>
+                This supplemental manual will cover all you need to know in order to serve as an expert for your streaming bomb technician through the modern communication technology known as Twitch Chat.
+            </p>
+            <h3>Sending Messages to the Bomb</h3>
+            <p>
+                Each module will have an assigned numerical digit in order to identify between modules that may have similar appearance but different expected outcomes.<br />This will appear in the top-right corner of the message flyout as a command indicator of the form <span class="command-text">!x</span>.<br />Start your message with that command and the remainder of the message will appear in the message flyout for that module.
+            </p>
+            <h3>Auto-play Mode</h3>
+            <p>
+                There is also the option to enable auto-play mode, which leaves the bomb entirely in the hands of you and your fellow Twitch Chat experts.<br />
+                In order to interact directly with the bomb, your commands will need to be very specific, based on the module that you're interacting with.<br />
+                See the details on the following pages on how to interact with each specific module.
+            </p>
+            <p>
+                <strong>Note:</strong> The Auto-play chat interpreter knows if a module is defused and will not interpret instructions for a defused module. Also, if given a sequence of instructions that causes a strike mid-way, it will stop the sequence mid-way to avoid further strikes.<br />However, it does not discern between different chat instructions, so coordinate with your fellow experts to avoid bad instructions to the bomb.<br />
+                Or maybe you want anarchy?<img src="img/Kappa.png" style="height:2em" />
+            </p>
+        </div>
+    </div>
+</div>
+<div class="section">
+    <div class="page page-bg-06">
+        <div class="page-header">
+            <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+            <span class="page-header-section-title">Twitch Plays</span>
+        </div>
+        <div class="page-content">
+            <h3>Module Command Reference (page 1)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th width="15%">Module Name</th>
+                        <th width="85%">Command &amp; Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Wires</td>
+                        <td>
+                            <p>
+                                Wire position is determined in order from top to bottom, first wire being 1.
+                            </p>
+                            <p>
+                                To cut the wire at position 'x': <span class="command-text"><span class="command-text-param">&lt;x&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 5</span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>The Button</td>
+                        <td>
+                            <p>
+                                To press and immediately release: <span class="command-text">tap</span><br />
+                                e.g. <span class="command-text">!1 tap</span><br />
+                            </p>
+                            <p>
+                                To hold the button down: <span class="command-text">hold</span><br />
+                                e.g. <span class="command-text">!1 hold</span><br />
+                            </p>
+                            <p>
+                                To release the button with 'x' in the displayed time: <span class="command-text">release <span class="command-text-param">&lt;x&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 release 4</span><br />
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Keypads</td>
+                        <td>
+                            <p>
+                                Buttons are expressed as their position on the module first from left to right, then top to bottom.
+                            </p>
+                            <p>
+                                To press a sequence of buttons: <span class="command-text"><span class="command-text-param">&lt;list&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 2 4 1 3</span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Simon Says</td>
+                        <td>
+                            <p>
+                                Colors can be expressed as either their English name (red, blue, green, yellow), or as their initial letter (r, g, b, y).
+                            </p>
+                            <p>
+                                To press a sequence of buttons: <span class="command-text"><span class="command-text-param">&lt;list&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 red red blue</span> or <span class="command-text">!1 r r b</span><br />
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Who's on First</td>
+                        <td>
+                            <p>
+                                To press a button labelled as 'x': <span class="command-text"><span class="command-text-param">&lt;x&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 ready</span><br />
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Memory</td>
+                        <td>
+                            <p>
+                                To press a button in the 'x' position: <span class="command-text">position <span class="command-text-param">&lt;x&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 position 2</span><br />
+                            </p>
+                            <p>
+                                To press a button labelled as 'x': <span class="command-text">label <span class="command-text-param">&lt;x&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 label 3</span><br />
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Morse Code</td>
+                        <td>
+                            <p>
+                                Frequencies are expressed as the three digits after the decimal point. e.g. 3.565 Mhz would be expressed as 565.
+                            </p>
+                            <p>
+                                To transmit at 'x': <span class="command-text"><span class="command-text-param">&lt;x&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 565</span><br />
+                            </p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="section">
+    <div class="page page-bg-07">
+        <div class="page-header">
+            <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+            <span class="page-header-section-title">Twitch Plays</span>
+        </div>
+        <div class="page-content">
+            <h3>Module Command Reference (page 2)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th width="15%">Module Name</th>
+                        <th width="85%">Command &amp; Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Complicated Wires</td>
+                        <td>
+                            <p>
+                                Wire index is determined in order from left to right, first wire being 1; index does not count by the wire slots, but by the existence of wires.
+                            </p>
+                            <p>
+                                To cut wires: <span class="command-text"><span class="command-text-param">&lt;list&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 2 4 5 6</span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Wire Sequences</td>
+                        <td>
+                            <p>
+                                Wires are determined by the number slot that they are plugged in to.
+                            </p>
+                            <p>
+                                To cut wires: <span class="command-text"><span class="command-text-param">&lt;list&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 7 8</span><br />
+                            </p>
+                            <p>
+                                To move down a panel: <span class="command-text">down</span><br />
+                                e.g. <span class="command-text">!1 down</span><br />
+                            </p>
+                            <p>
+                                To move up a panel: <span class="command-text">up</span><br />
+                                e.g. <span class="command-text">!1 up</span><br />
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Mazes</td>
+                        <td>
+                            <p>
+                                Maze directions can be expressed as either their English name (up, down, left, right), or as their initial letter (u, d, l, r).
+                            </p>
+                            <p>
+                                To navigate the maze with a sequence of movements: <span class="command-text"><span class="command-text-param">&lt;list&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 up right down down left</span> or <span class="command-text">!1 u r d d l</span><br />
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Passwords</td>
+                        <td>
+                            <p>
+                                Character column index is determined in order from left to right, first column being 1.
+                            </p>
+                            <p>
+                                To cycle through the character column 'x': <span class="command-text">cycle <span class="command-text-param">&lt;x&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 cycle 1</span><br />
+                            </p>
+                            <p>
+                                To try a password 'x': <span class="command-text"><span class="command-text-param">&lt;x&gt;</span></span><br />
+                                e.g. <span class="command-text">!1 world</span><br />
+                            </p>
+                            <p>
+                                <strong>Note:</strong> Submit will not be pressed unless the word can be spelled as specified.
+                            </p>
+                        </td>
+                    </tr>                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
