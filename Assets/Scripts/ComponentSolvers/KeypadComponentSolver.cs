@@ -1,0 +1,58 @@
+﻿using System;
+using System.Collections;
+using System.Reflection;
+using UnityEngine;
+
+public class KeypadComponentSolver : ComponentSolver
+{
+    public KeypadComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent) :
+        base(bomb, bombComponent)
+    {
+        _buttons = (Array)_buttonsField.GetValue(bombComponent);
+    }
+
+    protected override IEnumerator RespondToCommandInternal(string inputCommand)
+    {
+        int beforeButtonStrikeCount = StrikeCount;
+
+        string[] sequence = inputCommand.Split(' ');
+
+        foreach (string buttonIndexString in sequence)
+        {
+            int buttonIndex = 0;
+            if (!int.TryParse(buttonIndexString, out buttonIndex))
+            {
+                continue;
+            }
+
+            buttonIndex--;
+
+            if (buttonIndex >= 0 && buttonIndex < _buttons.Length)
+            {
+                yield return buttonIndexString;
+
+                MonoBehaviour button = (MonoBehaviour)_buttons.GetValue(buttonIndex);
+                DoInteractionStart(button);
+                yield return new WaitForSeconds(0.1f);
+                DoInteractionEnd(button);
+
+                //Escape the sequence if a part of the given sequence is wrong
+                if (StrikeCount != beforeButtonStrikeCount)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    static KeypadComponentSolver()
+    {
+        _keypadComponentType = ReflectionHelper.FindType("KeypadComponent");
+        _buttonsField = _keypadComponentType.GetField("buttons", BindingFlags.Public | BindingFlags.Instance);
+    }
+
+    private static Type _keypadComponentType = null;
+    private static FieldInfo _buttonsField = null;
+
+    private Array _buttons = null;
+}
