@@ -13,9 +13,15 @@ public class VennWireComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
+        if (!inputCommand.StartsWith("cut ", StringComparison.InvariantCultureIgnoreCase))
+        {
+            yield break;
+        }
+        inputCommand = inputCommand.Substring(4);
+
         int beforeButtonStrikeCount = StrikeCount;
 
-        string[] sequence = inputCommand.Split(' ');
+        string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         foreach (string wireIndexString in sequence)
         {

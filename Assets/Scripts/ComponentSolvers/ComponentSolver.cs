@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public abstract class ComponentSolver : ICommandResponder
 {
+    public delegate IEnumerator RegexResponse(Match match);
+
     #region Constructors
     static ComponentSolver()
     {

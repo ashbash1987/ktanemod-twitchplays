@@ -40,6 +40,15 @@ public static class ComponentSolverFactory
             case ComponentTypeEnum.WhosOnFirst:
                 return new WhosOnFirstComponentSolver(bomb, bombComponent);
 
+            case ComponentTypeEnum.NeedyVentGas:
+                return new NeedyVentComponentSolver(bomb, bombComponent);
+
+            case ComponentTypeEnum.NeedyCapacitor:
+                return new NeedyDischargeComponentSolver(bomb, bombComponent);
+
+            case ComponentTypeEnum.NeedyKnob:
+                return new NeedyKnobComponentSolver(bomb, bombComponent);
+
             default:
                 throw new NotSupportedException(string.Format("Currently {0} is not supported by 'Twitch Plays'.", (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null)));
         }

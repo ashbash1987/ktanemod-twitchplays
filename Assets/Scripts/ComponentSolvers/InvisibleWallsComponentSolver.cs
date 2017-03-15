@@ -12,10 +12,17 @@ public class InvisibleWallsComponentSolver : ComponentSolver
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
-    {
+    {     
+        if (!inputCommand.StartsWith("move ", StringComparison.InvariantCultureIgnoreCase))
+        {
+            yield break;
+        }
+
+        inputCommand = inputCommand.Substring(5);
+
         int beforeButtonStrikeCount = StrikeCount;
 
-        string[] sequence = inputCommand.Split(' ');
+        string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         foreach (string buttonString in sequence)
         {

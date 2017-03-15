@@ -16,8 +16,20 @@ public class MorseCodeComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
+        string[] commandParts = inputCommand.Split(' ');
+
+        if (commandParts.Length != 2)
+        {
+            yield break;
+        }
+
+        if (!commandParts[0].Equals("transmit", StringComparison.InvariantCultureIgnoreCase))
+        {
+            yield break;
+        }
+
         int targetFrequency = 0;
-        if (!int.TryParse(inputCommand, out targetFrequency))
+        if (!int.TryParse(commandParts[1], out targetFrequency))
         {
             yield break;
         }

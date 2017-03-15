@@ -13,6 +13,12 @@ public class WireSetComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
+        if (!inputCommand.StartsWith("cut ", StringComparison.InvariantCultureIgnoreCase))
+        {
+            yield break;
+        }
+        inputCommand = inputCommand.Substring(4);
+
         int wireIndex = 0;
         if (!int.TryParse(inputCommand, out wireIndex))
         {

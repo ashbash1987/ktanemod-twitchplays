@@ -27,6 +27,7 @@ public class ButtonComponentSolver : ComponentSolver
 
             _held = true;
             DoInteractionStart(_button);
+            yield return new WaitForSeconds(2.0f);
         }
         else if (_held)
         {

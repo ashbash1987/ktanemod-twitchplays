@@ -13,9 +13,15 @@ public class KeypadComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
+        if (!inputCommand.StartsWith("press ", StringComparison.InvariantCultureIgnoreCase))
+        {
+            yield break;
+        }
+        inputCommand = inputCommand.Substring(6);
+
         int beforeButtonStrikeCount = StrikeCount;
 
-        string[] sequence = inputCommand.Split(' ');
+        string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         foreach (string buttonIndexString in sequence)
         {
