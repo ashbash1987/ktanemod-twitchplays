@@ -1,3 +1,17 @@
-# ModSelector - a KTANEModKit mod
+# Twitch Plays: Keep Talking and Nobody Explodes
 
-This mod provides a 2D user interface while in the setup room, which allows dynamic selection/veto of active mod modules.
+This mod adds Twitch Chat integration into Keep Talking and Nobody Explodes.
+
+## Links
+
+**Main Page:** https://ashbash1987.github.io/ktanemod-twitchplays/
+
+**Manual:** https://ashbash1987.github.io/ktanemod-twitchplays/Manual/
+
+**Steam Workshop Link:** &lt;Not yet uploaded&gt;
+
+**Non-Steam Release:** &lt;Not yet uploaded&gt;
+
+## Setup
+
+&lt;To add&gt;
