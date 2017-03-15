@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class NeedyKnobComponentSolver : ComponentSolver
 {
-    public NeedyKnobComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent) :
-        base(bomb, bombComponent)
+    public NeedyKnobComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
+        base(bomb, bombComponent, ircConnection)
     {
         _pointingKnob = (MonoBehaviour)_pointingKnobField.GetValue(bombComponent);
     }

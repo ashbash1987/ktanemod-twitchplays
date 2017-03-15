@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class SimonComponentSolver : ComponentSolver
 {
-    public SimonComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent) :
-        base(bomb, bombComponent)
+    public SimonComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
+        base(bomb, bombComponent, ircConnection)
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
     }

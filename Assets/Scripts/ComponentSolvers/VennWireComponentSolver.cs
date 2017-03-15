@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class VennWireComponentSolver : ComponentSolver
 {
-    public VennWireComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent) :
-        base(bomb, bombComponent)
+    public VennWireComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
+        base(bomb, bombComponent, ircConnection)
     {
         _wires = (Array)_activeWiresProperty.GetValue(bombComponent, null);
     }

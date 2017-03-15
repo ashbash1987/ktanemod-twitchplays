@@ -21,6 +21,7 @@ GameObject:
   - 4: {fileID: 4000013469752438}
   - 114: {fileID: 114000014271784596}
   - 114: {fileID: 114000011618767326}
+  - 114: {fileID: 114000010782666596}
   - 114: {fileID: 114000011240893280}
   - 114: {fileID: 114000013407019822}
   m_Layer: 0
@@ -43,6 +44,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+--- !u!114 &114000010782666596
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000012806938254}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -289456416, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Settings: "{ \t\"authToken\": \"\", \t\"userName\": \"\", \t\"channelName\": \"\",
+    \t\"serverName\": \"irc.twitch.tv\", \t\"serverPort\": 6667 }"
 --- !u!114 &114000011240893280
 MonoBehaviour:
   m_ObjectHideFlags: 1

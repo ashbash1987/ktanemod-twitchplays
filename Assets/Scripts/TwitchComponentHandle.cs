@@ -13,7 +13,7 @@ public class TwitchComponentHandle : MonoBehaviour
     }
 
     #region Public Fields
-    public Text messagePrefab = null;
+    public TwitchMessage messagePrefab = null;
 
     public CanvasGroup canvasGroup = null;
     public Text headerText = null;
@@ -108,7 +108,7 @@ public class TwitchComponentHandle : MonoBehaviour
                 break;
         }
 
-        _solver = ComponentSolverFactory.CreateSolver(bomb, bombComponent, componentType);
+        _solver = ComponentSolverFactory.CreateSolver(bomb, bombComponent, componentType, ircConnection);
     }
 
     private void OnDestroy()
@@ -145,19 +145,19 @@ public class TwitchComponentHandle : MonoBehaviour
 
         string internalCommand = match.Groups[1].Value;
 
-        Text message = (Text)Instantiate(messagePrefab, messageScrollContents.transform, false);
+        TwitchMessage message = (TwitchMessage)Instantiate(messagePrefab, messageScrollContents.transform, false);
         if (string.IsNullOrEmpty(userColor))
         {
-            message.text = string.Format("<b>{0}</b>: {1}", userNickName, internalCommand);
+            message.SetMessage(string.Format("<b>{0}</b>: {1}", userNickName, internalCommand));
         }
         else
         {
-            message.text = string.Format("<b><color={2}>{0}</color></b>: {1}", userNickName, internalCommand, userColor);
+            message.SetMessage(string.Format("<b><color={2}>{0}</color></b>: {1}", userNickName, internalCommand, userColor));
         }
 
         if (_solver != null)
         {
-            coroutineQueue.AddToQueue(_solver.RespondToCommand(internalCommand));
+            coroutineQueue.AddToQueue(_solver.RespondToCommand(userNickName, internalCommand));
         }
     }
     #endregion

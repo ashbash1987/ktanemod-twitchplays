@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -47,14 +46,15 @@ public abstract class ComponentSolver : ICommandResponder
         _inputManager = (MonoBehaviour)_instanceProperty.GetValue(null, null);    
     }
 
-    public ComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent)
+    public ComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection)
     {
         Bomb = bomb;
-        BombComponent = bombComponent;        
+        BombComponent = bombComponent;
+        IRCConnection = ircConnection;
     }
     #endregion
 
-    public IEnumerator RespondToCommand(string message)
+    public IEnumerator RespondToCommand(string userNickName, string message)
     {
         IEnumerator subcoroutine = RespondToCommandInternal(message);
         if (!subcoroutine.MoveNext())
@@ -79,6 +79,7 @@ public abstract class ComponentSolver : ICommandResponder
         {
             yield return subcoroutine.Current;
         }
+
         yield return new WaitForSeconds(focusTime * 1.5f);
 
         _defocusMethod.Invoke(floatingHoldable, new object[] { true, true });
@@ -134,6 +135,7 @@ public abstract class ComponentSolver : ICommandResponder
     #region Readonly Fields
     public readonly MonoBehaviour Bomb = null;
     public readonly MonoBehaviour BombComponent = null;
+    public readonly IRCConnection IRCConnection = null;
     #endregion
 
     #region Private Static Fields

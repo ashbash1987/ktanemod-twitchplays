@@ -2,5 +2,5 @@
 
 public interface ICommandResponder
 {
-    IEnumerator RespondToCommand(string message);
+    IEnumerator RespondToCommand(string userNickName, string message);
 }

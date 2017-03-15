@@ -29,6 +29,11 @@ public class TwitchPlaysService : MonoBehaviour
         _modSettings = GetComponent<KMModSettings>();
 
         ModSettingsJSON settings = JsonConvert.DeserializeObject<ModSettingsJSON>(_modSettings.Settings);
+        if (settings == null)
+        {
+            Debug.LogError("[TwitchPlays] Failed to read connection settings from mod settings.");
+            return;
+        }
 
         _ircConnection = new IRCConnection(settings.authToken, settings.userName, settings.channelName, settings.serverName, settings.serverPort);
         _ircConnection.Connect();
@@ -38,12 +43,18 @@ public class TwitchPlaysService : MonoBehaviour
 
     private void Update()
     {
-        _ircConnection.Update();
+        if (_ircConnection != null)
+        {
+            _ircConnection.Update();
+        }
     }
 
     private void OnDestroy()
     {
-        _ircConnection.Disconnect();
+        if (_ircConnection != null)
+        {
+            _ircConnection.Disconnect();
+        }
     }
 
     private void OnStateChange(KMGameInfo.State state)
@@ -61,6 +72,11 @@ public class TwitchPlaysService : MonoBehaviour
 
     private IEnumerator CheckForModules()
     {
+        if (_ircConnection == null)
+        {
+            yield break;
+        }
+
         bool foundComponents = false;
 
         yield return new WaitForSeconds(1.0f);

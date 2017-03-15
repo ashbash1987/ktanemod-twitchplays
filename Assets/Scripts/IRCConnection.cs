@@ -126,7 +126,6 @@ public class IRCConnection
     {
         lock (_commandQueue)
         {
-            UnityEngine.Debug.LogFormat("[IRC:Send] {0}", command);
             _commandQueue.Enqueue(command);
         }
     }
