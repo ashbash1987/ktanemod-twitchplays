@@ -13,7 +13,9 @@ public class ButtonComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
-        if (!_held && (inputCommand.Equals("tap", StringComparison.InvariantCultureIgnoreCase) || inputCommand.Equals("click", StringComparison.InvariantCultureIgnoreCase)))
+        if (!_held && (inputCommand.Equals("tap", StringComparison.InvariantCultureIgnoreCase) ||
+                       inputCommand.Equals("click", StringComparison.InvariantCultureIgnoreCase) ||
+                       inputCommand.Equals("press and release", StringComparison.InvariantCultureIgnoreCase)))
         {
             yield return "tap";
 
@@ -21,7 +23,8 @@ public class ButtonComponentSolver : ComponentSolver
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(_button);
         }
-        else if (!_held && inputCommand.Equals("hold", StringComparison.InvariantCultureIgnoreCase))
+        else if (!_held && (inputCommand.Equals("hold", StringComparison.InvariantCultureIgnoreCase) ||
+                            inputCommand.Equals("press", StringComparison.InvariantCultureIgnoreCase)))
         {
             yield return "hold";
 

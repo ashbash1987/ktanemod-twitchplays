@@ -150,10 +150,9 @@ public abstract class ComponentSolver : ICommandResponder
     #region Private Methods
     private IEnumerator RespondToCommandCommon(string inputCommand)
     {
-        if (inputCommand.Equals("focus", StringComparison.InvariantCultureIgnoreCase) ||
-            inputCommand.Equals("show", StringComparison.InvariantCultureIgnoreCase))
+        if (inputCommand.Equals("show", StringComparison.InvariantCultureIgnoreCase))
         {
-            yield return "focus";
+            yield return "show";
             yield return null;
         }
     }
