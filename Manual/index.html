@@ -32,11 +32,45 @@
             <p>
                 There is also the option to enable auto-play mode, which leaves the bomb entirely in the hands of you and your fellow Twitch Chat experts.<br />
                 In order to interact directly with the bomb, your commands will need to be very specific, based on the module that you're interacting with.<br />
-                See the details on the following pages on how to interact with each specific module.
+                See the details on the following pages on how to interact with the bomb and each specific module.
             </p>
             <p>
                 <strong>Note:</strong> The Auto-play chat interpreter knows if a module is defused and will not interpret instructions for a defused module. Also, if given a sequence of instructions that causes a strike mid-way, it will stop the sequence mid-way to avoid further strikes.<br />However, it does not discern between different chat instructions, so coordinate with your fellow experts to avoid bad instructions to the bomb.<br />
                 Or maybe you want anarchy?<img src="img/Kappa.png" style="height:2em" />
+            </p>
+        </div>
+    </div>
+</div>
+<div class="section">
+    <div class="page page-bg-03">
+        <div class="page-header">
+            <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+            <span class="page-header-section-title">Twitch Plays</span>
+        </div>
+        <div class="page-content">
+            <h3>Bomb Command Reference</h3>
+            <p>
+                To pick up the bomb, use the command <span class="command-text">!bomb hold</span> or <span class="command-text">!bomb pick up</span>. If the bomb is already picked-up, this will do nothing.
+            </p>
+            <p>
+                To turn the bomb while picked up, use the command <span class="command-text">!bomb turn</span> or <span class="command-text">!bomb turn round</span> or <span class="command-text">!bomb turn around</span>. If the bomb is not picked up, this will also pick the bomb up first.
+            </p>  
+            <p>
+                To drop the bomb, use the command <span class="command-text">!bomb drop</span> or <span class="command-text">!bomb let go</span> or <span class="command-text">!bomb put down</span>. If the bomb is already put down, this will do nothing.
+            </p>
+            <p>
+                To view the edgework of the bomb, use the command <span class="command-text">!bomb edgework</span>. This will cycle through all the widget faces of the bomb, with short pauses on each face. If the bomb is not picked up, this will also pick the bomb up first.
+            </p> 
+            <h3>Common Module Command Reference</h3>
+            <p>
+                To focus on a specific module on the bomb, use the command <span class="command-text">!x show</span>, with 'x' being the numeric ID of the module to show.<br />
+                e.g. <span class="command-text">!1 show</span>
+            </p>
+            <p>
+                Some module commands below can cause extended interrupts of time. To stop these commands and allow further commands to then be processed, use the command <span class="command-text">!stop</span>. This will only stop the active command, if it needs to be stopped.
+            </p>
+            <p>
+                If there are commands that have been issued but not yet processed, and you believe that any of the queued commands will potentially cause a strike, you can use the command <span class="command-text">!cancel</span> to cancel <em><strong>all</strong></em> queued commands, as well as halting the active command like the above command.
             </p>
         </div>
     </div>
@@ -73,12 +107,12 @@
                         <td>The Button</td>
                         <td>
                             <p>
-                                To press and immediately release: <span class="command-text">tap</span><br />
-                                e.g. <span class="command-text">!1 tap</span><br />
+                                To press and immediately release: <span class="command-text">tap</span> or <span class="command-text">click</span> or <span class="command-text">press and release</span><br />
+                                e.g. <span class="command-text">!1 tap</span> or <span class="command-text">!1 click</span> or <span class="command-text">!1 press and release</span><br />
                             </p>
                             <p>
-                                To hold the button down: <span class="command-text">hold</span><br />
-                                e.g. <span class="command-text">!1 hold</span><br />
+                                To hold the button down: <span class="command-text">hold</span> or <span class="command-text">press</span><br />
+                                e.g. <span class="command-text">!1 hold</span> or <span class="command-text">!1 press</span><br />
                             </p>
                             <p>
                                 To release the button with 'x' in the displayed time: <span class="command-text">release <span class="command-text-param">&lt;x&gt;</span></span><br />
@@ -91,7 +125,7 @@
                         <td>
                             <p>
                                 Button index is determined as the position on the module first from left to right, then top to bottom, first button being 1.<br />
-				i.e. top-left is 1, top-right is 2, bottom-left is 3, bottom-right is 4.
+				                i.e. top-left is 1, top-right is 2, bottom-left is 3, bottom-right is 4.
                             </p>
                             <p>
                                 To press a sequence of buttons: <span class="command-text">press <span class="command-text-param">&lt;list&gt;</span></span><br />
