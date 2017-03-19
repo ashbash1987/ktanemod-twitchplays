@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class NeedyVentComponentSolver : ComponentSolver
 {
-    public NeedyVentComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
-        base(bomb, bombComponent, ircConnection)
+    public NeedyVentComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
+        base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _yesButton = (MonoBehaviour)_yesButtonField.GetValue(bombComponent);
         _noButton = (MonoBehaviour)_noButtonField.GetValue(bombComponent);

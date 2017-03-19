@@ -21,8 +21,9 @@ GameObject:
   - 224: {fileID: 224000012661628322}
   - 222: {fileID: 222000014207408244}
   - 114: {fileID: 114000012693088404}
-  - 114: {fileID: 114000013939532878}
   - 114: {fileID: 114000012089106560}
+  - 114: {fileID: 114000012481730220}
+  - 95: {fileID: 95000013421588532}
   m_Layer: 0
   m_Name: Message
   m_TagString: Untagged
@@ -47,6 +48,23 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!95 &95000013421588532
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000013363248026}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8a4baf56a95f3d6438c43d7c931b9b8f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
 --- !u!114 &114000010701885078
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -73,13 +91,13 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 0
     m_MaxSize: 300
-    m_Alignment: 3
+    m_Alignment: 0
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: '<b>Username</b>: I am a test'
+  m_Text: '<b>Username</b>: Test'
 --- !u!114 &114000012089106560
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -91,6 +109,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a7346a790affd0408a9346e1340eb40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  normalColor: {r: 1, g: 1, b: 1, a: 0}
+  highlightColor: {r: 1, g: 0.8862745, b: 0, a: 0.39215687}
+  completeColor: {r: 0, g: 1, b: 0, a: 0.235}
+  errorColor: {r: 1, g: 0, b: 0, a: 0.354}
+  ignoreColor: {r: 0.26805797, g: 0.32078537, b: 0.5441177, a: 0.178}
+--- !u!114 &114000012481730220
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000013363248026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1297475563, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 2
+    m_Right: 2
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 0
 --- !u!114 &114000012693088404
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -118,26 +161,6 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
---- !u!114 &114000013939532878
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1000013363248026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1297475563, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 4
-    m_Right: 4
-    m_Top: 2
-    m_Bottom: 2
-  m_ChildAlignment: 0
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
 --- !u!222 &222000011754809022
 CanvasRenderer:
   m_ObjectHideFlags: 1
@@ -156,18 +179,18 @@ RectTransform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000013543781288}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 224000012661628322}
   m_RootOrder: 0
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 1}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224000012661628322
 RectTransform:
   m_ObjectHideFlags: 1

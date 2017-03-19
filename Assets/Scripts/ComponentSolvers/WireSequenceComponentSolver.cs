@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class WireSequenceComponentSolver : ComponentSolver
 {
-    public WireSequenceComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
-        base(bomb, bombComponent, ircConnection)
+    public WireSequenceComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
+        base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _wireSequence = (IList)_wireSequenceField.GetValue(bombComponent);
         _upButton = (MonoBehaviour)_upButtonField.GetValue(bombComponent);

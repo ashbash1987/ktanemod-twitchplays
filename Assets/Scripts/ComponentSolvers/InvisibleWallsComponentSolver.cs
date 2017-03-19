@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class InvisibleWallsComponentSolver : ComponentSolver
 {
-    public InvisibleWallsComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
-        base(bomb, bombComponent, ircConnection)
+    public InvisibleWallsComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
+        base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (IList)_buttonsField.GetValue(bombComponent);
     }

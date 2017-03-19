@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class TwitchPlaysService : MonoBehaviour
@@ -20,6 +21,9 @@ public class TwitchPlaysService : MonoBehaviour
     private KMModSettings _modSettings = null;
     private IRCConnection _ircConnection = null;
     private CoroutineQueue _coroutineQueue = null;
+    private BombCommander _bombCommander = null;
+
+    private CoroutineCanceller _coroutineCanceller = null;
 
     private void Start()
     {
@@ -37,8 +41,10 @@ public class TwitchPlaysService : MonoBehaviour
 
         _ircConnection = new IRCConnection(settings.authToken, settings.userName, settings.channelName, settings.serverName, settings.serverPort);
         _ircConnection.Connect();
+        _ircConnection.OnMessageReceived.AddListener(OnMessageReceived);
 
         _coroutineQueue = GetComponent<CoroutineQueue>();
+        _coroutineCanceller = new CoroutineCanceller();
     }
 
     private void Update()
@@ -54,6 +60,7 @@ public class TwitchPlaysService : MonoBehaviour
         if (_ircConnection != null)
         {
             _ircConnection.Disconnect();
+            _ircConnection.OnMessageReceived.RemoveListener(OnMessageReceived);
         }
     }
 
@@ -62,38 +69,49 @@ public class TwitchPlaysService : MonoBehaviour
         switch (state)
         {
             case KMGameInfo.State.Gameplay:
-                StartCoroutine(CheckForModules());
+                StartCoroutine(CheckForBombs());
                 break;
+
             default:
                 StopAllCoroutines();
                 break;
         }
     }
 
-    private IEnumerator CheckForModules()
+    private IEnumerator CheckForBombs()
     {
         if (_ircConnection == null)
         {
             yield break;
         }
 
+        _coroutineQueue.StopQueue();
+        _coroutineQueue.CancelFutureSubcoroutines();
+
         bool foundComponents = false;
 
-        yield return new WaitForSeconds(1.0f);
+        yield return null;
 
         while (!foundComponents)
         {
             UnityEngine.Object[] bombs = FindObjectsOfType(CommonReflectedTypeInfo.BombType);
             foreach (UnityEngine.Object bomb in bombs)
             {
-                foundComponents = foundComponents || CreateHandlesForBomb((MonoBehaviour)bomb);
+                MonoBehaviour bombBehaviour = (MonoBehaviour)bomb;
+                _bombCommander = new BombCommander(bombBehaviour);
+
+                if (CreateComponentHandlesForBomb(bombBehaviour))
+                {
+                    foundComponents = true;
+                    break;
+                }
             }
 
             yield return null;
         }
     }
 
-    private bool CreateHandlesForBomb(MonoBehaviour bomb)
+    private bool CreateComponentHandlesForBomb(MonoBehaviour bomb)
     {
         bool foundComponents = false;
 
@@ -119,12 +137,13 @@ public class TwitchPlaysService : MonoBehaviour
 
             TwitchComponentHandle handle = (TwitchComponentHandle)Instantiate(twitchComponentHandlePrefab, bombComponent.transform, false);
             handle.ircConnection = _ircConnection;
-            handle.bomb = bomb;
+            handle.bombCommander = _bombCommander;
             handle.bombComponent = bombComponent;
             handle.componentType = componentTypeEnum;
             handle.coroutineQueue = _coroutineQueue;
+            handle.coroutineCanceller = _coroutineCanceller;
 
-            Vector3 idealOffset = handle.transform.TransformDirection(GetIdealPositionForHandle(handle, bombComponents, out handle.direction)); 
+            Vector3 idealOffset = handle.transform.TransformDirection(GetIdealPositionForHandle(handle, bombComponents, out handle.direction));
             handle.transform.SetParent(bombComponent.transform.parent, true);
             handle.basePosition = handle.transform.localPosition;
             handle.idealHandlePositionOffset = bombComponent.transform.parent.InverseTransformDirection(idealOffset);
@@ -135,7 +154,7 @@ public class TwitchPlaysService : MonoBehaviour
 
     private Vector3 GetIdealPositionForHandle(TwitchComponentHandle thisHandle, IList bombComponents, out TwitchComponentHandle.Direction direction)
     {
-        Rect handleBasicRect = new Rect(-0.13f, -0.08f, 0.26f, 0.16f);
+        Rect handleBasicRect = new Rect(-0.155f, -0.1f, 0.31f, 0.2f);
         Rect bombComponentBasicRect = new Rect(-0.1f, -0.1f, 0.2f, 0.2f);
 
         float baseUp = (handleBasicRect.height + bombComponentBasicRect.height) * 0.55f;
@@ -204,6 +223,54 @@ public class TwitchPlaysService : MonoBehaviour
             {
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    private void OnMessageReceived(string userNickName, string userColor, string text)
+    {
+        if (CheckForBombMesasge(userNickName, text))
+        {
+            return;
+        }
+
+        if (CheckForMiscellaneousMessages(userNickName, text))
+        {
+            return;
+        }
+    }
+
+    private bool CheckForBombMesasge(string userNickName, string text)
+    {
+        Match match = Regex.Match(text, "^!bomb (.+)", RegexOptions.IgnoreCase);
+        if (!match.Success)
+        {
+            return false;
+        }
+
+        string internalCommand = match.Groups[1].Value;
+        if (_bombCommander != null)
+        {
+            _coroutineQueue.AddToQueue(_bombCommander.RespondToCommand(userNickName, internalCommand, null));
+        }
+
+        return true;
+    }
+
+    private bool CheckForMiscellaneousMessages(string userNickName, string text)
+    {
+        if (text.Equals("!stop", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _coroutineCanceller.SetCancel();
+            return true;
+        }
+
+        if (text.Equals("!cancel", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _coroutineCanceller.SetCancel();
+            _coroutineQueue.CancelFutureSubcoroutines();
+            return true;
         }
 
         return false;

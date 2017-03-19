@@ -3,51 +3,51 @@ using UnityEngine;
 
 public static class ComponentSolverFactory
 {
-    public static ComponentSolver CreateSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, ComponentTypeEnum componentType, IRCConnection ircConnection)
+    public static ComponentSolver CreateSolver(BombCommander bombCommander, MonoBehaviour bombComponent, ComponentTypeEnum componentType, IRCConnection ircConnection, CoroutineCanceller canceller)
     {
         switch (componentType)
         {
             case ComponentTypeEnum.Wires:
-                return new WireSetComponentSolver(bomb, bombComponent, ircConnection);
+                return new WireSetComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.Keypad:
-                return new KeypadComponentSolver(bomb, bombComponent, ircConnection);
+                return new KeypadComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.BigButton:
-                return new ButtonComponentSolver(bomb, bombComponent, ircConnection);
+                return new ButtonComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.Memory:
-                return new MemoryComponentSolver(bomb, bombComponent, ircConnection);
+                return new MemoryComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.Simon:
-                return new SimonComponentSolver(bomb, bombComponent, ircConnection);
+                return new SimonComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.Venn:
-                return new VennWireComponentSolver(bomb, bombComponent, ircConnection);
+                return new VennWireComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.Morse:
-                return new MorseCodeComponentSolver(bomb, bombComponent, ircConnection);
+                return new MorseCodeComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.WireSequence:
-                return new WireSequenceComponentSolver(bomb, bombComponent, ircConnection);
+                return new WireSequenceComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.Password:
-                return new PasswordComponentSolver(bomb, bombComponent, ircConnection);
+                return new PasswordComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.Maze:
-                return new InvisibleWallsComponentSolver(bomb, bombComponent, ircConnection);
+                return new InvisibleWallsComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.WhosOnFirst:
-                return new WhosOnFirstComponentSolver(bomb, bombComponent, ircConnection);
+                return new WhosOnFirstComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.NeedyVentGas:
-                return new NeedyVentComponentSolver(bomb, bombComponent, ircConnection);
+                return new NeedyVentComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.NeedyCapacitor:
-                return new NeedyDischargeComponentSolver(bomb, bombComponent, ircConnection);
+                return new NeedyDischargeComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             case ComponentTypeEnum.NeedyKnob:
-                return new NeedyKnobComponentSolver(bomb, bombComponent, ircConnection);
+                return new NeedyKnobComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
             default:
                 throw new NotSupportedException(string.Format("Currently {0} is not supported by 'Twitch Plays'.", (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null)));

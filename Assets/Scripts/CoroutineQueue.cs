@@ -14,13 +14,27 @@ public class CoroutineQueue : MonoBehaviour
         if (!_processing && _coroutineQueue.Count > 0)
         {
             _processing = true;
-            StartCoroutine(ProcessQueueCoroutine());
+            _activeCoroutine = StartCoroutine(ProcessQueueCoroutine());
         }
     }
 
     public void AddToQueue(IEnumerator subcoroutine)
     {
         _coroutineQueue.Enqueue(subcoroutine);
+    }
+
+    public void CancelFutureSubcoroutines()
+    {
+        _coroutineQueue.Clear();
+    }
+
+    public void StopQueue()
+    {
+        if (_activeCoroutine != null)
+        {
+            StopCoroutine(_activeCoroutine);
+            _activeCoroutine = null;
+        }
     }
 
     private IEnumerator ProcessQueueCoroutine()
@@ -35,8 +49,10 @@ public class CoroutineQueue : MonoBehaviour
         }
 
         _processing = false;
+        _activeCoroutine = null;
     }
 
     private Queue<IEnumerator> _coroutineQueue = null;
     private bool _processing = false;
+    private Coroutine _activeCoroutine = null;
 }

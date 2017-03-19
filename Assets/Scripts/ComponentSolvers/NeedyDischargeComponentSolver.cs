@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class NeedyDischargeComponentSolver : ComponentSolver
 {
-    public NeedyDischargeComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
-        base(bomb, bombComponent, ircConnection)
+    public NeedyDischargeComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
+        base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _dischargeButton = (MonoBehaviour)_dischargeButtonField.GetValue(bombComponent);
     }
@@ -33,9 +33,19 @@ public class NeedyDischargeComponentSolver : ComponentSolver
 
         yield return "hold";
 
+        if (holdTime > 10.0f)
+        {
+            MusicPlayer.GetMusicPlayer("JeopardyThink").StartMusic();
+        }
+
         DoInteractionStart(_dischargeButton);
-        yield return new WaitForSeconds(holdTime);
+        yield return new WaitForSecondsWithCancel(holdTime, Canceller);
         DoInteractionEnd(_dischargeButton);
+
+        if (holdTime > 10.0f)
+        {
+            MusicPlayer.GetMusicPlayer("JeopardyThink").StopMusic();
+        }
     }
 
     static NeedyDischargeComponentSolver()

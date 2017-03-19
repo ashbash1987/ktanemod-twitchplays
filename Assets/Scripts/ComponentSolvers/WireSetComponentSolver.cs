@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class WireSetComponentSolver : ComponentSolver
 {
-    public WireSetComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
-        base(bomb, bombComponent, ircConnection)
+    public WireSetComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
+        base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _wires = (IList)_wiresField.GetValue(bombComponent);
     }

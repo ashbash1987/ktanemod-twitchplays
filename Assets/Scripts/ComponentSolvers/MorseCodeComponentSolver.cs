@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class MorseCodeComponentSolver : ComponentSolver
 {
-    public MorseCodeComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
-        base(bomb, bombComponent, ircConnection)
+    public MorseCodeComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
+        base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _upButton = (MonoBehaviour)_upButtonField.GetValue(bombComponent);
         _downButton = (MonoBehaviour)_downButtonField.GetValue(bombComponent);
@@ -42,7 +42,7 @@ public class MorseCodeComponentSolver : ComponentSolver
         int initialFrequency = CurrentFrequency;
         MonoBehaviour buttonToShift = targetFrequency < initialFrequency ? _downButton : _upButton;
 
-        while (CurrentFrequency != targetFrequency && Mathf.Sign(CurrentFrequency - initialFrequency) != Mathf.Sign(CurrentFrequency - targetFrequency))
+        while (CurrentFrequency != targetFrequency && (CurrentFrequency == initialFrequency || Mathf.Sign(CurrentFrequency - initialFrequency) != Mathf.Sign(CurrentFrequency - targetFrequency)))
         {
             yield return "change frequency";
 

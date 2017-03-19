@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class PasswordComponentSolver : ComponentSolver
 {
-    public PasswordComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
-        base(bomb, bombComponent, ircConnection)
+    public PasswordComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
+        base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _spinners = (IList)_spinnersField.GetValue(bombComponent);
         _submitButton = (MonoBehaviour)_submitButtonField.GetValue(bombComponent);

@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class ButtonComponentSolver : ComponentSolver
 {
-    public ButtonComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection) :
-        base(bomb, bombComponent, ircConnection)
+    public ButtonComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
+        base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _button = (MonoBehaviour)_buttonField.GetValue(bombComponent);
     }
@@ -56,7 +56,7 @@ public class ButtonComponentSolver : ComponentSolver
     {
         yield return "release";
 
-        MonoBehaviour timerComponent = (MonoBehaviour)CommonReflectedTypeInfo.GetTimerMethod.Invoke(Bomb, null);
+        MonoBehaviour timerComponent = (MonoBehaviour)CommonReflectedTypeInfo.GetTimerMethod.Invoke(BombCommander.Bomb, null);
 
         string secondString = second.ToString();
 

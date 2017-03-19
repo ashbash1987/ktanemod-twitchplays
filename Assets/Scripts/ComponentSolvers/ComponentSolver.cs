@@ -16,78 +16,82 @@ public abstract class ComponentSolver : ICommandResponder
         _interactEndedMethod = _selectableType.GetMethod("OnInteractEnded", BindingFlags.Public | BindingFlags.Instance);
         _setHighlightMethod = _selectableType.GetMethod("SetHighlight", BindingFlags.Public | BindingFlags.Instance);
         _getFocusDistanceMethod = _selectableType.GetMethod("GetFocusDistance", BindingFlags.Public | BindingFlags.Instance);
-
-        _floatingHoldableType = ReflectionHelper.FindType("FloatingHoldable");
-        if (_floatingHoldableType == null)
-        {
-            return;
-        }
-        _focusMethod = _floatingHoldableType.GetMethod("Focus", BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(Transform), typeof(float), typeof(bool), typeof(bool), typeof(float) }, null);
-        _defocusMethod = _floatingHoldableType.GetMethod("Defocus", BindingFlags.Public | BindingFlags.Instance);
-        _focusTimeField = _floatingHoldableType.GetField("FocusTime", BindingFlags.Public | BindingFlags.Instance);
-        _pickupTimeField = _floatingHoldableType.GetField("PickupTime", BindingFlags.Public | BindingFlags.Instance);
-        _holdStateProperty = _floatingHoldableType.GetProperty("HoldState", BindingFlags.Public | BindingFlags.Instance);
-
-        _selectableManagerType = ReflectionHelper.FindType("SelectableManager");
-        if (_selectableManagerType == null)
-        {
-            return;
-        }
-        _holdMethod = _selectableManagerType.GetMethod("Hold", BindingFlags.Public | BindingFlags.Instance);
-
-        _inputManagerType = ReflectionHelper.FindType("KTInputManager");
-        if (_inputManagerType == null)
-        {
-            return;
-        }
-        _instanceProperty = _inputManagerType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-        _selectableManagerProperty = _inputManagerType.GetProperty("SelectableManager", BindingFlags.Public | BindingFlags.Instance);
-
-        _inputManager = (MonoBehaviour)_instanceProperty.GetValue(null, null);    
     }
 
-    public ComponentSolver(MonoBehaviour bomb, MonoBehaviour bombComponent, IRCConnection ircConnection)
+    public ComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller)
     {
-        Bomb = bomb;
+        BombCommander = bombCommander;
         BombComponent = bombComponent;
+        Selectable = (MonoBehaviour)bombComponent.GetComponent(_selectableType);
         IRCConnection = ircConnection;
+        Canceller = canceller;
     }
     #endregion
 
-    public IEnumerator RespondToCommand(string userNickName, string message)
+    #region Interface Implementation
+    public IEnumerator RespondToCommand(string userNickName, string message, ICommandResponseNotifier responseNotifier)
     {
-        IEnumerator subcoroutine = RespondToCommandInternal(message);
-        if (!subcoroutine.MoveNext())
+        if (Solved)
         {
+            responseNotifier.ProcessResponse(CommandResponse.NoResponse);
             yield break;
         }
 
-        MonoBehaviour floatingHoldable = (MonoBehaviour)Bomb.GetComponent(_floatingHoldableType);
-
-        int holdState = (int)_holdStateProperty.GetValue(floatingHoldable, null);
-        if (holdState != 0)
+        IEnumerator subcoroutine = RespondToCommandCommon(message);
+        if (subcoroutine == null || !subcoroutine.MoveNext())
         {
-            MonoBehaviour selectableManager = (MonoBehaviour)_selectableManagerProperty.GetValue(_inputManager, null);
-            _holdMethod.Invoke(selectableManager, new object[] { floatingHoldable });
+            subcoroutine = RespondToCommandInternal(message);
+            if (subcoroutine == null || !subcoroutine.MoveNext())
+            {
+                responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+                yield break;
+            }
         }
 
-        float focusTime = (float)_focusTimeField.GetValue(floatingHoldable);
-        _focusMethod.Invoke(floatingHoldable, new object[] { BombComponent.transform, FocusDistance, true, true, focusTime });
-        yield return new WaitForSeconds(focusTime * 1.5f);
+        responseNotifier.ProcessResponse(CommandResponse.Start);
+
+        IEnumerator focusCoroutine = BombCommander.Focus(Selectable, FocusDistance, FrontFace);
+        while (focusCoroutine.MoveNext())
+        {
+            yield return focusCoroutine.Current;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        int previousStrikeCount = StrikeCount;
 
         while (subcoroutine.MoveNext())
         {
             yield return subcoroutine.Current;
         }
 
-        yield return new WaitForSeconds(focusTime * 1.5f);
+        if (Solved)
+        {
+            responseNotifier.ProcessResponse(CommandResponse.EndComplete);
+        }
+        else if (previousStrikeCount != StrikeCount)
+        {
+            responseNotifier.ProcessResponse(CommandResponse.EndError);
+        }
+        else
+        {
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
+        }
 
-        _defocusMethod.Invoke(floatingHoldable, new object[] { true, true });
-        yield return new WaitForSeconds(focusTime * 1.5f);
+        yield return new WaitForSeconds(0.5f);
+
+        IEnumerator defocusCoroutine = BombCommander.Defocus(FrontFace);
+        while (defocusCoroutine.MoveNext())
+        {
+            yield return defocusCoroutine.Current;
+        }
+
+        yield return new WaitForSeconds(0.5f);
     }
+    #endregion
 
     #region Abstract Interface
-    protected abstract IEnumerator RespondToCommandInternal(string message);
+    protected abstract IEnumerator RespondToCommandInternal(string inputCommand);
     #endregion
 
     #region Protected Helper Methods
@@ -105,8 +109,8 @@ public abstract class ComponentSolver : ICommandResponder
     }
     #endregion
 
-    #region Public Properties
-    public bool Solved
+    #region Protected Properties
+    protected bool Solved
     {
         get
         {
@@ -114,15 +118,15 @@ public abstract class ComponentSolver : ICommandResponder
         }
     }
 
-    public int StrikeCount
+    protected int StrikeCount
     {
         get
         {
-            return (int)CommonReflectedTypeInfo.NumStrikesField.GetValue(Bomb);
+            return (int)CommonReflectedTypeInfo.NumStrikesField.GetValue(BombCommander.Bomb);
         }
     }
 
-    public float FocusDistance
+    protected float FocusDistance
     {
         get
         {
@@ -130,12 +134,37 @@ public abstract class ComponentSolver : ICommandResponder
             return (float)_getFocusDistanceMethod.Invoke(selectable, null);
         }
     }
+
+    protected bool FrontFace
+    {
+        get
+        {
+            Vector3 componentUp = BombComponent.transform.up;
+            Vector3 bombUp = BombCommander.Bomb.transform.up;
+            float angleBetween = Vector3.Angle(componentUp, bombUp);
+            return angleBetween < 90.0f;
+        }
+    }
+    #endregion
+
+    #region Private Methods
+    private IEnumerator RespondToCommandCommon(string inputCommand)
+    {
+        if (inputCommand.Equals("focus", StringComparison.InvariantCultureIgnoreCase) ||
+            inputCommand.Equals("show", StringComparison.InvariantCultureIgnoreCase))
+        {
+            yield return "focus";
+            yield return null;
+        }
+    }
     #endregion
 
     #region Readonly Fields
-    public readonly MonoBehaviour Bomb = null;
-    public readonly MonoBehaviour BombComponent = null;
-    public readonly IRCConnection IRCConnection = null;
+    protected readonly BombCommander BombCommander = null;
+    protected readonly MonoBehaviour BombComponent = null;
+    protected readonly MonoBehaviour Selectable = null;
+    protected readonly IRCConnection IRCConnection = null;
+    public readonly CoroutineCanceller Canceller = null;
     #endregion
 
     #region Private Static Fields
@@ -144,21 +173,5 @@ public abstract class ComponentSolver : ICommandResponder
     private static MethodInfo _interactEndedMethod = null;
     private static MethodInfo _setHighlightMethod = null;
     private static MethodInfo _getFocusDistanceMethod = null;
-
-    private static Type _floatingHoldableType = null;
-    private static MethodInfo _focusMethod = null;
-    private static MethodInfo _defocusMethod = null;
-    private static FieldInfo _focusTimeField = null;
-    private static FieldInfo _pickupTimeField = null;
-    private static PropertyInfo _holdStateProperty = null;
-
-    private static Type _selectableManagerType = null;
-    private static MethodInfo _holdMethod = null;
-
-    private static Type _inputManagerType = null;
-    private static PropertyInfo _instanceProperty = null;
-    private static PropertyInfo _selectableManagerProperty = null;
-
-    private static MonoBehaviour _inputManager = null;
     #endregion
 }
