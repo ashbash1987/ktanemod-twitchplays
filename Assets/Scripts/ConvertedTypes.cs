@@ -40,6 +40,8 @@ public static class CommonReflectedTypeInfo
         TimerComponentType = ReflectionHelper.FindType("TimerComponent");
         TimeRemainingField = TimerComponentType.GetField("TimeRemaining", BindingFlags.Public | BindingFlags.Instance);
         GetFormattedTimeMethod = TimerComponentType.GetMethod("GetFormattedTime", BindingFlags.Public | BindingFlags.Static);
+
+        ResultPageType = ReflectionHelper.FindType("ResultPage");
     }
 
     #region Bomb
@@ -108,6 +110,14 @@ public static class CommonReflectedTypeInfo
     }
 
     public static MethodInfo GetFormattedTimeMethod
+    {
+        get;
+        private set;
+    }
+    #endregion
+
+    #region Result Page
+    public static Type ResultPageType
     {
         get;
         private set;

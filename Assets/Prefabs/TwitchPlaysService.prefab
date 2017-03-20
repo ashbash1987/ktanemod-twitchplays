@@ -191,7 +191,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: bfe7de401ae99814cbca7c791d3c5205, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.5
+  m_Volume: 0.3
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -242,7 +242,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
-    m_RotationOrder: 4
+    m_RotationOrder: 0
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:
@@ -279,6 +279,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   twitchComponentHandlePrefab: {fileID: 114000012400141880, guid: 0f644f742882dc444876f1811f05a6bb,
+    type: 2}
+  twitchBombHandlePrefab: {fileID: 114000010032398610, guid: 60b75909c23ea834abc0710ecf8e18db,
     type: 2}
 --- !u!114 &114000011618767326
 MonoBehaviour:

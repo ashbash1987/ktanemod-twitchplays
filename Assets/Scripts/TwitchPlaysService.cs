@@ -16,12 +16,14 @@ public class TwitchPlaysService : MonoBehaviour
     }
 
     public TwitchComponentHandle twitchComponentHandlePrefab = null;
+    public TwitchBombHandle twitchBombHandlePrefab = null;
 
     private KMGameInfo _gameInfo = null;
     private KMModSettings _modSettings = null;
     private IRCConnection _ircConnection = null;
     private CoroutineQueue _coroutineQueue = null;
     private BombCommander _bombCommander = null;
+    private PostGameCommander _postGameCommander = null;
 
     private CoroutineCanceller _coroutineCanceller = null;
 
@@ -66,30 +68,55 @@ public class TwitchPlaysService : MonoBehaviour
 
     private void OnStateChange(KMGameInfo.State state)
     {
+        if (_ircConnection == null)
+        {
+            return;
+        }
+
+        StopEveryCoroutine();
+
         switch (state)
         {
             case KMGameInfo.State.Gameplay:
+                _postGameCommander = null;
                 StartCoroutine(CheckForBombs());
                 break;
 
+            case KMGameInfo.State.PostGame:
+                _bombCommander = null;
+                DestroyBombHandles();
+                StartCoroutine(CheckForResultsPage());
+                break;
+
+            case KMGameInfo.State.Setup:
+                _bombCommander = null;
+                _postGameCommander = null;
+                DestroyBombHandles();
+                break;
+
             default:
-                StopAllCoroutines();
                 break;
         }
     }
 
-    private IEnumerator CheckForBombs()
+    private void DestroyBombHandles()
     {
-        if (_ircConnection == null)
+        foreach (TwitchBombHandle bombHandle in FindObjectsOfType<TwitchBombHandle>())
         {
-            yield break;
+            Destroy(bombHandle.gameObject);
         }
+    }
 
+    private void StopEveryCoroutine()
+    {
+        StopAllCoroutines();
         _coroutineQueue.StopQueue();
         _coroutineQueue.CancelFutureSubcoroutines();
+    }
 
+    private IEnumerator CheckForBombs()
+    {
         bool foundComponents = false;
-
         yield return null;
 
         while (!foundComponents)
@@ -100,6 +127,8 @@ public class TwitchPlaysService : MonoBehaviour
                 MonoBehaviour bombBehaviour = (MonoBehaviour)bomb;
                 _bombCommander = new BombCommander(bombBehaviour);
 
+                CreateBombHandleForBomb(bombBehaviour);
+
                 if (CreateComponentHandlesForBomb(bombBehaviour))
                 {
                     foundComponents = true;
@@ -109,6 +138,35 @@ public class TwitchPlaysService : MonoBehaviour
 
             yield return null;
         }
+    }
+
+    private IEnumerator CheckForResultsPage()
+    {
+        bool foundResultsPage = false;
+        yield return null;
+
+        while (!foundResultsPage)
+        {
+            UnityEngine.Object[] resultPages = FindObjectsOfType(CommonReflectedTypeInfo.ResultPageType);
+            foreach (UnityEngine.Object resultPage in resultPages)
+            {
+                MonoBehaviour resultPageBehaviour = (MonoBehaviour)resultPage;
+                _postGameCommander = new PostGameCommander(resultPageBehaviour);
+                foundResultsPage = true;
+                break;
+            }
+
+            yield return null;
+        }
+    }
+
+    private void CreateBombHandleForBomb(MonoBehaviour bomb)
+    {
+        TwitchBombHandle handle = Instantiate<TwitchBombHandle>(twitchBombHandlePrefab);
+        handle.ircConnection = _ircConnection;
+        handle.bombCommander = _bombCommander;
+        handle.coroutineQueue = _coroutineQueue;
+        handle.coroutineCanceller = _coroutineCanceller;
     }
 
     private bool CreateComponentHandlesForBomb(MonoBehaviour bomb)
@@ -133,7 +191,6 @@ public class TwitchPlaysService : MonoBehaviour
                     foundComponents = true;
                     break;
             }
-
 
             TwitchComponentHandle handle = (TwitchComponentHandle)Instantiate(twitchComponentHandlePrefab, bombComponent.transform, false);
             handle.ircConnection = _ircConnection;
@@ -230,47 +287,32 @@ public class TwitchPlaysService : MonoBehaviour
 
     private void OnMessageReceived(string userNickName, string userColor, string text)
     {
-        if (CheckForBombMesasge(userNickName, text))
-        {
-            return;
-        }
-
         if (CheckForMiscellaneousMessages(userNickName, text))
         {
             return;
         }
-    }
-
-    private bool CheckForBombMesasge(string userNickName, string text)
-    {
-        Match match = Regex.Match(text, "^!bomb (.+)", RegexOptions.IgnoreCase);
-        if (!match.Success)
-        {
-            return false;
-        }
-
-        string internalCommand = match.Groups[1].Value;
-        if (_bombCommander != null)
-        {
-            _coroutineQueue.AddToQueue(_bombCommander.RespondToCommand(userNickName, internalCommand, null));
-        }
-
-        return true;
-    }
+    }   
 
     private bool CheckForMiscellaneousMessages(string userNickName, string text)
     {
-        if (text.Equals("!stop", StringComparison.InvariantCultureIgnoreCase))
+        if (_postGameCommander != null)
         {
-            _coroutineCanceller.SetCancel();
-            return true;
+            _coroutineQueue.AddToQueue(_postGameCommander.RespondToCommand(userNickName, text, null));
         }
-
-        if (text.Equals("!cancel", StringComparison.InvariantCultureIgnoreCase))
+        else
         {
-            _coroutineCanceller.SetCancel();
-            _coroutineQueue.CancelFutureSubcoroutines();
-            return true;
+            if (text.Equals("!cancel", StringComparison.InvariantCultureIgnoreCase))
+            {
+                _coroutineCanceller.SetCancel();
+                return true;
+            }
+
+            if (text.Equals("!stop", StringComparison.InvariantCultureIgnoreCase))
+            {
+                _coroutineCanceller.SetCancel();
+                _coroutineQueue.CancelFutureSubcoroutines();
+                return true;
+            }
         }
 
         return false;

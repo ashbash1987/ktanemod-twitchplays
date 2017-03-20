@@ -62,42 +62,60 @@ public class BombCommander : ICommandResponder
         if (message.Equals("hold", StringComparison.InvariantCultureIgnoreCase) ||
             message.Equals("pick up", StringComparison.InvariantCultureIgnoreCase))
         {
+            responseNotifier.ProcessResponse(CommandResponse.Start);
+
             IEnumerator holdCoroutine = HoldBomb(_heldFrontFace);
             while (holdCoroutine.MoveNext())
             {
                 yield return holdCoroutine.Current;
             }
+
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
         else if (message.Equals("turn", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("turn round", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("turn around", StringComparison.InvariantCultureIgnoreCase))
         {
+            responseNotifier.ProcessResponse(CommandResponse.Start);
+
             IEnumerator holdCoroutine = HoldBomb(!_heldFrontFace);
             while (holdCoroutine.MoveNext())
             {
                 yield return holdCoroutine.Current;
             }
+
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
         else if (message.Equals("drop", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("let go", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("put down", StringComparison.InvariantCultureIgnoreCase))
         {
+            responseNotifier.ProcessResponse(CommandResponse.Start);
+
             IEnumerator letGoCoroutine = LetGoBomb();
             while (letGoCoroutine.MoveNext())
             {
                 yield return letGoCoroutine.Current;
             }
+
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
         else if (message.Equals("edgework", StringComparison.InvariantCultureIgnoreCase))
         {
+            responseNotifier.ProcessResponse(CommandResponse.Start);
+
             IEnumerator edgeworkCoroutine = ShowEdgework();
             while (edgeworkCoroutine.MoveNext())
             {
                 yield return edgeworkCoroutine.Current;
             }
-        }
 
-        yield break;
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+        else
+        {
+            responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+        }
     }
     #endregion
 
@@ -283,6 +301,7 @@ public class BombCommander : ICommandResponder
     public readonly MonoBehaviour Selectable = null;
     public readonly MonoBehaviour FloatingHoldable = null;
     private readonly MonoBehaviour SelectableManager = null;
+    private readonly CoroutineCanceller CoroutineCanceller = null;
     #endregion
 
     #region Private Static Fields

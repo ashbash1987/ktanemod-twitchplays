@@ -55,9 +55,14 @@ public class WireSequenceComponentSolver : ComponentSolver
 
                 if (CanInteractWithWire(wireIndex))
                 {
+                    MonoBehaviour wire = GetWire(wireIndex);
+                    if (wire == null)
+                    {
+                        yield break;
+                    }
+
                     yield return wireIndexString;
 
-                    MonoBehaviour wire = GetWire(wireIndex);
                     DoInteractionStart(wire);
                     yield return new WaitForSeconds(0.1f);
                     DoInteractionEnd(wire);

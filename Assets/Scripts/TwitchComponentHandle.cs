@@ -96,6 +96,7 @@ public class TwitchComponentHandle : MonoBehaviour
         idText.text = string.Format("!{0}", _code);
 
         canvasGroup.alpha = 0.0f;
+        highlightGroup.alpha = 0.0f;
 
         Arrow.gameObject.SetActive(true);
         HighlightArrow.gameObject.SetActive(true);

@@ -14,4 +14,5 @@ MonoBehaviour:
   id: TwitchPlays
   title: Twitch Plays
   version: v1.0.0
-  outputFolder: H:\SteamLibrary\steamapps\common\Keep Talking and Nobody Explodes\mods
+  outputFolder: C:\Program Files (x86)\Steam\steamapps\common\Keep Talking and Nobody
+    Explodes\mods
