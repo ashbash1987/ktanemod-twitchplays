@@ -35,6 +35,8 @@ public class CoroutineQueue : MonoBehaviour
             StopCoroutine(_activeCoroutine);
             _activeCoroutine = null;
         }
+
+        _processing = false;
     }
 
     private IEnumerator ProcessQueueCoroutine()

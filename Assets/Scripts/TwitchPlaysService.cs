@@ -109,9 +109,9 @@ public class TwitchPlaysService : MonoBehaviour
 
     private void StopEveryCoroutine()
     {
-        StopAllCoroutines();
         _coroutineQueue.StopQueue();
         _coroutineQueue.CancelFutureSubcoroutines();
+        StopAllCoroutines();
     }
 
     private IEnumerator CheckForBombs()
