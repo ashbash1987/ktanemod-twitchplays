@@ -39,28 +39,15 @@ public class TwitchBombHandle : MonoBehaviour
 
     private void Start()
     {
-        if (ircConnection != null)
-        {
-            ircConnection.OnMessageReceived.AddListener(OnMessageReceived);
-        }
-
         idText.text = string.Format("!{0}", _code);
 
         canvasGroup.alpha = 1.0f;
         highlightGroup.alpha = 0.0f;
     }
-
-    private void OnDestroy()
-    {
-        if (ircConnection != null)
-        {
-            ircConnection.OnMessageReceived.RemoveListener(OnMessageReceived);
-        }
-    }
     #endregion
 
-    #region Private Methods
-    private void OnMessageReceived(string userNickName, string userColor, string text)
+    #region Message Interface    
+    public void OnMessageReceived(string userNickName, string userColor, string text)
     {
         Match match = Regex.Match(text, string.Format("^!{0} (.+)", _code), RegexOptions.IgnoreCase);
         if (!match.Success)
@@ -82,7 +69,9 @@ public class TwitchBombHandle : MonoBehaviour
 
         coroutineQueue.AddToQueue(RespondToCommandCoroutine(userNickName, internalCommand, message));
     }
+    #endregion
 
+    #region Private Methods
     private IEnumerator RespondToCommandCoroutine(string userNickName, string internalCommand, ICommandResponseNotifier message, float fadeDuration = 0.1f)
     {
         float time = Time.time;

@@ -83,11 +83,6 @@ public class TwitchComponentHandle : MonoBehaviour
 
     private void Start()
     {
-        if (ircConnection != null)
-        {
-            ircConnection.OnMessageReceived.AddListener(OnMessageReceived);
-        }
-
         if (bombComponent != null)
         {
             headerText.text = (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null);
@@ -102,14 +97,6 @@ public class TwitchComponentHandle : MonoBehaviour
         HighlightArrow.gameObject.SetActive(true);
 
         _solver = ComponentSolverFactory.CreateSolver(bombCommander, bombComponent, componentType, ircConnection, coroutineCanceller);
-    }
-
-    private void OnDestroy()
-    {
-        if (ircConnection != null)
-        {
-            ircConnection.OnMessageReceived.RemoveListener(OnMessageReceived);
-        }
     }
 
     private void LateUpdate()
@@ -127,8 +114,8 @@ public class TwitchComponentHandle : MonoBehaviour
     }
     #endregion
 
-    #region Private Methods
-    private void OnMessageReceived(string userNickName, string userColor, string text)
+    #region Message Interface
+    public void OnMessageReceived(string userNickName, string userColor, string text)
     {
         Match match = Regex.Match(text, string.Format("^!{0} (.+)", _code), RegexOptions.IgnoreCase);
         if (!match.Success)
@@ -153,7 +140,9 @@ public class TwitchComponentHandle : MonoBehaviour
             coroutineQueue.AddToQueue(RespondToCommandCoroutine(userNickName, internalCommand, message));
         }
     }
+    #endregion
 
+    #region Private Methods
     private IEnumerator RespondToCommandCoroutine(string userNickName, string internalCommand, ICommandResponseNotifier message, float fadeDuration = 0.1f)
     {
         float time = Time.time;

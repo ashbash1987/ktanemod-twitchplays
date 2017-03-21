@@ -1,7 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class TwitchPlaysService : MonoBehaviour
@@ -15,17 +12,18 @@ public class TwitchPlaysService : MonoBehaviour
         public int serverPort;
     }
 
-    public TwitchComponentHandle twitchComponentHandlePrefab = null;
-    public TwitchBombHandle twitchBombHandlePrefab = null;
+    public BombMessageResponder bombMessageResponder = null;
+    public PostGameMessageResponder postGameMessageResponder = null;
+    public MissionMessageResponder missionMessageResponder = null;
+    public MiscellaneousMessageResponder miscellaneousMessageResponder = null;
 
     private KMGameInfo _gameInfo = null;
     private KMModSettings _modSettings = null;
     private IRCConnection _ircConnection = null;
     private CoroutineQueue _coroutineQueue = null;
-    private BombCommander _bombCommander = null;
-    private PostGameCommander _postGameCommander = null;
-
     private CoroutineCanceller _coroutineCanceller = null;
+
+    private MessageResponder _activeMessageResponder = null;
 
     private void Start()
     {
@@ -43,10 +41,14 @@ public class TwitchPlaysService : MonoBehaviour
 
         _ircConnection = new IRCConnection(settings.authToken, settings.userName, settings.channelName, settings.serverName, settings.serverPort);
         _ircConnection.Connect();
-        _ircConnection.OnMessageReceived.AddListener(OnMessageReceived);
 
         _coroutineQueue = GetComponent<CoroutineQueue>();
         _coroutineCanceller = new CoroutineCanceller();
+
+        SetupResponder(bombMessageResponder);
+        SetupResponder(postGameMessageResponder);
+        SetupResponder(missionMessageResponder);
+        SetupResponder(miscellaneousMessageResponder);
     }
 
     private void Update()
@@ -62,7 +64,6 @@ public class TwitchPlaysService : MonoBehaviour
         if (_ircConnection != null)
         {
             _ircConnection.Disconnect();
-            _ircConnection.OnMessageReceived.RemoveListener(OnMessageReceived);
         }
     }
 
@@ -75,36 +76,17 @@ public class TwitchPlaysService : MonoBehaviour
 
         StopEveryCoroutine();
 
-        switch (state)
+        if (_activeMessageResponder != null)
         {
-            case KMGameInfo.State.Gameplay:
-                _postGameCommander = null;
-                StartCoroutine(CheckForBombs());
-                break;
-
-            case KMGameInfo.State.PostGame:
-                _bombCommander = null;
-                DestroyBombHandles();
-                StartCoroutine(CheckForResultsPage());
-                break;
-
-            case KMGameInfo.State.Setup:
-                _bombCommander = null;
-                _postGameCommander = null;
-                DestroyBombHandles();
-                break;
-
-            default:
-                break;
+            _activeMessageResponder.gameObject.SetActive(false);
         }
-    }
 
-    private void DestroyBombHandles()
-    {
-        foreach (TwitchBombHandle bombHandle in FindObjectsOfType<TwitchBombHandle>())
+        _activeMessageResponder = GetActiveResponder(state);
+
+        if (_activeMessageResponder != null)
         {
-            Destroy(bombHandle.gameObject);
-        }
+            _activeMessageResponder.gameObject.SetActive(true);
+        }        
     }
 
     private void StopEveryCoroutine()
@@ -114,207 +96,29 @@ public class TwitchPlaysService : MonoBehaviour
         StopAllCoroutines();
     }
 
-    private IEnumerator CheckForBombs()
+    private void SetupResponder(MessageResponder responder)
     {
-        bool foundComponents = false;
-        yield return null;
-
-        while (!foundComponents)
+        if (responder != null)
         {
-            UnityEngine.Object[] bombs = FindObjectsOfType(CommonReflectedTypeInfo.BombType);
-            foreach (UnityEngine.Object bomb in bombs)
-            {
-                MonoBehaviour bombBehaviour = (MonoBehaviour)bomb;
-                _bombCommander = new BombCommander(bombBehaviour);
-
-                CreateBombHandleForBomb(bombBehaviour);
-
-                if (CreateComponentHandlesForBomb(bombBehaviour))
-                {
-                    foundComponents = true;
-                    break;
-                }
-            }
-
-            yield return null;
+            responder.SetupResponder(_ircConnection, _coroutineQueue, _coroutineCanceller);
         }
     }
 
-    private IEnumerator CheckForResultsPage()
+    private MessageResponder GetActiveResponder(KMGameInfo.State state)
     {
-        bool foundResultsPage = false;
-        yield return null;
-
-        while (!foundResultsPage)
+        switch (state)
         {
-            UnityEngine.Object[] resultPages = FindObjectsOfType(CommonReflectedTypeInfo.ResultPageType);
-            foreach (UnityEngine.Object resultPage in resultPages)
-            {
-                MonoBehaviour resultPageBehaviour = (MonoBehaviour)resultPage;
-                _postGameCommander = new PostGameCommander(resultPageBehaviour);
-                foundResultsPage = true;
-                break;
-            }
+            case KMGameInfo.State.Gameplay:
+                return bombMessageResponder;
 
-            yield return null;
+            case KMGameInfo.State.Setup:
+                return missionMessageResponder;
+
+            case KMGameInfo.State.PostGame:
+                return postGameMessageResponder;
+
+            default:
+                return null;
         }
-    }
-
-    private void CreateBombHandleForBomb(MonoBehaviour bomb)
-    {
-        TwitchBombHandle handle = Instantiate<TwitchBombHandle>(twitchBombHandlePrefab);
-        handle.ircConnection = _ircConnection;
-        handle.bombCommander = _bombCommander;
-        handle.coroutineQueue = _coroutineQueue;
-        handle.coroutineCanceller = _coroutineCanceller;
-    }
-
-    private bool CreateComponentHandlesForBomb(MonoBehaviour bomb)
-    {
-        bool foundComponents = false;
-
-        IList bombComponents = (IList)CommonReflectedTypeInfo.BombComponentsField.GetValue(bomb);
-
-        foreach (MonoBehaviour bombComponent in bombComponents)
-        {
-            object componentType = CommonReflectedTypeInfo.ComponentTypeField.GetValue(bombComponent);
-            int componentTypeInt = (int)Convert.ChangeType(componentType, typeof(int));
-            ComponentTypeEnum componentTypeEnum = (ComponentTypeEnum)componentTypeInt;
-
-            switch (componentTypeEnum)
-            {
-                case ComponentTypeEnum.Empty:
-                case ComponentTypeEnum.Timer:
-                    continue;
-
-                default:
-                    foundComponents = true;
-                    break;
-            }
-
-            TwitchComponentHandle handle = (TwitchComponentHandle)Instantiate(twitchComponentHandlePrefab, bombComponent.transform, false);
-            handle.ircConnection = _ircConnection;
-            handle.bombCommander = _bombCommander;
-            handle.bombComponent = bombComponent;
-            handle.componentType = componentTypeEnum;
-            handle.coroutineQueue = _coroutineQueue;
-            handle.coroutineCanceller = _coroutineCanceller;
-
-            Vector3 idealOffset = handle.transform.TransformDirection(GetIdealPositionForHandle(handle, bombComponents, out handle.direction));
-            handle.transform.SetParent(bombComponent.transform.parent, true);
-            handle.basePosition = handle.transform.localPosition;
-            handle.idealHandlePositionOffset = bombComponent.transform.parent.InverseTransformDirection(idealOffset);
-        }
-
-        return foundComponents;
-    }
-
-    private Vector3 GetIdealPositionForHandle(TwitchComponentHandle thisHandle, IList bombComponents, out TwitchComponentHandle.Direction direction)
-    {
-        Rect handleBasicRect = new Rect(-0.155f, -0.1f, 0.31f, 0.2f);
-        Rect bombComponentBasicRect = new Rect(-0.1f, -0.1f, 0.2f, 0.2f);
-
-        float baseUp = (handleBasicRect.height + bombComponentBasicRect.height) * 0.55f;
-        float baseRight = (handleBasicRect.width + bombComponentBasicRect.width) * 0.55f;
-
-        Vector2 extentUp = new Vector2(0.0f, baseUp * 0.1f);
-        Vector2 extentRight = new Vector2(baseRight * 0.2f, 0.0f);
-
-        Vector2 extentResult = Vector2.zero;
-
-        while (true)
-        {
-            Rect handleRect = handleBasicRect;
-            handleRect.position += extentRight;
-            if (!HasOverlap(thisHandle, handleRect, bombComponentBasicRect, bombComponents))
-            {
-                extentResult = extentRight;
-                direction = TwitchComponentHandle.Direction.Left;
-                break;
-            }
-
-            handleRect = handleBasicRect;
-            handleRect.position -= extentRight;
-            if (!HasOverlap(thisHandle, handleRect, bombComponentBasicRect, bombComponents))
-            {
-                extentResult = -extentRight;
-                direction = TwitchComponentHandle.Direction.Right;
-                break;
-            }
-
-            handleRect = handleBasicRect;
-            handleRect.position += extentUp;
-            if (!HasOverlap(thisHandle, handleRect, bombComponentBasicRect, bombComponents))
-            {
-                extentResult = extentUp;
-                direction = TwitchComponentHandle.Direction.Down;
-                break;
-            }
-
-            handleRect = handleBasicRect;
-            handleRect.position -= extentUp;
-            if (!HasOverlap(thisHandle, handleRect, bombComponentBasicRect, bombComponents))
-            {
-                extentResult = -extentUp;
-                direction = TwitchComponentHandle.Direction.Up;
-                break;
-            }
-
-            extentUp.y += baseUp * 0.1f;
-            extentRight.x += baseRight * 0.1f;
-        }
-
-        return new Vector3(extentResult.x, 0.0f, extentResult.y);
-    }
-
-    private bool HasOverlap(TwitchComponentHandle thisHandle, Rect handleRect, Rect bombComponentBasicRect, IList bombComponents)
-    {
-        foreach (MonoBehaviour bombComponent in bombComponents)
-        {
-            Vector3 bombComponentCenter = thisHandle.transform.InverseTransformPoint(bombComponent.transform.position);
-
-            Rect bombComponentRect = bombComponentBasicRect;
-            bombComponentRect.position += new Vector2(bombComponentCenter.x, bombComponentCenter.z);
-
-            if (bombComponentRect.Overlaps(handleRect))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private void OnMessageReceived(string userNickName, string userColor, string text)
-    {
-        if (CheckForMiscellaneousMessages(userNickName, text))
-        {
-            return;
-        }
-    }   
-
-    private bool CheckForMiscellaneousMessages(string userNickName, string text)
-    {
-        if (_postGameCommander != null)
-        {
-            _coroutineQueue.AddToQueue(_postGameCommander.RespondToCommand(userNickName, text, null));
-        }
-        else
-        {
-            if (text.Equals("!cancel", StringComparison.InvariantCultureIgnoreCase))
-            {
-                _coroutineCanceller.SetCancel();
-                return true;
-            }
-
-            if (text.Equals("!stop", StringComparison.InvariantCultureIgnoreCase))
-            {
-                _coroutineCanceller.SetCancel();
-                _coroutineQueue.CancelFutureSubcoroutines();
-                return true;
-            }
-        }
-
-        return false;
     }
 }
