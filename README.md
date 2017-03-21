@@ -4,9 +4,9 @@ This mod adds Twitch Chat integration into Keep Talking and Nobody Explodes.
 
 ## Links
 
-**Main Page:** https://ashbash1987.github.io/ktanemod-twitchplays/
+**Main Page:** http://www.twitchplaysktane.me
 
-**Manual:** https://ashbash1987.github.io/ktanemod-twitchplays/Manual/
+**Manual:** http://www.twitchplaysktane.me/Manual/
 
 **Steam Workshop Link:** &lt;Not yet uploaded&gt;
 
