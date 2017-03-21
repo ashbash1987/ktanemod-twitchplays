@@ -114,7 +114,7 @@ html {
 body {
     margin: 0;
     padding: 0;
-    background: url('../img/web-background.jpg');
+    background: url('../img/web-background.png');
     background-attachment: fixed;
 }
 @media print {
