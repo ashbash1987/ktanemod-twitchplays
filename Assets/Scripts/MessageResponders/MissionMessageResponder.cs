@@ -5,13 +5,14 @@ using UnityEngine;
 public class MissionMessageResponder : MessageResponder
 {
     private BombBinderCommander _bombBinderCommander = null;
+    private FreeplayCommander _freeplayCommander = null;
 
     #region Unity Lifecycle
     private void OnEnable()
     {
         InputInterceptor.DisableInput();
 
-        StartCoroutine(CheckForBombBinder());
+        StartCoroutine(CheckForBombBinderAndFreeplayDevice());
     }
 
     private void OnDisable()
@@ -19,11 +20,12 @@ public class MissionMessageResponder : MessageResponder
         StopAllCoroutines();
 
         _bombBinderCommander = null;
+        _freeplayCommander = null;
     }
     #endregion
 
     #region Protected/Private Methods
-    private IEnumerator CheckForBombBinder()
+    private IEnumerator CheckForBombBinderAndFreeplayDevice()
     {
         yield return null;
 
@@ -38,6 +40,18 @@ public class MissionMessageResponder : MessageResponder
 
             yield return null;
         }
+
+        while (true)
+        {
+            UnityEngine.Object[] freeplayDevices = FindObjectsOfType(CommonReflectedTypeInfo.FreeplayDeviceType);
+            if (freeplayDevices != null && freeplayDevices.Length > 0)
+            {
+                _freeplayCommander = new FreeplayCommander((MonoBehaviour)freeplayDevices[0]);
+                break;
+            }
+
+            yield return null;
+        }
     }
 
     protected override void OnMessageReceived(string userNickName, string userColorCode, string text)
@@ -47,13 +61,17 @@ public class MissionMessageResponder : MessageResponder
             return;
         }
 
-        Match match = Regex.Match(text, "^!binder (.+)", RegexOptions.IgnoreCase);
-        if (!match.Success)
+        Match binderMatch = Regex.Match(text, "^!binder (.+)", RegexOptions.IgnoreCase);
+        if (binderMatch.Success)
         {
-            return;
+            _coroutineQueue.AddToQueue(_bombBinderCommander.RespondToCommand(userNickName, binderMatch.Groups[1].Value, null));
         }
 
-        _coroutineQueue.AddToQueue(_bombBinderCommander.RespondToCommand(userNickName, match.Groups[1].Value, null));
+        Match freeplayMatch = Regex.Match(text, "^!freeplay (.+)", RegexOptions.IgnoreCase);
+        if (freeplayMatch.Success)
+        {
+            _coroutineQueue.AddToQueue(_freeplayCommander.RespondToCommand(userNickName, freeplayMatch.Groups[1].Value, null));
+        }
     }
     #endregion
 }

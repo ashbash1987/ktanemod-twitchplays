@@ -1,14 +1,29 @@
 ﻿using System;
 using System.Collections;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-public class BombBinderCommander : ICommandResponder
+public class FreeplayCommander : ICommandResponder
 {
     #region Constructors
-    static BombBinderCommander()
+    static FreeplayCommander()
     {
+        _freeplayDeviceType = CommonReflectedTypeInfo.FreeplayDeviceType;
+        _moduleCountIncrementField = _freeplayDeviceType.GetField("ModuleCountIncrement", BindingFlags.Public | BindingFlags.Instance);
+        _moduleCountDecrementField = _freeplayDeviceType.GetField("ModuleCountDecrement", BindingFlags.Public | BindingFlags.Instance);
+        _timeIncrementField = _freeplayDeviceType.GetField("TimeIncrement", BindingFlags.Public | BindingFlags.Instance);
+        _timeDecrementField = _freeplayDeviceType.GetField("TimeDecrement", BindingFlags.Public | BindingFlags.Instance);
+        _needyToggleField = _freeplayDeviceType.GetField("NeedyToggle", BindingFlags.Public | BindingFlags.Instance);
+        _hardcoreToggleField = _freeplayDeviceType.GetField("HardcoreToggle", BindingFlags.Public | BindingFlags.Instance);
+        _startButtonField = _freeplayDeviceType.GetField("StartButton", BindingFlags.Public | BindingFlags.Instance);
+        _currentSettingsField = _freeplayDeviceType.GetField("currentSettings", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        _freeplaySettingsType = ReflectionHelper.FindType("Assets.Scripts.Settings.FreeplaySettings");
+        _moduleCountField = _freeplaySettingsType.GetField("ModuleCount", BindingFlags.Public | BindingFlags.Instance);
+        _timeField = _freeplaySettingsType.GetField("Time", BindingFlags.Public | BindingFlags.Instance);
+        _isHardCoreField = _freeplaySettingsType.GetField("IsHardCore", BindingFlags.Public | BindingFlags.Instance);
+        _hasNeedyField = _freeplaySettingsType.GetField("HasNeedy", BindingFlags.Public | BindingFlags.Instance);
+
         _floatingHoldableType = ReflectionHelper.FindType("FloatingHoldable");
         if (_floatingHoldableType == null)
         {
@@ -21,8 +36,6 @@ public class BombBinderCommander : ICommandResponder
         _handleSelectMethod = _selectableType.GetMethod("HandleSelect", BindingFlags.Public | BindingFlags.Instance);
         _handleDeselectMethod = _selectableType.GetMethod("HandleDeselect", BindingFlags.Public | BindingFlags.Instance);
         _onInteractEndedMethod = _selectableType.GetMethod("OnInteractEnded", BindingFlags.Public | BindingFlags.Instance);
-        _getCurrentChildMethod = _selectableType.GetMethod("GetCurrentChild", BindingFlags.Public | BindingFlags.Instance);
-        _childrenField = _selectableType.GetField("Children", BindingFlags.Public | BindingFlags.Instance);
 
         _selectableManagerType = ReflectionHelper.FindType("SelectableManager");
         if (_selectableManagerType == null)
@@ -48,11 +61,11 @@ public class BombBinderCommander : ICommandResponder
         _inputManager = (MonoBehaviour)_instanceProperty.GetValue(null, null);
     }
 
-    public BombBinderCommander(MonoBehaviour bombBinder)
+    public FreeplayCommander(MonoBehaviour freeplayDevice)
     {
-        BombBinder = bombBinder;
-        Selectable = (MonoBehaviour)BombBinder.GetComponent(_selectableType);
-        FloatingHoldable = (MonoBehaviour)BombBinder.GetComponent(_floatingHoldableType);
+        FreeplayDevice = freeplayDevice;
+        Selectable = (MonoBehaviour)FreeplayDevice.GetComponent(_selectableType);
+        FloatingHoldable = (MonoBehaviour)FreeplayDevice.GetComponent(_floatingHoldableType);
         SelectableManager = (MonoBehaviour)_selectableManagerProperty.GetValue(_inputManager, null);
     }
     #endregion
@@ -60,42 +73,82 @@ public class BombBinderCommander : ICommandResponder
     #region Interface Implementation
     public IEnumerator RespondToCommand(string userNickName, string message, ICommandResponseNotifier responseNotifier)
     {
+        MonoBehaviour singlePressButton = null;
+
         if (message.Equals("hold", StringComparison.InvariantCultureIgnoreCase) ||
             message.Equals("pick up", StringComparison.InvariantCultureIgnoreCase))
         {
-            IEnumerator holdCoroutine = HoldBombBinder();
+            IEnumerator holdCoroutine = HoldFreeplayDevice();
             while (holdCoroutine.MoveNext())
             {
                 yield return holdCoroutine.Current;
             }
-        }        
+        }
         else if (message.Equals("drop", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("let go", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("put down", StringComparison.InvariantCultureIgnoreCase))
         {
-            LetGoBombBinder();
+            LetGoFreeplayDevice();
         }
-        else if (message.Equals("down", StringComparison.InvariantCultureIgnoreCase))
+        else if (message.Equals("needy on", StringComparison.InvariantCultureIgnoreCase))
         {
-            MoveDownOnPage();
-        }
-        else if (message.Equals("up", StringComparison.InvariantCultureIgnoreCase))
-        {
-            MoveUpOnPage();
-        }
-        else if (message.Equals("select", StringComparison.InvariantCultureIgnoreCase))
-        {
-            IEnumerator selectCoroutine = SelectOnPage();
-            while (selectCoroutine.MoveNext())
+            object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
+            bool hasNeedy = (bool)_hasNeedyField.GetValue(currentSettings);
+            if (!hasNeedy)
             {
-                yield return selectCoroutine.Current;
+                MonoBehaviour needyToggle = (MonoBehaviour)_needyToggleField.GetValue(FreeplayDevice);
+                singlePressButton = (MonoBehaviour)needyToggle.GetComponent(_selectableType);
             }
+        }
+        else if (message.Equals("needy off", StringComparison.InvariantCultureIgnoreCase))
+        {
+            object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
+            bool hasNeedy = (bool)_hasNeedyField.GetValue(currentSettings);
+            if (hasNeedy)
+            {
+                MonoBehaviour needyToggle = (MonoBehaviour)_needyToggleField.GetValue(FreeplayDevice);
+                singlePressButton = (MonoBehaviour)needyToggle.GetComponent(_selectableType);
+            }
+        }
+        else if (message.Equals("hardcore on", StringComparison.InvariantCultureIgnoreCase))
+        {
+            object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
+            bool isHardcore = (bool)_isHardCoreField.GetValue(currentSettings);
+            if (!isHardcore)
+            {
+                MonoBehaviour hardcoreToggle = (MonoBehaviour)_hardcoreToggleField.GetValue(FreeplayDevice);
+                singlePressButton = (MonoBehaviour)hardcoreToggle.GetComponent(_selectableType);
+            }
+        }
+        else if (message.Equals("hardcore off", StringComparison.InvariantCultureIgnoreCase))
+        {
+            object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
+            bool isHardcore = (bool)_isHardCoreField.GetValue(currentSettings);
+            if (isHardcore)
+            {
+                MonoBehaviour hardcoreToggle = (MonoBehaviour)_hardcoreToggleField.GetValue(FreeplayDevice);
+                singlePressButton = (MonoBehaviour)hardcoreToggle.GetComponent(_selectableType);
+            }
+        }
+        else if (message.Equals("start", StringComparison.InvariantCultureIgnoreCase))
+        {
+            MonoBehaviour startButton = (MonoBehaviour)_startButtonField.GetValue(FreeplayDevice);
+            singlePressButton = (MonoBehaviour)startButton.GetComponent(_selectableType);
+        }
+        else
+        {
+
+        }
+
+        if (singlePressButton != null)
+        {
+            SelectObject(singlePressButton);
         }
     }
     #endregion
 
     #region Helper Methods
-    public IEnumerator HoldBombBinder()
+    public IEnumerator HoldFreeplayDevice()
     {
         int holdState = (int)_holdStateProperty.GetValue(FloatingHoldable, null);
 
@@ -109,99 +162,15 @@ public class BombBinderCommander : ICommandResponder
             {
                 yield return forceRotationCoroutine.Current;
             }
-
-            yield return null;
-
-            InitialisePage();            
         }
     }
 
-    public void LetGoBombBinder()
+    public void LetGoFreeplayDevice()
     {
         int holdState = (int)_holdStateProperty.GetValue(FloatingHoldable, null);
         if (holdState == 0)
         {
             DeselectObject(Selectable);
-        }
-    }
-    
-    private void InitialisePage()
-    {
-        MonoBehaviour currentPage = (MonoBehaviour)Selectable.GetComponentsInChildren(_selectableType, false).Where((x) => x != Selectable).FirstOrDefault();
-        _currentSelectable = (MonoBehaviour)_getCurrentChildMethod.Invoke(currentPage, null);
-
-        _handleSelectMethod.Invoke(_currentSelectable, new object[] { true });
-
-        _currentSelectables = (Array)_childrenField.GetValue(currentPage);
-
-        _currentSelectableIndex = 0;
-        for (; _currentSelectableIndex < _currentSelectables.Length; ++_currentSelectableIndex)
-        {
-            object selectable = _currentSelectables.GetValue(_currentSelectableIndex);
-            if (selectable != null && _currentSelectable == (MonoBehaviour)selectable)
-            {
-                return;
-            }
-        }
-
-        _currentSelectableIndex = int.MinValue;
-    }
-
-    private void MoveDownOnPage()
-    {
-        if (_currentSelectableIndex == int.MinValue || _currentSelectables == null || _currentSelectable == null)
-        {
-            return;
-        }
-
-        int oldSelectableIndex = _currentSelectableIndex;
-
-        for (++_currentSelectableIndex; _currentSelectableIndex < _currentSelectables.Length; ++_currentSelectableIndex)
-        {
-            MonoBehaviour newSelectable = (MonoBehaviour)_currentSelectables.GetValue(_currentSelectableIndex);
-            if (newSelectable != null)
-            {
-                _handleDeselectMethod.Invoke(_currentSelectable, new object[] { null });
-                _currentSelectable = newSelectable;
-                _handleSelectMethod.Invoke(_currentSelectable, new object[] { true });
-                return;
-            }
-        }
-
-        _currentSelectableIndex = oldSelectableIndex;
-    }
-
-    private void MoveUpOnPage()
-    {
-        if (_currentSelectableIndex == int.MinValue || _currentSelectables == null || _currentSelectable == null)
-        {
-            return;
-        }
-
-        int oldSelectableIndex = _currentSelectableIndex;
-
-        for (--_currentSelectableIndex; _currentSelectableIndex >= 0; --_currentSelectableIndex)
-        {
-            MonoBehaviour newSelectable = (MonoBehaviour)_currentSelectables.GetValue(_currentSelectableIndex);
-            if (newSelectable != null)
-            {
-                _handleDeselectMethod.Invoke(_currentSelectable, new object[] { null });
-                _currentSelectable = newSelectable;
-                _handleSelectMethod.Invoke(_currentSelectable, new object[] { true });
-                return;
-            }
-        }
-
-        _currentSelectableIndex = oldSelectableIndex;
-    }
-
-    private IEnumerator SelectOnPage()
-    {
-        if (_currentSelectable != null)
-        {
-            SelectObject(_currentSelectable);
-            yield return null;
-            InitialisePage();
         }
     }
 
@@ -242,7 +211,7 @@ public class BombBinderCommander : ICommandResponder
     #endregion
 
     #region Readonly Fields
-    public readonly MonoBehaviour BombBinder = null;
+    public readonly MonoBehaviour FreeplayDevice = null;
     public readonly MonoBehaviour Selectable = null;
     public readonly MonoBehaviour FloatingHoldable = null;
     private readonly MonoBehaviour SelectableManager = null;
@@ -250,6 +219,22 @@ public class BombBinderCommander : ICommandResponder
     #endregion
 
     #region Private Static Fields
+    private static Type _freeplayDeviceType = null;
+    private static FieldInfo _moduleCountIncrementField = null;
+    private static FieldInfo _moduleCountDecrementField = null;
+    private static FieldInfo _timeIncrementField = null;
+    private static FieldInfo _timeDecrementField = null;
+    private static FieldInfo _needyToggleField = null;
+    private static FieldInfo _hardcoreToggleField = null;
+    private static FieldInfo _startButtonField = null;
+    private static FieldInfo _currentSettingsField = null;
+
+    private static Type _freeplaySettingsType = null;
+    private static FieldInfo _moduleCountField = null;
+    private static FieldInfo _timeField = null;
+    private static FieldInfo _isHardCoreField = null;
+    private static FieldInfo _hasNeedyField = null;
+
     private static Type _floatingHoldableType = null;
     private static FieldInfo _pickupTimeField = null;
     private static PropertyInfo _holdStateProperty = null;
@@ -258,8 +243,6 @@ public class BombBinderCommander : ICommandResponder
     private static MethodInfo _handleSelectMethod = null;
     private static MethodInfo _handleDeselectMethod = null;
     private static MethodInfo _onInteractEndedMethod = null;
-    private static MethodInfo _getCurrentChildMethod = null;
-    private static FieldInfo _childrenField = null;
 
     private static Type _selectableManagerType = null;
     private static MethodInfo _selectMethod = null;
@@ -275,12 +258,6 @@ public class BombBinderCommander : ICommandResponder
     private static PropertyInfo _selectableManagerProperty = null;
 
     private static MonoBehaviour _inputManager = null;
-    #endregion
-
-    #region Private Fields
-    private MonoBehaviour _currentSelectable = null;
-    private int _currentSelectableIndex = int.MinValue;
-    private Array _currentSelectables = null;
     #endregion
 }
 

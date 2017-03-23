@@ -124,6 +124,8 @@ public class BombMessageResponder : MessageResponder
             handle.transform.SetParent(bombComponent.transform.parent, true);
             handle.basePosition = handle.transform.localPosition;
             handle.idealHandlePositionOffset = bombComponent.transform.parent.InverseTransformDirection(idealOffset);
+
+            _componentHandles.Add(handle);
         }
 
         return foundComponents;

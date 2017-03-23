@@ -44,6 +44,8 @@ public static class CommonReflectedTypeInfo
         ResultPageType = ReflectionHelper.FindType("ResultPage");
 
         BombBinderType = ReflectionHelper.FindType("BombBinder");
+
+        FreeplayDeviceType = ReflectionHelper.FindType("FreeplayDevice");
     }
 
     #region Bomb
@@ -127,6 +129,12 @@ public static class CommonReflectedTypeInfo
     #endregion
 
     public static Type BombBinderType
+    {
+        get;
+        private set;
+    }
+
+    public static Type FreeplayDeviceType
     {
         get;
         private set;

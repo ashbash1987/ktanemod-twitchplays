@@ -275,10 +275,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1000013378177458}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a44baf0045523f49bbcaef8d5b1bef8, type: 3}
+  m_Script: {fileID: 11500000, guid: b0fffb3be7657d645a75b5464b672855, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  messagePrefab: {fileID: 114000013934508510, guid: eaefed77918294947a596df986fbea35,
+  messagePrefab: {fileID: 114000014222916652, guid: eaefed77918294947a596df986fbea35,
     type: 2}
   canvasGroup: {fileID: 225000011905846548}
   highlightGroup: {fileID: 225000011631707134}

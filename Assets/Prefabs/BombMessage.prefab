@@ -21,7 +21,7 @@ GameObject:
   - 224: {fileID: 224000012198280416}
   - 222: {fileID: 222000012321177034}
   - 114: {fileID: 114000011728858032}
-  - 114: {fileID: 114000013934508510}
+  - 114: {fileID: 114000014222916652}
   - 114: {fileID: 114000014077209302}
   - 95: {fileID: 95000012361388150}
   m_Layer: 0
@@ -125,22 +125,6 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: '<b>Username</b>: Test'
---- !u!114 &114000013934508510
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1000010192721636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0a7346a790affd0408a9346e1340eb40, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  normalColor: {r: 1, g: 1, b: 1, a: 0}
-  highlightColor: {r: 1, g: 0.8862745, b: 0, a: 0.39215687}
-  completeColor: {r: 0, g: 1, b: 0, a: 0.235}
-  errorColor: {r: 1, g: 0, b: 0, a: 0.354}
-  ignoreColor: {r: 0.26805797, g: 0.32078537, b: 0.5441177, a: 0.178}
 --- !u!114 &114000014077209302
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -161,6 +145,22 @@ MonoBehaviour:
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
+--- !u!114 &114000014222916652
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000010192721636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddde00cdfe8ef20479d742568d08d70e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  normalColor: {r: 1, g: 1, b: 1, a: 0}
+  highlightColor: {r: 1, g: 0.8862745, b: 0, a: 0.39215687}
+  completeColor: {r: 0, g: 1, b: 0, a: 0.235}
+  errorColor: {r: 1, g: 0, b: 0, a: 0.354}
+  ignoreColor: {r: 0.23924091, g: 0.2764062, b: 0.43382353, a: 0.178}
 --- !u!222 &222000011741262156
 CanvasRenderer:
   m_ObjectHideFlags: 1
