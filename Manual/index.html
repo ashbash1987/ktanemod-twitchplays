@@ -37,11 +37,14 @@
                 Each module will have an assigned numerical digit in order to identify between modules that may have similar appearance but different expected outcomes.<br />This will appear in the top-right corner of the message flyout as a command indicator of the form <span class="command-text">!x</span>.<br />Start your message with that command and the remainder of the message will appear in the message flyout for that module.<br />
                 Example: <span class="command-text">!1 I am a message for module 1. Hello!</span>
             </p>
+            <p>
+                You can also send messages to the bomb in general as well. To do this, start the command with the form <span class="command-text">!bomb</span>; for example: <span class="command-text">!bomb I am a message for the bomb. Hello!</span>
+            </p>
             <h3>Auto-play Mode</h3>
             <p>
-                There is also the option to enable auto-play mode, which leaves the bomb entirely in the hands of you and your fellow Twitch Chat experts.<br />
-                In order to interact directly with the bomb, your commands will need to be very specific, based on the module that you're interacting with.<br />
-                See the details on the following pages on how to interact with the bomb and each specific module.
+                There is also the option to enable auto-play mode, which leaves the game entirely in the hands of you and your fellow Twitch Chat experts.<br />
+                In order to interact directly with the game, your commands will need to be very specific, based on what you want to interacting with.<br />
+                See the details on the following pages on how to interact with the game, the bomb and each specific module.
             </p>
             <p>
                 <strong>Note:</strong> The Auto-play chat interpreter knows if a module is defused and will not interpret instructions for a defused module. Also, if given a sequence of instructions that causes a strike mid-way, it will stop the sequence mid-way to avoid further strikes.<br />However, it does not discern between different chat instructions, so coordinate with your fellow experts to avoid bad instructions to the bomb.<br />
@@ -81,9 +84,40 @@
             <p>
                 If there are commands that have been issued but not yet processed, and you believe that any of the queued commands will potentially cause a strike, you can use the command <span class="command-text">!stop</span> to stop <em><strong>all</strong></em> queued commands, as well as halting the active command like the above command.
             </p>
+        </div>
+    </div>
+</div>
+<div class="section">
+    <div class="page page-bg-02">
+        <div class="page-header">
+            <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+            <span class="page-header-section-title">Twitch Plays</span>
+        </div>
+        <div class="page-content">            
+            <h3>Pre-Bomb Reference</h3>
+            <p>
+                While in the setup room before a bomb, there are various commands available:
+                <h4>Bomb/Mission Binder Case Commands</h4>
+                <p>
+                    To pick up the binder, use the command <span class="command-text">!binder hold</span> or <span class="command-text">!binder pick up</span>.<br />
+                    To drop the binder, use the command <span class="command-text">!binder drop</span> or <span class="command-text">!binder let go</span> or <span class="command-text">!binder put down</span>.<br />
+                    To move the active selection up and down in the binder, use the commands <span class="command-text">!binder up</span> and <span class="command-text">!binder down</span> respectively.<br />
+                    To choose the active selection, use the command <span class="command-text">!binder select</span>.<br />
+                </p>
+                <h4>Freeplay Case Commands</h4>
+                <p>
+                    To pick up the freeplay case, use the command <span class="command-text">!freeplay hold</span> or <span class="command-text">!freeplay pick up</span>.<br />
+                    To drop the freeplay case, use the command <span class="command-text">!freeplay drop</span> or <span class="command-text">!freeplay let go</span> or <span class="command-text">!freeplay put down</span>.<br />
+                    To set the number of modules, use the command <span class="command-text">!freeplay modules <span class="command-text-param">&lt;x&gt;</span></span>, replacing 'x' with the requested number of modules.<br />
+                    To set the timer, use the command <span class="command-text">!freeplay timer <span class="command-text-param">&lt;mm:ss&gt;</span></span>, replacing 'm:ss' with the requested time, split up in minutes ('x') and seconds ('ss').<br />
+                    To toggle the needy switch on and off, use the commands <span class="command-text">!freeplay needy on</span> and <span class="command-text">!freeplay needy off</span> respectively.<br />
+                    To toggle the hardcore switch on and off, use the commands <span class="command-text">!freeplay hardcore on</span> and <span class="command-text">!freeplay hardcore off</span> respectively.<br />
+                    To start a freeplay bomb, use the commands <span class="command-text">!freeplay start</span>.
+                </p>
+            </p>
             <h3>Post-Bomb Reference</h3>
             <p>
-                At the end of a bomb there are a couple of options available to chat:<br />
+                At the end of a bomb there are a couple of options available:<br />
                 <span class="command-text">!continue</span>: On completing a bomb, this will take you to the main setup scene.<br />
                 <span class="command-text">!back</span>: On failing a bomb, this will take you to the main setup scene.<br />
                 <span class="command-text">!retry</span>: On failing a bomb, this will retry the bomb.<br />
