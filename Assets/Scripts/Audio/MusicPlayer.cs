@@ -22,18 +22,21 @@ public class MusicPlayer : MonoBehaviour
 
     public void StartMusic()
     {
-        StopAllCoroutines();
         StartCoroutine(StartMusicCoroutine());
     }
 
     public void StopMusic()
     {
-        StopAllCoroutines();
         StartCoroutine(EndMusicCoroutine());
     }
 
     private IEnumerator StartMusicCoroutine()
     {
+        if (musicLoopSound == null || musicLoopSound.isPlaying)
+        {
+            yield break;
+        }
+
         InterruptMusic.Instance.SetMusicInterrupt(true);
 
         if (startInterruptSound != null)
@@ -43,19 +46,18 @@ public class MusicPlayer : MonoBehaviour
         }
         yield return new WaitForSeconds(startInterruptSound.clip.length);
 
-        if (musicLoopSound != null)
-        {
-            musicLoopSound.time = 0.0f;
-            musicLoopSound.Play();
-        }
+        musicLoopSound.time = 0.0f;
+        musicLoopSound.Play();
     }
 
     private IEnumerator EndMusicCoroutine()
     {
-        if (musicLoopSound != null)
+        if (musicLoopSound == null || !musicLoopSound.isPlaying)
         {
-            musicLoopSound.Stop();
+            yield break;
         }
+
+        musicLoopSound.Stop();
 
         if (endInterruptSound != null)
         {

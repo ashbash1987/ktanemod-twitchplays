@@ -39,6 +39,8 @@ public class BombMessageResponder : MessageResponder
         _componentHandles.Clear();
 
         InputInterceptor.EnableInput();
+
+        MusicPlayer.GetMusicPlayer("JeopardyThink").StopMusic();
     }
     #endregion
 

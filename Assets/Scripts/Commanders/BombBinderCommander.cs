@@ -46,6 +46,16 @@ public class BombBinderCommander : ICommandResponder
         _selectableManagerProperty = _inputManagerType.GetProperty("SelectableManager", BindingFlags.Public | BindingFlags.Instance);
 
         _inputManager = (MonoBehaviour)_instanceProperty.GetValue(null, null);
+
+        _missionTableOfContentsMissionEntryType = ReflectionHelper.FindType("MissionTableOfContentsMissionEntry");
+        _missionIDField = _missionTableOfContentsMissionEntryType.GetField("MissionID", BindingFlags.Public | BindingFlags.Instance);
+
+        _missionManagerType = ReflectionHelper.FindType("Assets.Scripts.Missions.MissionManager");
+        _missionManagerInstanceProperty = _missionManagerType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+        _getMissionMethod = _missionManagerType.GetMethod("GetMission", BindingFlags.Public | BindingFlags.Instance);
+
+        _missionType = ReflectionHelper.FindType("Assets.Scripts.Missions.Mission");
+        _isTutorialProperty = _missionType.GetProperty("IsTutorial", BindingFlags.Public | BindingFlags.Instance);
     }
 
     public BombBinderCommander(MonoBehaviour bombBinder)
@@ -68,33 +78,42 @@ public class BombBinderCommander : ICommandResponder
             {
                 yield return holdCoroutine.Current;
             }
-        }        
-        else if (message.Equals("drop", StringComparison.InvariantCultureIgnoreCase) ||
-                 message.Equals("let go", StringComparison.InvariantCultureIgnoreCase) ||
-                 message.Equals("put down", StringComparison.InvariantCultureIgnoreCase))
-        {
-            LetGoBombBinder();
         }
-        else if (message.Equals("down", StringComparison.InvariantCultureIgnoreCase))
+        else
         {
-            MoveDownOnPage();
-        }
-        else if (message.Equals("up", StringComparison.InvariantCultureIgnoreCase))
-        {
-            MoveUpOnPage();
-        }
-        else if (message.Equals("select", StringComparison.InvariantCultureIgnoreCase))
-        {
-            IEnumerator selectCoroutine = SelectOnPage();
-            while (selectCoroutine.MoveNext())
+            int holdState = (int)_holdStateProperty.GetValue(FloatingHoldable, null);
+            if (holdState != 0)
             {
-                yield return selectCoroutine.Current;
+                yield break;
+            }
+
+            if (message.Equals("drop", StringComparison.InvariantCultureIgnoreCase) ||
+                message.Equals("let go", StringComparison.InvariantCultureIgnoreCase) ||
+                message.Equals("put down", StringComparison.InvariantCultureIgnoreCase))
+            {
+                LetGoBombBinder();
+            }
+            else if (message.Equals("down", StringComparison.InvariantCultureIgnoreCase))
+            {
+                MoveDownOnPage();
+            }
+            else if (message.Equals("up", StringComparison.InvariantCultureIgnoreCase))
+            {
+                MoveUpOnPage();
+            }
+            else if (message.Equals("select", StringComparison.InvariantCultureIgnoreCase))
+            {
+                IEnumerator selectCoroutine = SelectOnPage();
+                while (selectCoroutine.MoveNext())
+                {
+                    yield return selectCoroutine.Current;
+                }
             }
         }
     }
     #endregion
 
-    #region Helper Methods
+        #region Helper Methods
     public IEnumerator HoldBombBinder()
     {
         int holdState = (int)_holdStateProperty.GetValue(FloatingHoldable, null);
@@ -112,7 +131,7 @@ public class BombBinderCommander : ICommandResponder
 
             yield return null;
 
-            InitialisePage();            
+            InitialisePage();
         }
     }
 
@@ -199,6 +218,21 @@ public class BombBinderCommander : ICommandResponder
     {
         if (_currentSelectable != null)
         {
+            //Some protection to prevent going into a tutorial; don't have complete support for that!
+            object tableOfContentsEntryObject = _currentSelectable.GetComponent(_missionTableOfContentsMissionEntryType);
+            Debug.Log(tableOfContentsEntryObject);
+            if (tableOfContentsEntryObject != null)
+            {
+                object missionID = _missionIDField.GetValue(tableOfContentsEntryObject);
+                object missionManager = _missionManagerInstanceProperty.GetValue(null, null);
+                object mission = _getMissionMethod.Invoke(missionManager, new object[] { missionID });
+                bool isTutorial = (bool)_isTutorialProperty.GetValue(mission, null);
+                if (isTutorial)
+                {
+                    yield break;
+                }
+            }
+
             SelectObject(_currentSelectable);
             yield return null;
             InitialisePage();
@@ -273,6 +307,16 @@ public class BombBinderCommander : ICommandResponder
     private static Type _inputManagerType = null;
     private static PropertyInfo _instanceProperty = null;
     private static PropertyInfo _selectableManagerProperty = null;
+
+    private static Type _missionTableOfContentsMissionEntryType = null;
+    private static FieldInfo _missionIDField = null;
+
+    private static Type _missionManagerType = null;
+    private static PropertyInfo _missionManagerInstanceProperty = null;
+    private static MethodInfo _getMissionMethod = null;
+
+    private static Type _missionType = null;
+    private static PropertyInfo _isTutorialProperty = null;
 
     private static MonoBehaviour _inputManager = null;
     #endregion
