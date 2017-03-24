@@ -18,7 +18,7 @@ These are features that are absolutely required in order to allow Twitch Plays t
 - [x] Control vanilla modules directly with `!x` commands.
 - [x] Control bomb orientation and held status with `!bomb` commands.
 - [x] Control post-game screen with `!continue`, `!retry`, and `!back` commands.
-- [ ] Control pre-game screen with `!binder` and `!freeplay` commands.
+- [x] Control pre-game screen with `!binder` and `!freeplay` commands.
 - [ ] Add response messages to improve interaction with Twitch Chat.
 ### Phase 2
 These are the next 'nice-to-have' features, once all of the phase 1 tasks are completed and tested to function well.
