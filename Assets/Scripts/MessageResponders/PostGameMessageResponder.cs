@@ -3,12 +3,23 @@ using UnityEngine;
 
 public class PostGameMessageResponder : MessageResponder
 {
+    public TwitchLeaderboard twitchLeaderboardPrefab = null;
+    public Leaderboard leaderboard = null;
+
     private PostGameCommander _postGameCommander = null;
+    private TwitchLeaderboard _leaderboardDisplay = null;
+    private int _bombCount = 0;
 
     #region Unity Lifecycle
     private void OnEnable()
     {
         StartCoroutine(CheckForResultsPage());
+
+        _bombCount++;
+
+        _leaderboardDisplay = Instantiate<TwitchLeaderboard>(twitchLeaderboardPrefab);
+        _leaderboardDisplay.bombCount = _bombCount;
+        _leaderboardDisplay.leaderboard = leaderboard;
     }
 
     private void OnDisable()
@@ -16,6 +27,9 @@ public class PostGameMessageResponder : MessageResponder
         StopAllCoroutines();
 
         _postGameCommander = null;
+
+        DestroyObject(_leaderboardDisplay);
+        _leaderboardDisplay = null;
     }
     #endregion
 

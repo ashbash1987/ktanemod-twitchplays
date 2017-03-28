@@ -255,8 +255,6 @@ public class FreeplayCommander : ICommandResponder
         float initialTime = Time.time;
         while (Time.time - initialTime < duration)
         {
-            float lerp = (Time.time - initialTime) / duration;
-
             Quaternion currentRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
 
             _setZSpinMethod.Invoke(SelectableManager, new object[] { 0.0f });

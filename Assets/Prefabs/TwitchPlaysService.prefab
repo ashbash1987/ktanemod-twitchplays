@@ -555,6 +555,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6f70e1d5d9a6d042be7be1082b3a605, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  twitchLeaderboardPrefab: {fileID: 114000011074794554, guid: dee70f605eecbda45be089a74e6863d3,
+    type: 2}
 --- !u!114 &114000014271784596
 MonoBehaviour:
   m_ObjectHideFlags: 1

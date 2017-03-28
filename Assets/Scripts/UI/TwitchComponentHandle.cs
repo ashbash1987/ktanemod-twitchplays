@@ -59,6 +59,9 @@ public class TwitchComponentHandle : MonoBehaviour
 
     [HideInInspector]
     public CoroutineCanceller coroutineCanceller = null;
+
+    [HideInInspector]
+    public Leaderboard leaderboard = null;
     #endregion
 
     #region Private Fields
@@ -126,13 +129,20 @@ public class TwitchComponentHandle : MonoBehaviour
         string internalCommand = match.Groups[1].Value;
 
         TwitchMessage message = (TwitchMessage)Instantiate(messagePrefab, messageScrollContents.transform, false);
+        message.leaderboard = leaderboard;
+        message.userName = userNickName;
         if (string.IsNullOrEmpty(userColor))
         {
             message.SetMessage(string.Format("<b>{0}</b>: {1}", userNickName, internalCommand));
+            message.userColor = new Color(0.31f, 0.31f, 0.31f);
         }
         else
         {
             message.SetMessage(string.Format("<b><color={2}>{0}</color></b>: {1}", userNickName, internalCommand, userColor));
+            if (!ColorUtility.TryParseHtmlString(userColor, out message.userColor))
+            {
+                message.userColor = new Color(0.31f, 0.31f, 0.31f);
+            }
         }
 
         if (_solver != null)

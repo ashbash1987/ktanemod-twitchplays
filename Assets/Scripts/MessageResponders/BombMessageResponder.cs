@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class BombMessageResponder : MessageResponder
 {
-    public TwitchBombHandle twitchBombHandlePrefab;
-    public TwitchComponentHandle twitchComponentHandlePrefab;
+    public TwitchBombHandle twitchBombHandlePrefab = null;
+    public TwitchComponentHandle twitchComponentHandlePrefab = null;
+    public Leaderboard leaderboard = null;
 
     private BombCommander _bombCommander = null;
     private TwitchBombHandle _bombHandle = null;
@@ -121,6 +122,7 @@ public class BombMessageResponder : MessageResponder
             handle.componentType = componentTypeEnum;
             handle.coroutineQueue = _coroutineQueue;
             handle.coroutineCanceller = _coroutineCanceller;
+            handle.leaderboard = leaderboard;
 
             Vector3 idealOffset = handle.transform.TransformDirection(GetIdealPositionForHandle(handle, bombComponents, out handle.direction));
             handle.transform.SetParent(bombComponent.transform.parent, true);

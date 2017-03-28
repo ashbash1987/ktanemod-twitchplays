@@ -10,6 +10,10 @@ public class TwitchMessage : MonoBehaviour, ICommandResponseNotifier
     public Color errorColor = Color.white;
     public Color ignoreColor = Color.white;
 
+    public Leaderboard leaderboard = null;
+    public string userName = null;
+    public Color userColor = Color.black;
+
     private Image _messageBackground = null;
     private Text _messageText = null;
 
@@ -40,10 +44,18 @@ public class TwitchMessage : MonoBehaviour, ICommandResponseNotifier
             case CommandResponse.EndComplete:
                 StopAllCoroutines();
                 StartCoroutine(DoBackgroundColorChange(completeColor));
+                if (leaderboard != null)
+                {
+                    leaderboard.AddSolve(userName, userColor);
+                }
                 break;
             case CommandResponse.EndError:
                 StopAllCoroutines();
                 StartCoroutine(DoBackgroundColorChange(errorColor));
+                if (leaderboard != null)
+                {
+                    leaderboard.AddStrike(userName, userColor);
+                }
                 break;
             case CommandResponse.NoResponse:
                 StopAllCoroutines();

@@ -24,6 +24,7 @@ public class TwitchPlaysService : MonoBehaviour
     private CoroutineCanceller _coroutineCanceller = null;
 
     private MessageResponder _activeMessageResponder = null;
+    private Leaderboard _leaderboard = null;
 
     private void Start()
     {
@@ -45,10 +46,15 @@ public class TwitchPlaysService : MonoBehaviour
         _coroutineQueue = GetComponent<CoroutineQueue>();
         _coroutineCanceller = new CoroutineCanceller();
 
+        _leaderboard = new Leaderboard();
+
         SetupResponder(bombMessageResponder);
         SetupResponder(postGameMessageResponder);
         SetupResponder(missionMessageResponder);
         SetupResponder(miscellaneousMessageResponder);
+
+        bombMessageResponder.leaderboard = _leaderboard;
+        postGameMessageResponder.leaderboard = _leaderboard;
     }
 
     private void Update()
