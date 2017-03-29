@@ -102,6 +102,7 @@
                     To pick up the binder, use the command <span class="command-text">!binder hold</span> or <span class="command-text">!binder pick up</span>.<br />
                     To drop the binder, use the command <span class="command-text">!binder drop</span> or <span class="command-text">!binder let go</span> or <span class="command-text">!binder put down</span>.<br />
                     To move the active selection up and down in the binder, use the commands <span class="command-text">!binder up</span> and <span class="command-text">!binder down</span> respectively.<br />
+                    Movement commands can be chained into a list, e.g. <span class="command-text">!binder up up up down up</span>. Also, <span class="command-text">u</span> can be used as shorthand for up and <span class="command-text">d</span> can be used as shorthand for down.<br />
                     To choose the active selection, use the command <span class="command-text">!binder select</span>.<br />
                 </p>
                 <h4>Freeplay Case Commands</h4>
@@ -109,7 +110,7 @@
                     To pick up the freeplay case, use the command <span class="command-text">!freeplay hold</span> or <span class="command-text">!freeplay pick up</span>.<br />
                     To drop the freeplay case, use the command <span class="command-text">!freeplay drop</span> or <span class="command-text">!freeplay let go</span> or <span class="command-text">!freeplay put down</span>.<br />
                     To set the number of modules, use the command <span class="command-text">!freeplay modules <span class="command-text-param">&lt;x&gt;</span></span>, replacing 'x' with the requested number of modules.<br />
-                    To set the timer, use the command <span class="command-text">!freeplay timer <span class="command-text-param">&lt;mm:ss&gt;</span></span>, replacing 'm:ss' with the requested time, split up in minutes ('x') and seconds ('ss').<br />
+                    To set the timer, use the command <span class="command-text">!freeplay timer <span class="command-text-param">&lt;mm:ss&gt;</span></span> or <span class="command-text">!freeplay time <span class="command-text-param">&lt;mm:ss&gt;</span></span>, replacing 'm:ss' with the requested time, split up in minutes ('x') and seconds ('ss').<br />
                     To toggle the needy switch on and off, use the commands <span class="command-text">!freeplay needy on</span> and <span class="command-text">!freeplay needy off</span> respectively.<br />
                     To toggle the hardcore switch on and off, use the commands <span class="command-text">!freeplay hardcore on</span> and <span class="command-text">!freeplay hardcore off</span> respectively.<br />
                     To start a freeplay bomb, use the commands <span class="command-text">!freeplay start</span>.
@@ -338,12 +339,12 @@
                         <td>Venting Gas</td>
                         <td>
                             <p>
-                                To press Y: <span class="command-text">press y</span><br />
-                                e.g. <span class="command-text">!1 press y</span>
+                                To press Y: <span class="command-text">press y</span> or <span class="command-text">press yes</span>, or simply just <span class="command-text">y</span> or <span class="command-text">yes</span><br />
+                                e.g. <span class="command-text">!1 press y</span>, <span class="command-text">!1 press yes</span>, <span class="command-text">!1 y</span>, <span class="command-text">!1 yes</span>
                             </p>
                             <p>
-                                To press N: <span class="command-text">press n</span><br />
-                                e.g. <span class="command-text">!1 press n</span>
+                                To press N: <span class="command-text">press n</span> or <span class="command-text">press no</span>, or simply just <span class="command-text">n</span> or <span class="command-text">no</span><br />
+                                e.g. <span class="command-text">!1 press n</span>, <span class="command-text">!1 press no</span>, <span class="command-text">!1 n</span>, <span class="command-text">!1 no</span>
                             </p>
                         </td>
                     </tr>  
@@ -361,7 +362,8 @@
                         <td>
                             <p>
                                 To rotate the knob 'x' number of clicks: <span class="command-text">rotate <span class="command-text-param">&lt;x&gt;</span></span><br />
-                                e.g. <span class="command-text">!1 rotate 3</span>
+                                e.g. <span class="command-text">!1 rotate 3</span><br />
+                                The number that will actually be rotated by will be with respect to <strong>modulo 4</strong>.
                             </p>
                         </td>
                     </tr>			
