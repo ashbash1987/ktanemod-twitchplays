@@ -66,6 +66,12 @@ public class ButtonComponentSolver : ComponentSolver
         float timeRemaining = float.PositiveInfinity;
         while (timeRemaining > 0.0f)
         {
+            if (Canceller.ShouldCancel)
+            {
+                Canceller.ResetCancel();
+                yield break;
+            }
+
             timeRemaining = (float)CommonReflectedTypeInfo.TimeRemainingField.GetValue(timerComponent);
             string formattedTime = (string)CommonReflectedTypeInfo.GetFormattedTimeMethod.Invoke(null, new object[] { timeRemaining, true });
 

@@ -46,6 +46,12 @@ public class MorseCodeComponentSolver : ComponentSolver
         {
             yield return "change frequency";
 
+            if (Canceller.ShouldCancel)
+            {
+                Canceller.ResetCancel();
+                yield break;
+            }
+
             DoInteractionStart(buttonToShift);
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(buttonToShift);

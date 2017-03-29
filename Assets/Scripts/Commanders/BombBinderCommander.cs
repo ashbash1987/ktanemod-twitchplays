@@ -93,14 +93,6 @@ public class BombBinderCommander : ICommandResponder
             {
                 LetGoBombBinder();
             }
-            else if (message.Equals("down", StringComparison.InvariantCultureIgnoreCase))
-            {
-                MoveDownOnPage();
-            }
-            else if (message.Equals("up", StringComparison.InvariantCultureIgnoreCase))
-            {
-                MoveUpOnPage();
-            }
             else if (message.Equals("select", StringComparison.InvariantCultureIgnoreCase))
             {
                 IEnumerator selectCoroutine = SelectOnPage();
@@ -109,11 +101,30 @@ public class BombBinderCommander : ICommandResponder
                     yield return selectCoroutine.Current;
                 }
             }
+            else
+            {
+                string[] sequence = message.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string subCommand in sequence)
+                {
+                    if (subCommand.Equals("down", StringComparison.InvariantCultureIgnoreCase) ||
+                        subCommand.Equals("d", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        MoveDownOnPage();
+                        yield return new WaitForSeconds(0.2f);
+                    }
+                    else if (subCommand.Equals("up", StringComparison.InvariantCultureIgnoreCase) ||
+                             subCommand.Equals("u", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        MoveUpOnPage();
+                        yield return new WaitForSeconds(0.2f);
+                    }
+                }
+            }
         }
     }
     #endregion
 
-        #region Helper Methods
+    #region Helper Methods
     public IEnumerator HoldBombBinder()
     {
         int holdState = (int)_holdStateProperty.GetValue(FloatingHoldable, null);

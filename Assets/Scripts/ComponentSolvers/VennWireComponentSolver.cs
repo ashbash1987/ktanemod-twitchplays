@@ -37,6 +37,12 @@ public class VennWireComponentSolver : ComponentSolver
             {
                 yield return wireIndexString;
 
+                if (Canceller.ShouldCancel)
+                {
+                    Canceller.ResetCancel();
+                    yield break;
+                }
+
                 MonoBehaviour wire = (MonoBehaviour)_wires.GetValue(wireIndex);
 
                 DoInteractionStart(wire);

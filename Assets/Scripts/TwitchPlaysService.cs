@@ -43,8 +43,10 @@ public class TwitchPlaysService : MonoBehaviour
         _ircConnection = new IRCConnection(settings.authToken, settings.userName, settings.channelName, settings.serverName, settings.serverPort);
         _ircConnection.Connect();
 
-        _coroutineQueue = GetComponent<CoroutineQueue>();
         _coroutineCanceller = new CoroutineCanceller();
+
+        _coroutineQueue = GetComponent<CoroutineQueue>();
+        _coroutineQueue.coroutineCanceller = _coroutineCanceller;
 
         _leaderboard = new Leaderboard();
 

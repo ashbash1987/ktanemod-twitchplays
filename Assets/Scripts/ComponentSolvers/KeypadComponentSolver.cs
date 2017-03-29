@@ -37,6 +37,12 @@ public class KeypadComponentSolver : ComponentSolver
             {
                 yield return buttonIndexString;
 
+                if (Canceller.ShouldCancel)
+                {
+                    Canceller.ResetCancel();
+                    yield break;
+                }
+
                 MonoBehaviour button = (MonoBehaviour)_buttons.GetValue(buttonIndex);
                 DoInteractionStart(button);
                 yield return new WaitForSeconds(0.1f);

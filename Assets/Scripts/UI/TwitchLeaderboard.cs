@@ -31,18 +31,11 @@ public class TwitchLeaderboard : MonoBehaviour
             return;
         }
 
-        int index = -1;
-        float previousScore = float.PositiveInfinity;
         float delay = 0.6f;
+        int index = 0;
 
         foreach (Leaderboard.LeaderboardEntry entry in leaderboard.GetSortedEntries(maximumRowCount))
         {
-            if (entry.Score != previousScore)
-            {
-                index++;
-            }
-            previousScore = entry.Score;
-
             TwitchLeaderboardRow row = Instantiate<TwitchLeaderboardRow>(index < specialRows.Length ? specialRows[index] : normalRow);
             row.position = index + 1;
             row.leaderboardEntry = entry;
@@ -52,6 +45,7 @@ public class TwitchLeaderboard : MonoBehaviour
             _instancedRows.Add(row);
 
             delay += 0.1f;
+            index++;
         }
 
         int solveCount = 0;

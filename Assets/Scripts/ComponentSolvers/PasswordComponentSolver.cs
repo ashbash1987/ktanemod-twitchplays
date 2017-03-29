@@ -63,6 +63,12 @@ public class PasswordComponentSolver : ComponentSolver
 
         for (int hitCount = 0; hitCount < 6; ++hitCount)
         {
+            if (Canceller.ShouldCancel)
+            {
+                Canceller.ResetCancel();
+                yield break;
+            }
+
             DoInteractionStart(downButton);
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(downButton);
@@ -75,6 +81,12 @@ public class PasswordComponentSolver : ComponentSolver
         char[] characters = word.ToCharArray();
         for (int characterIndex = 0; characterIndex < characters.Length; ++characterIndex)
         {
+            if (Canceller.ShouldCancel)
+            {
+                Canceller.ResetCancel();
+                yield break;
+            }
+
             MonoBehaviour spinner = GetCharSpinner(characterIndex);
             IEnumerator subcoroutine = GetCharacterSpinnerToCharacterCoroutine(spinner, characters[characterIndex]);
             while (subcoroutine.MoveNext())

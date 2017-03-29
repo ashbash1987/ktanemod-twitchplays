@@ -14,7 +14,10 @@ public class NeedyVentComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
-        if (inputCommand.Equals("y", StringComparison.InvariantCultureIgnoreCase))
+        if (inputCommand.Equals("y", StringComparison.InvariantCultureIgnoreCase) ||
+            inputCommand.Equals("yes", StringComparison.InvariantCultureIgnoreCase) ||
+            inputCommand.Equals("press y", StringComparison.InvariantCultureIgnoreCase) ||
+            inputCommand.Equals("press yes", StringComparison.InvariantCultureIgnoreCase))
         {
             yield return "yes";
 
@@ -22,7 +25,10 @@ public class NeedyVentComponentSolver : ComponentSolver
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(_yesButton);
         }
-        else if (inputCommand.Equals("n", StringComparison.InvariantCultureIgnoreCase))
+        else if (inputCommand.Equals("n", StringComparison.InvariantCultureIgnoreCase) ||
+                 inputCommand.Equals("no", StringComparison.InvariantCultureIgnoreCase) ||
+                 inputCommand.Equals("press n", StringComparison.InvariantCultureIgnoreCase) ||
+                 inputCommand.Equals("press no", StringComparison.InvariantCultureIgnoreCase))
         {
             yield return "no";
 

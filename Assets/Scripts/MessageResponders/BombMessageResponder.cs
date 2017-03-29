@@ -68,6 +68,8 @@ public class BombMessageResponder : MessageResponder
         _bombCommander = new BombCommander(bomb);
         CreateBombHandleForBomb(bomb);
         CreateComponentHandlesForBomb(bomb);
+
+        _ircConnection.SendMessage("The next bomb is now live! Start sending your commands!");
     }
 
     protected override void OnMessageReceived(string userNickName, string userColorCode, string text)

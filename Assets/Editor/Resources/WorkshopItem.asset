@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Name: WorkshopItem
   m_EditorClassIdentifier: 
   WorkshopPublishedFileID: 0
-  Title: Widget Recount
-  Description: 
-  PreviewImage: {fileID: 2800000, guid: a74ac0e6597ff8145915c7a6717a8ea9, type: 3}
+  Title: Twitch Plays
+  Description: This mod adds support for users to control KTaNE directly from Twitch
+    Chat!
+  PreviewImage: {fileID: 2800000, guid: fc38eff07fb2f51469ac309cca164e26, type: 3}
   Tags:
   - Other

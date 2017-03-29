@@ -31,14 +31,21 @@ public class NeedyKnobComponentSolver : ComponentSolver
             yield break;
         }
 
+        totalTurnCount = totalTurnCount % 4;
+
         yield return "rotate";
 
         for (int turnCount = 0; turnCount < totalTurnCount; ++turnCount)
         {
+            if (Canceller.ShouldCancel)
+            {
+                Canceller.ResetCancel();
+                yield break;
+            }
+
             DoInteractionStart(_pointingKnob);
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(_pointingKnob);
-
         }
     }
 

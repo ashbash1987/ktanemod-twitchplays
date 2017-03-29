@@ -71,39 +71,59 @@ public class Leaderboard
     {
         LeaderboardEntry entry = null;
 
-        if (!_entries.ContainsKey(userName))
+        if (!_entryDictionary.ContainsKey(userName))
         {
             entry = new LeaderboardEntry() { UserName = userName, UserColor = userColor };
-            _entries[userName] = entry;
+            _entryDictionary[userName] = entry;
+            _entryList.Add(entry);
         }
         else
         {
-            entry = _entries[userName];
+            entry = _entryDictionary[userName];
         }
 
         entry.AddSolve();
+
+        ResetSortFlag();
     }
 
     public void AddStrike(string userName, Color userColor)
     {
         LeaderboardEntry entry = null;
 
-        if (!_entries.ContainsKey(userName))
+        if (!_entryDictionary.ContainsKey(userName))
         {
             entry = new LeaderboardEntry() { UserName = userName, UserColor = userColor };
-            _entries[userName] = entry;
+            _entryDictionary[userName] = entry;
+            _entryList.Add(entry);
         }
         else
         {
-            entry = _entries[userName];
+            entry = _entryDictionary[userName];
         }
 
         entry.AddStrike();
+
+        ResetSortFlag();
     }
 
     public IEnumerable<LeaderboardEntry> GetSortedEntries(int count)
     {
-        return _entries.Values.OrderByDescending((x) => x.Score).Take(count);
+        CheckAndSort();
+        return _entryList.Take(count);
+    }
+
+    public int GetRank(string userName, out LeaderboardEntry entry)
+    {
+        if (!_entryDictionary.ContainsKey(userName))
+        {
+            entry = null;
+            return _entryList.Count + 1;
+        }
+
+        CheckAndSort();
+        entry = _entryDictionary[userName];
+        return _entryList.IndexOf(entry) + 1;
     }
 
     public void GetTotalSolveStrikeCounts(out int solveCount, out int strikeCount)
@@ -111,13 +131,29 @@ public class Leaderboard
         solveCount = 0;
         strikeCount = 0;
 
-        foreach (LeaderboardEntry entry in _entries.Values)
+        foreach (LeaderboardEntry entry in _entryList)
         {
             solveCount += entry.SolveCount;
             strikeCount += entry.StrikeCount;
         }
     }
 
-    private Dictionary<string, LeaderboardEntry> _entries = new Dictionary<string, LeaderboardEntry>();
+    private void ResetSortFlag()
+    {
+        _sorted = false;
+    }
+
+    private void CheckAndSort()
+    {
+        if (!_sorted)
+        {
+            _entryList.Sort();
+            _sorted = true;
+        }
+    }
+
+    private Dictionary<string, LeaderboardEntry> _entryDictionary = new Dictionary<string, LeaderboardEntry>();
+    private List<LeaderboardEntry> _entryList = new List<LeaderboardEntry>();
+    private bool _sorted = true;
 }
 

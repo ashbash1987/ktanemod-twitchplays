@@ -49,6 +49,12 @@ public class InvisibleWallsComponentSolver : ComponentSolver
             {
                 yield return buttonString;
 
+                if (Canceller.ShouldCancel)
+                {
+                    Canceller.ResetCancel();
+                    yield break;
+                }
+
                 DoInteractionStart(button);
                 yield return new WaitForSeconds(0.1f);
                 DoInteractionEnd(button);
