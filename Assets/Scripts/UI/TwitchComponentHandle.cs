@@ -73,7 +73,12 @@ public class TwitchComponentHandle : MonoBehaviour
     private static int _nextID = 0;
     private static int GetNewID()
     {
-        _nextID = (_nextID + 1) % 1000;
+        _nextID++;
+        if (_nextID >= 100)
+        {
+            _nextID = 1;
+        }
+
         return _nextID;
     }
     #endregion
@@ -100,6 +105,7 @@ public class TwitchComponentHandle : MonoBehaviour
         HighlightArrow.gameObject.SetActive(true);
 
         _solver = ComponentSolverFactory.CreateSolver(bombCommander, bombComponent, componentType, ircConnection, coroutineCanceller);
+        _solver.Code = _code;
     }
 
     private void LateUpdate()

@@ -35,7 +35,7 @@ public class NeedyDischargeComponentSolver : ComponentSolver
 
         if (holdTime > 10.0f)
         {
-            MusicPlayer.GetMusicPlayer("JeopardyThink").StartMusic();
+            _musicPlayer = MusicPlayer.StartRandomMusic();
         }
 
         DoInteractionStart(_dischargeButton);
@@ -44,7 +44,7 @@ public class NeedyDischargeComponentSolver : ComponentSolver
 
         if (holdTime > 10.0f)
         {
-            MusicPlayer.GetMusicPlayer("JeopardyThink").StopMusic();
+            _musicPlayer.StopMusic();
         }
     }
 
@@ -58,4 +58,5 @@ public class NeedyDischargeComponentSolver : ComponentSolver
     private static FieldInfo _dischargeButtonField = null;
 
     private MonoBehaviour _dischargeButton = null;
+    private MusicPlayer _musicPlayer = null;
 }

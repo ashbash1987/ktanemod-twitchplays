@@ -67,10 +67,12 @@ public abstract class ComponentSolver : ICommandResponder
 
         if (Solved)
         {
+            IRCConnection.SendMessage(string.Format("VoteYea Module {0} is solved!", Code));
             responseNotifier.ProcessResponse(CommandResponse.EndComplete);
         }
         else if (previousStrikeCount != StrikeCount)
         {
+            IRCConnection.SendMessage(string.Format("VoteNay Module {0} got a strike!", Code));
             responseNotifier.ProcessResponse(CommandResponse.EndError);
         }
         else
@@ -108,6 +110,12 @@ public abstract class ComponentSolver : ICommandResponder
         _setHighlightMethod.Invoke(selectable, new object[] { false });
     }
     #endregion
+
+    public string Code
+    {
+        get;
+        set;
+    }
 
     #region Protected Properties
     protected bool Solved

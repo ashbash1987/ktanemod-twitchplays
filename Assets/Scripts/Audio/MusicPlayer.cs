@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -18,6 +19,21 @@ public class MusicPlayer : MonoBehaviour
     public static MusicPlayer GetMusicPlayer(string name)
     {
         return _musicPlayers[name];
+    }
+
+    public static MusicPlayer StartRandomMusic()
+    {
+        MusicPlayer player = _musicPlayers.Values.ElementAt(UnityEngine.Random.Range(0, _musicPlayers.Values.Count));
+        player.StartMusic();
+        return player;
+    }
+
+    public static void StopAllMusic()
+    {
+        foreach (MusicPlayer player in _musicPlayers.Values)
+        {
+            player.StopMusic();
+        }
     }
 
     public void StartMusic()

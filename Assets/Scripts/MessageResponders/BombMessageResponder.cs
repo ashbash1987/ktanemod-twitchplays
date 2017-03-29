@@ -29,19 +29,21 @@ public class BombMessageResponder : MessageResponder
 
         if (_bombHandle != null)
         {
-            DestroyObject(_bombHandle.gameObject);
+            DestroyObject(_bombHandle.gameObject, 0.5f);
         }
         _bombHandle = null;
 
         foreach (TwitchComponentHandle componentHandle in _componentHandles)
         {
-            DestroyObject(componentHandle.gameObject);
+            DestroyObject(componentHandle.gameObject, 0.5f);
         }
         _componentHandles.Clear();
 
         InputInterceptor.EnableInput();
 
-        MusicPlayer.GetMusicPlayer("JeopardyThink").StopMusic();
+        MusicPlayer.StopAllMusic();
+
+        _ircConnection.SendMessage("The bomb is over! MrDestructoid");
     }
     #endregion
 
@@ -69,7 +71,7 @@ public class BombMessageResponder : MessageResponder
         CreateBombHandleForBomb(bomb);
         CreateComponentHandlesForBomb(bomb);
 
-        _ircConnection.SendMessage("The next bomb is now live! Start sending your commands!");
+        _ircConnection.SendMessage("The next bomb is now live! Start sending your commands! MrDestructoid");
     }
 
     protected override void OnMessageReceived(string userNickName, string userColorCode, string text)
