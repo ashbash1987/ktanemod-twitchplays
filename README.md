@@ -6,7 +6,7 @@ This mod adds Twitch Chat direct control into Keep Talking and Nobody Explodes, 
 ## Links
 * **Main Page:** http://www.twitchplaysktane.me
 * **Manual:** http://www.twitchplaysktane.me/Manual/
-* **Steam Workshop Link:** *&lt;Not yet uploaded&gt;*
+* **Steam Workshop Link:** http://steamcommunity.com/sharedfiles/filedetails/?id=894079739
 * **Non-Steam Release:** *&lt;Not yet uploaded&gt;*
 
 ## Wiki
