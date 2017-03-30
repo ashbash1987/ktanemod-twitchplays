@@ -59,7 +59,7 @@ public class TwitchLeaderboard : MonoBehaviour
         }
         else
         {
-            totalSolveRate = solveCount / strikeCount;
+            totalSolveRate = ((float)solveCount) / strikeCount;
         }
 
         totalBombCountText.text = bombCount.ToString();
