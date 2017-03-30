@@ -706,7 +706,7 @@ MonoBehaviour:
   totalBombCountText: {fileID: 114000013408158854}
   totalSolveCountText: {fileID: 114000012949108386}
   totalStrikeCountText: {fileID: 114000011887044046}
-  totalRateText: {fileID: 0}
+  totalRateText: {fileID: 114000014033258946}
   tableTransform: {fileID: 224000010389906064}
   bombCount: 0
   maximumRowCount: 15
