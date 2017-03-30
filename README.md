@@ -19,8 +19,8 @@ These are features that are absolutely required in order to allow Twitch Plays t
 - [x] Control bomb orientation and held status with `!bomb` commands.
 - [x] Control post-game screen with `!continue`, `!retry`, and `!back` commands.
 - [x] Control pre-game screen with `!binder` and `!freeplay` commands.
-- [ ] Add response messages to improve interaction with Twitch Chat.
-- [ ] Add leaderboard/blame UI to post-game screen to add further interaction with Twitch Chat.
+- [x] Add response messages to improve interaction with Twitch Chat.
+- [x] Add leaderboard/blame UI to post-game screen to add further interaction with Twitch Chat.
 ### Phase 2
 These are the next 'nice-to-have' features, once all of the phase 1 tasks are completed and tested to function well.
 - [ ] Add robust support for mod bomb casings and multiple bombs.
