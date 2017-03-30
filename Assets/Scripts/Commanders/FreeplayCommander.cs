@@ -146,7 +146,7 @@ public class FreeplayCommander : ICommandResponder
             }
             else
             {
-                Match timerMatch = Regex.Match(message, "^timer ([0-9]+:)?([0-9][0-9])$", RegexOptions.IgnoreCase);
+                Match timerMatch = Regex.Match(message, "^timer? ([0-9]+:)?([0-9][0-9])$", RegexOptions.IgnoreCase);
                 if (timerMatch.Success)
                 {
                     int minutes = 0;

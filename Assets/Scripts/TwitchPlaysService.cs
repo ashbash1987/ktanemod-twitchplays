@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections;
 using UnityEngine;
 
 public class TwitchPlaysService : MonoBehaviour
@@ -83,7 +84,7 @@ public class TwitchPlaysService : MonoBehaviour
             return;
         }
 
-        StopEveryCoroutine();
+        StartCoroutine(StopEveryCoroutine());
 
         if (_activeMessageResponder != null)
         {
@@ -98,8 +99,10 @@ public class TwitchPlaysService : MonoBehaviour
         }        
     }
 
-    private void StopEveryCoroutine()
+    private IEnumerator StopEveryCoroutine()
     {
+        yield return new WaitForSeconds(2.0f);
+
         _coroutineQueue.StopQueue();
         _coroutineQueue.CancelFutureSubcoroutines();
         StopAllCoroutines();

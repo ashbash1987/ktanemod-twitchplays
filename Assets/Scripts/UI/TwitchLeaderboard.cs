@@ -12,7 +12,7 @@ public class TwitchLeaderboard : MonoBehaviour
     public Text totalBombCountText = null;
     public Text totalSolveCountText = null;
     public Text totalStrikeCountText = null;
-    public Text totalSuccessText = null;
+    public Text totalRateText = null;
 
     [Header("Hierachy Management")]
     public RectTransform tableTransform = null;
@@ -50,13 +50,22 @@ public class TwitchLeaderboard : MonoBehaviour
 
         int solveCount = 0;
         int strikeCount = 0;
+        float totalSolveRate = 0.0f;
         leaderboard.GetTotalSolveStrikeCounts(out solveCount, out strikeCount);
-        float totalPercentage = (solveCount * 100.0f) / (solveCount + strikeCount);
+
+        if (strikeCount == 0)
+        {
+            totalSolveRate = strikeCount;
+        }
+        else
+        {
+            totalSolveRate = solveCount / strikeCount;
+        }
 
         totalBombCountText.text = bombCount.ToString();
         totalSolveCountText.text = solveCount.ToString();
         totalStrikeCountText.text = strikeCount.ToString();
-        totalSuccessText.text = Mathf.RoundToInt(totalPercentage).ToString();
+        totalRateText.text = string.Format("{0:0.00}", totalSolveRate);
     }
 
     private void OnDisable()

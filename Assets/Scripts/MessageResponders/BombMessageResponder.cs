@@ -25,25 +25,34 @@ public class BombMessageResponder : MessageResponder
     {
         StopAllCoroutines();
 
-        _bombCommander = null;
+        if ((bool)CommonReflectedTypeInfo.HasDetonatedProperty.GetValue(_bombCommander.Bomb, null))
+        {
+            _ircConnection.SendMessage("KAPOW KAPOW The bomb has exploded! KAPOW KAPOW");
+        }
+        else
+        {
+            _ircConnection.SendMessage("PraiseIt PraiseIt The bomb has been defused! PraiseIt PraiseIt");
+        }
 
         if (_bombHandle != null)
         {
-            DestroyObject(_bombHandle.gameObject, 0.5f);
+            Destroy(_bombHandle.gameObject, 2.0f);
         }
         _bombHandle = null;
+        _bombCommander = null;
 
-        foreach (TwitchComponentHandle componentHandle in _componentHandles)
+        if (_componentHandles != null)
         {
-            DestroyObject(componentHandle.gameObject, 0.5f);
+            foreach (TwitchComponentHandle handle in _componentHandles)
+            {
+                Destroy(handle.gameObject, 2.0f);
+            }
         }
         _componentHandles.Clear();
 
         InputInterceptor.EnableInput();
 
         MusicPlayer.StopAllMusic();
-
-        _ircConnection.SendMessage("The bomb is over! MrDestructoid");
     }
     #endregion
 

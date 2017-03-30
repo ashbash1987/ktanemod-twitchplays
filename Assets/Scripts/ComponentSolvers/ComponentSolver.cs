@@ -67,12 +67,12 @@ public abstract class ComponentSolver : ICommandResponder
 
         if (Solved)
         {
-            IRCConnection.SendMessage(string.Format("VoteYea Module {0} is solved!", Code));
+            IRCConnection.SendMessage(string.Format("VoteYea Module {0} is solved! +1 solve to {1}", Code, userNickName));
             responseNotifier.ProcessResponse(CommandResponse.EndComplete);
         }
         else if (previousStrikeCount != StrikeCount)
         {
-            IRCConnection.SendMessage(string.Format("VoteNay Module {0} got a strike!", Code));
+            IRCConnection.SendMessage(string.Format("VoteNay Module {0} got a strike! +1 strike to {1}", Code, userNickName));
             responseNotifier.ProcessResponse(CommandResponse.EndError);
         }
         else
@@ -126,11 +126,27 @@ public abstract class ComponentSolver : ICommandResponder
         }
     }
 
+    protected bool Detonated
+    {
+        get
+        {
+            return (bool)CommonReflectedTypeInfo.HasDetonatedProperty.GetValue(BombCommander.Bomb, null);
+        }
+    }
+
     protected int StrikeCount
     {
         get
         {
-            return (int)CommonReflectedTypeInfo.NumStrikesField.GetValue(BombCommander.Bomb);
+            //This extra check is required, since it doesn't increment the NumStrikes field on the last strike of the bomb!
+            if (Detonated)
+            {
+                return (int)CommonReflectedTypeInfo.NumStrikesToLoseField.GetValue(BombCommander.Bomb);
+            }
+            else
+            {
+                return (int)CommonReflectedTypeInfo.NumStrikesField.GetValue(BombCommander.Bomb);
+            }
         }
     }
 

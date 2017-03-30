@@ -40,29 +40,16 @@ public class Leaderboard
             private set;
         }
 
-        public float Percent
+        public float SolveRate
         {
             get
             {
-                if (SolveCount == 0 && StrikeCount == 0)
+                if (StrikeCount == 0)
                 {
-                    return float.NaN;
+                    return SolveCount;
                 }
 
-                return (SolveCount * 100.0f) / (SolveCount + StrikeCount);
-            }
-        }
-
-        public float Score
-        {
-            get
-            {
-                if (SolveCount == 0 && StrikeCount == 0)
-                {
-                    return 0;
-                }
-
-                return SolveCount + (SolveCount / (SolveCount + StrikeCount));
+                return ((float)SolveCount) / StrikeCount;
             }
         }
     }
@@ -147,13 +134,24 @@ public class Leaderboard
     {
         if (!_sorted)
         {
-            _entryList.Sort();
+            _entryList.Sort(CompareScores);
             _sorted = true;
         }
+    }
+
+    private static int CompareScores(LeaderboardEntry lhs, LeaderboardEntry rhs)
+    {
+        if (lhs.SolveCount != rhs.SolveCount)
+        {
+            //Intentially reversed comparison to sort from highest to lowest
+            return rhs.SolveCount.CompareTo(lhs.SolveCount);
+        }
+
+        //Intentially reversed comparison to sort from highest to lowest
+        return rhs.SolveRate.CompareTo(lhs.SolveRate);
     }
 
     private Dictionary<string, LeaderboardEntry> _entryDictionary = new Dictionary<string, LeaderboardEntry>();
     private List<LeaderboardEntry> _entryList = new List<LeaderboardEntry>();
     private bool _sorted = true;
 }
-

@@ -9,7 +9,7 @@ public class TwitchLeaderboardRow : MonoBehaviour
     public Text userNameText = null;
     public Text solvesText = null;
     public Text strikesText = null;
-    public Text percentText = null;
+    public Text rateText = null;
 
     [Header("Values")]
     public int position = 0;
@@ -38,14 +38,14 @@ public class TwitchLeaderboardRow : MonoBehaviour
             solvesText.text = leaderboardEntry.SolveCount.ToString();
             strikesText.text = leaderboardEntry.StrikeCount.ToString();
 
-            float percent = leaderboardEntry.Percent;
-            if (float.IsNaN(percent))
+            float solveRate = leaderboardEntry.SolveRate;
+            if (float.IsNaN(solveRate))
             {
-                percentText.text = "--";
+                rateText.text = "--";
             }
             else
             {
-                percentText.text = string.Format("{0}%", Mathf.RoundToInt(percent));
+                rateText.text = string.Format("{0:0.00}", solveRate);
             }
         }
 

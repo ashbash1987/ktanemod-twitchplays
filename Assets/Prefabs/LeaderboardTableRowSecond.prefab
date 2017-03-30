@@ -23,7 +23,7 @@ GameObject:
   - 114: {fileID: 114000010430565878}
   - 114: {fileID: 114000011007241858}
   m_Layer: 0
-  m_Name: Percentage
+  m_Name: Rate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -307,7 +307,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9558824, g: 0.9558824, b: 0.9558824, a: 1}
+  m_Color: {r: 0.8308824, g: 0.8308824, b: 0.8308824, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -388,7 +388,7 @@ MonoBehaviour:
   userNameText: {fileID: 114000011965906724}
   solvesText: {fileID: 114000011242053406}
   strikesText: {fileID: 114000013713332002}
-  percentText: {fileID: 114000010430565878}
+  rateText: {fileID: 114000010430565878}
   position: 2
   delay: 1.1
 --- !u!114 &114000012994379730

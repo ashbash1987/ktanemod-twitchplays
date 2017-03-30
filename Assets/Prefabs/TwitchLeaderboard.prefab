@@ -228,7 +228,7 @@ GameObject:
   - 222: {fileID: 222000010488573486}
   - 114: {fileID: 114000014033258946}
   m_Layer: 0
-  m_Name: Success
+  m_Name: Rate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -297,7 +297,7 @@ GameObject:
   - 114: {fileID: 114000010246729842}
   - 225: {fileID: 225000010226232510}
   m_Layer: 0
-  m_Name: TotalSuccess
+  m_Name: TotalRate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -652,7 +652,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: '% success'
+  m_Text: Solve Rate
 --- !u!114 &114000010837661036
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -706,7 +706,7 @@ MonoBehaviour:
   totalBombCountText: {fileID: 114000013408158854}
   totalSolveCountText: {fileID: 114000012949108386}
   totalStrikeCountText: {fileID: 114000011887044046}
-  totalSuccessText: {fileID: 114000014033258946}
+  totalRateText: {fileID: 0}
   tableTransform: {fileID: 224000010389906064}
   bombCount: 0
   maximumRowCount: 15
@@ -1177,7 +1177,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: '%'
+  m_Text: Solve Rate
 --- !u!114 &114000012949108386
 MonoBehaviour:
   m_ObjectHideFlags: 1

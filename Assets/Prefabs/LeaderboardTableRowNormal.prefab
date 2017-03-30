@@ -93,7 +93,7 @@ GameObject:
   - 114: {fileID: 114000012727926632}
   - 114: {fileID: 114000010316780288}
   m_Layer: 0
-  m_Name: Percentage
+  m_Name: Rate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -370,7 +370,7 @@ MonoBehaviour:
   userNameText: {fileID: 114000010491250818}
   solvesText: {fileID: 114000012816059174}
   strikesText: {fileID: 114000011609417270}
-  percentText: {fileID: 114000012727926632}
+  rateText: {fileID: 114000012727926632}
   position: 4
   delay: 1.3
 --- !u!114 &114000012515317330

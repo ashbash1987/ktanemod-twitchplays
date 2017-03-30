@@ -34,7 +34,7 @@ public class MiscellaneousMessageResponder : MessageResponder
             int rank = leaderboard.GetRank(userNickName, out entry);
             if (entry != null)
             {
-                _ircConnection.SendMessage(string.Format("{0} is #{1} with {2} solves and {3} strikes ({4}% success)", userNickName, rank, entry.SolveCount, entry.StrikeCount, Mathf.RoundToInt(entry.Percent)));
+                _ircConnection.SendMessage(string.Format("{0} is #{1} with {2} solves and {3} strikes (success rate of {4:0.00})", userNickName, rank, entry.SolveCount, entry.StrikeCount, entry.SolveRate));
             }
             else
             {
