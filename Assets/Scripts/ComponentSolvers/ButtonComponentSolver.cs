@@ -14,8 +14,7 @@ public class ButtonComponentSolver : ComponentSolver
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
         if (!_held && (inputCommand.Equals("tap", StringComparison.InvariantCultureIgnoreCase) ||
-                       inputCommand.Equals("click", StringComparison.InvariantCultureIgnoreCase) ||
-                       inputCommand.Equals("press and release", StringComparison.InvariantCultureIgnoreCase)))
+                       inputCommand.Equals("click", StringComparison.InvariantCultureIgnoreCase)))
         {
             yield return "tap";
 

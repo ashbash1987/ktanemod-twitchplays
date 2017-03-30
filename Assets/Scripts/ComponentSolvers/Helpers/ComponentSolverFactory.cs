@@ -48,6 +48,25 @@ public static class ComponentSolverFactory
 
             case ComponentTypeEnum.NeedyKnob:
                 return new NeedyKnobComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+                
+            case ComponentTypeEnum.Mod:
+                KMBombModule module = bombComponent.GetComponent<KMBombModule>();
+                switch (module.ModuleDisplayName)
+                {
+                    case "Forget Me Not": return new ForgetMeNotComponentSolver (bombCommander, bombComponent, ircConnection, canceller);
+                    case "Square Button": return new SquareButtonComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+                    case "Round Keypad":  return new RoundKeypadComponentSolver (bombCommander, bombComponent, ircConnection, canceller);
+                    default:
+                        throw new NotSupportedException(string.Format("Currently {0} is not supported by 'Twitch Plays'.", (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null)));
+                }
+                
+            case ComponentTypeEnum.NeedyMod:
+                KMNeedyModule needy = bombComponent.GetComponent<KMNeedyModule>();
+                switch (needy.ModuleDisplayName)
+                {
+                    default:
+                        throw new NotSupportedException(string.Format("Currently {0} is not supported by 'Twitch Plays'.", (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null)));
+                }
 
             default:
                 throw new NotSupportedException(string.Format("Currently {0} is not supported by 'Twitch Plays'.", (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null)));
