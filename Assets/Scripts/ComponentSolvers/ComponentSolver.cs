@@ -33,7 +33,7 @@ public abstract class ComponentSolver : ICommandResponder
     {
         if (Solved)
         {
-            responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+            responseNotifier.ProcessResponse(CommandResponse.NoResponse, 1);
             yield break;
         }
 
@@ -43,12 +43,12 @@ public abstract class ComponentSolver : ICommandResponder
             subcoroutine = RespondToCommandInternal(message);
             if (subcoroutine == null || !subcoroutine.MoveNext())
             {
-                responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+                responseNotifier.ProcessResponse(CommandResponse.NoResponse, 1);
                 yield break;
             }
         }
 
-        responseNotifier.ProcessResponse(CommandResponse.Start);
+        responseNotifier.ProcessResponse(CommandResponse.Start, 1);
 
         IEnumerator focusCoroutine = BombCommander.Focus(Selectable, FocusDistance, FrontFace);
         while (focusCoroutine.MoveNext())
@@ -68,16 +68,17 @@ public abstract class ComponentSolver : ICommandResponder
         if (Solved)
         {
             IRCConnection.SendMessage(string.Format("VoteYea Module {0} is solved! +1 solve to {1}", Code, userNickName));
-            responseNotifier.ProcessResponse(CommandResponse.EndComplete);
+            responseNotifier.ProcessResponse(CommandResponse.EndComplete, 1);
         }
         else if (previousStrikeCount != StrikeCount)
         {
-            IRCConnection.SendMessage(string.Format("VoteNay Module {0} got a strike! +1 strike to {1}", Code, userNickName));
-            responseNotifier.ProcessResponse(CommandResponse.EndError);
+            int numStrikes = StrikeCount - previousStrikeCount;
+            IRCConnection.SendMessage(string.Format("VoteNay Module {0} got a strike! +"+numStrikes+" strike"+((numStrikes==1)?"":"s")+" to {1}", Code, userNickName));
+            responseNotifier.ProcessResponse(CommandResponse.EndError, numStrikes);
         }
         else
         {
-            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete, 1);
         }
 
         yield return new WaitForSeconds(0.5f);

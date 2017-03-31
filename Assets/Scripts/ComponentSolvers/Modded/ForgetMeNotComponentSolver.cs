@@ -21,7 +21,7 @@ public class ForgetMeNotComponentSolver : ComponentSolver
 
         int beforeButtonStrikeCount = StrikeCount;
 
-        string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] sequence = inputCommand.Split(new string[] { "" }, StringSplitOptions.RemoveEmptyEntries);
 
         foreach (string buttonString in sequence)
         {

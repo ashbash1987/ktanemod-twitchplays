@@ -14,6 +14,6 @@ public enum CommandResponse
 
 public interface ICommandResponseNotifier
 {
-    void ProcessResponse(CommandResponse response);
+    void ProcessResponse(CommandResponse response, int value);
 }
 

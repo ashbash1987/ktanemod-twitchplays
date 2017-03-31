@@ -29,7 +29,7 @@ public class TwitchMessage : MonoBehaviour, ICommandResponseNotifier
         _messageText.text = text;
     }
 
-    public void ProcessResponse(CommandResponse response)
+    public void ProcessResponse(CommandResponse response, int value)
     {
         switch (response)
         {
@@ -54,7 +54,7 @@ public class TwitchMessage : MonoBehaviour, ICommandResponseNotifier
                 StartCoroutine(DoBackgroundColorChange(errorColor));
                 if (leaderboard != null)
                 {
-                    leaderboard.AddStrike(userName, userColor);
+                    leaderboard.AddStrike(userName, userColor, value);
                 }
                 break;
             case CommandResponse.NoResponse:

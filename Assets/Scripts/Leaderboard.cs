@@ -11,9 +11,9 @@ public class Leaderboard
             SolveCount++;
         }
 
-        public void AddStrike()
+        public void AddStrike(int num)
         {
-            StrikeCount++;
+            StrikeCount += num;
         }
 
         public string UserName
@@ -74,7 +74,7 @@ public class Leaderboard
         ResetSortFlag();
     }
 
-    public void AddStrike(string userName, Color userColor)
+    public void AddStrike(string userName, Color userColor, int numStrikes)
     {
         LeaderboardEntry entry = null;
 
@@ -89,7 +89,7 @@ public class Leaderboard
             entry = _entryDictionary[userName];
         }
 
-        entry.AddStrike();
+        entry.AddStrike(numStrikes);
 
         ResetSortFlag();
     }

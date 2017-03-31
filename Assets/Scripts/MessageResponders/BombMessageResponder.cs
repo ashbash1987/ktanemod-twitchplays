@@ -21,13 +21,20 @@ public class BombMessageResponder : MessageResponder
         StartCoroutine(CheckForBomb());
     }
 
+    private static IEnumerator HandleDelayDeath(IRCConnection conn)
+    {
+        yield return new WaitForSeconds(2);
+        conn.SendMessage("KAPOW KAPOW The bomb has exploded! KAPOW KAPOW");
+        yield break;
+    }
+
     private void OnDisable()
     {
         StopAllCoroutines();
 
         if ((bool)CommonReflectedTypeInfo.HasDetonatedProperty.GetValue(_bombCommander.Bomb, null))
         {
-            _ircConnection.SendMessage("KAPOW KAPOW The bomb has exploded! KAPOW KAPOW");
+            StartCoroutine(HandleDelayDeath(_ircConnection));
         }
         else
         {
