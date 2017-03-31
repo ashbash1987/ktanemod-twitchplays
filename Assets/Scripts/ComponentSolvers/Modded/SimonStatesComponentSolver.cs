@@ -8,10 +8,10 @@ public class SimonStatesComponentSolver : ComponentSolver
     public SimonStatesComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
-        _blue = (MonoBehaviour) _bluebuttonField.GetValue(bombComponent.GetComponent(_componentType));
-        _green = (MonoBehaviour) _greenbuttonField.GetValue(bombComponent.GetComponent(_componentType));
-        _red = (MonoBehaviour) _redbuttonField.GetValue(bombComponent.GetComponent(_componentType));
-        _yellow = (MonoBehaviour) _yellowbuttonField.GetValue(bombComponent.GetComponent(_componentType));
+        _tl = (MonoBehaviour) _tlField.GetValue(bombComponent.GetComponent(_componentType));
+        _tr = (MonoBehaviour) _trField.GetValue(bombComponent.GetComponent(_componentType));
+        _bl = (MonoBehaviour) _blField.GetValue(bombComponent.GetComponent(_componentType));
+        _br = (MonoBehaviour) _brField.GetValue(bombComponent.GetComponent(_componentType));
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -30,22 +30,23 @@ public class SimonStatesComponentSolver : ComponentSolver
         {
             MonoBehaviour button = null;
 
-            if (buttonString.Equals("r", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("red", StringComparison.InvariantCultureIgnoreCase))
+            if (buttonString.Equals("1", StringComparison.InvariantCultureIgnoreCase))
             {
-                button = _red;
+                button = _tl;
             }
-            else if (buttonString.Equals("b", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("blue", StringComparison.InvariantCultureIgnoreCase))
+            else if (buttonString.Equals("2", StringComparison.InvariantCultureIgnoreCase))
             {
-                button = _blue;
+                button = _tr;
             }
-            else if (buttonString.Equals("g", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("green", StringComparison.InvariantCultureIgnoreCase))
+            else if (buttonString.Equals("3", StringComparison.InvariantCultureIgnoreCase))
             {
-                button = _green;
+                button = _bl;
             }
-            else if (buttonString.Equals("y", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("yellow", StringComparison.InvariantCultureIgnoreCase))
+            else if (buttonString.Equals("4", StringComparison.InvariantCultureIgnoreCase))
             {
-                button = _yellow;
+                button = _br;
             }
+
 
             if (button != null)
             {
@@ -73,18 +74,15 @@ public class SimonStatesComponentSolver : ComponentSolver
     static SimonStatesComponentSolver()
     {
         _componentType = ReflectionHelper.FindType("AdvancedSimon");
-        _redbuttonField = _componentType.GetField("ButtonRed", BindingFlags.NonPublic | BindingFlags.Instance);
-        _greenbuttonField = _componentType.GetField("ButtonGreen", BindingFlags.NonPublic | BindingFlags.Instance);
-        _yellowbuttonField = _componentType.GetField("ButtonYellow", BindingFlags.NonPublic | BindingFlags.Instance);
-        _bluebuttonField = _componentType.GetField("ButtonBlue", BindingFlags.NonPublic | BindingFlags.Instance);
+        _tlField = _componentType.GetField("ButtonTL", BindingFlags.Public | BindingFlags.Instance);
+        _trField = _componentType.GetField("ButtonTR", BindingFlags.Public | BindingFlags.Instance);
+        _blField = _componentType.GetField("ButtonBL", BindingFlags.Public | BindingFlags.Instance);
+        _brField = _componentType.GetField("ButtonBR", BindingFlags.Public | BindingFlags.Instance);
     }
 
     private static Type _componentType = null;
-    private static FieldInfo _redbuttonField, _greenbuttonField, _yellowbuttonField, _bluebuttonField = null;
+    private static FieldInfo _tlField, _trField, _blField, _brField = null;
 
-    private MonoBehaviour _red = null;
-    private MonoBehaviour _green = null;
-    private MonoBehaviour _yellow = null;
-    private MonoBehaviour _blue = null;
+    private MonoBehaviour _tl, _tr, _bl, _br = null;
 
 }
