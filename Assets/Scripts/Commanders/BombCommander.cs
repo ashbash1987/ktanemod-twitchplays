@@ -62,7 +62,7 @@ public class BombCommander : ICommandResponder
         if (message.Equals("hold", StringComparison.InvariantCultureIgnoreCase) ||
             message.Equals("pick up", StringComparison.InvariantCultureIgnoreCase))
         {
-            responseNotifier.ProcessResponse(CommandResponse.Start, 1);
+            responseNotifier.ProcessResponse(CommandResponse.Start);
 
             IEnumerator holdCoroutine = HoldBomb(_heldFrontFace);
             while (holdCoroutine.MoveNext())
@@ -70,13 +70,13 @@ public class BombCommander : ICommandResponder
                 yield return holdCoroutine.Current;
             }
 
-            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete, 1);
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
         else if (message.Equals("turn", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("turn round", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("turn around", StringComparison.InvariantCultureIgnoreCase))
         {
-            responseNotifier.ProcessResponse(CommandResponse.Start, 1);
+            responseNotifier.ProcessResponse(CommandResponse.Start);
 
             IEnumerator holdCoroutine = HoldBomb(!_heldFrontFace);
             while (holdCoroutine.MoveNext())
@@ -84,13 +84,13 @@ public class BombCommander : ICommandResponder
                 yield return holdCoroutine.Current;
             }
 
-            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete, 1);
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
         else if (message.Equals("drop", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("let go", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("put down", StringComparison.InvariantCultureIgnoreCase))
         {
-            responseNotifier.ProcessResponse(CommandResponse.Start, 1);
+            responseNotifier.ProcessResponse(CommandResponse.Start);
 
             IEnumerator letGoCoroutine = LetGoBomb();
             while (letGoCoroutine.MoveNext())
@@ -98,11 +98,11 @@ public class BombCommander : ICommandResponder
                 yield return letGoCoroutine.Current;
             }
 
-            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete, 1);
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
         else if (message.Equals("edgework", StringComparison.InvariantCultureIgnoreCase))
         {
-            responseNotifier.ProcessResponse(CommandResponse.Start, 1);
+            responseNotifier.ProcessResponse(CommandResponse.Start);
 
             IEnumerator edgeworkCoroutine = ShowEdgework();
             while (edgeworkCoroutine.MoveNext())
@@ -110,11 +110,11 @@ public class BombCommander : ICommandResponder
                 yield return edgeworkCoroutine.Current;
             }
 
-            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete, 1);
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
         else
         {
-            responseNotifier.ProcessResponse(CommandResponse.NoResponse, 1);
+            responseNotifier.ProcessResponse(CommandResponse.NoResponse);
         }
     }
     #endregion

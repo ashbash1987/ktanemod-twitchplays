@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-public enum CommandResponse
+﻿public enum CommandResponse
 {
     Start,
     EndNotComplete,
@@ -14,6 +9,5 @@ public enum CommandResponse
 
 public interface ICommandResponseNotifier
 {
-    void ProcessResponse(CommandResponse response, int value);
+    void ProcessResponse(CommandResponse response, int value = 0);
 }
-

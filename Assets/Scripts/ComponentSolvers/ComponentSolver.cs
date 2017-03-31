@@ -33,7 +33,7 @@ public abstract class ComponentSolver : ICommandResponder
     {
         if (Solved)
         {
-            responseNotifier.ProcessResponse(CommandResponse.NoResponse, 1);
+            responseNotifier.ProcessResponse(CommandResponse.NoResponse);
             yield break;
         }
 
@@ -43,12 +43,12 @@ public abstract class ComponentSolver : ICommandResponder
             subcoroutine = RespondToCommandInternal(message);
             if (subcoroutine == null || !subcoroutine.MoveNext())
             {
-                responseNotifier.ProcessResponse(CommandResponse.NoResponse, 1);
+                responseNotifier.ProcessResponse(CommandResponse.NoResponse);
                 yield break;
             }
         }
 
-        responseNotifier.ProcessResponse(CommandResponse.Start, 1);
+        responseNotifier.ProcessResponse(CommandResponse.Start);
 
         IEnumerator focusCoroutine = BombCommander.Focus(Selectable, FocusDistance, FrontFace);
         while (focusCoroutine.MoveNext())
@@ -68,17 +68,17 @@ public abstract class ComponentSolver : ICommandResponder
         if (Solved)
         {
             IRCConnection.SendMessage(string.Format("VoteYea Module {0} is solved! +1 solve to {1}", Code, userNickName));
-            responseNotifier.ProcessResponse(CommandResponse.EndComplete, 1);
+            responseNotifier.ProcessResponse(CommandResponse.EndComplete);
         }
         else if (previousStrikeCount != StrikeCount)
         {
             int numStrikes = StrikeCount - previousStrikeCount;
-            IRCConnection.SendMessage(string.Format("VoteNay Module {0} got a strike! +"+numStrikes+" strike"+((numStrikes==1)?"":"s")+" to {1}", Code, userNickName));
+            IRCConnection.SendMessage(string.Format("VoteNay Module {0} got {1} strike{2}! +{3} strike{2} to {4}", Code, numStrikes == 1 ? "a" : numStrikes.ToString(), numStrikes == 1 ? "" : "s", numStrikes, userNickName));
             responseNotifier.ProcessResponse(CommandResponse.EndError, numStrikes);
         }
         else
         {
-            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete, 1);
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
 
         yield return new WaitForSeconds(0.5f);
