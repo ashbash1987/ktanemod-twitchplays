@@ -8,6 +8,7 @@ public class BombMessageResponder : MessageResponder
     public TwitchBombHandle twitchBombHandlePrefab = null;
     public TwitchComponentHandle twitchComponentHandlePrefab = null;
     public Leaderboard leaderboard = null;
+    public TwitchPlaysService parentService = null;
 
     private BombCommander _bombCommander = null;
     private TwitchBombHandle _bombHandle = null;
@@ -25,14 +26,17 @@ public class BombMessageResponder : MessageResponder
     {
         StopAllCoroutines();
 
+        string bombMessage = null;
         if ((bool)CommonReflectedTypeInfo.HasDetonatedProperty.GetValue(_bombCommander.Bomb, null))
         {
-            _ircConnection.SendMessage("KAPOW KAPOW The bomb has exploded! KAPOW KAPOW");
+            bombMessage = "KAPOW KAPOW The bomb has exploded! KAPOW KAPOW";
         }
         else
         {
-            _ircConnection.SendMessage("PraiseIt PraiseIt The bomb has been defused! PraiseIt PraiseIt");
+            bombMessage = "PraiseIt PraiseIt The bomb has been defused! PraiseIt PraiseIt";
         }
+
+        parentService.StartCoroutine(SendDelayedMessage(1.5f, bombMessage));
 
         if (_bombHandle != null)
         {
@@ -222,6 +226,12 @@ public class BombMessageResponder : MessageResponder
         }
 
         return false;
+    }
+
+    private IEnumerator SendDelayedMessage(float delay, string message)
+    {
+        yield return new WaitForSeconds(delay);
+        _ircConnection.SendMessage(message);
     }
     #endregion
 }

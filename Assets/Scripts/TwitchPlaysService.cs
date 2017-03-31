@@ -59,6 +59,8 @@ public class TwitchPlaysService : MonoBehaviour
         bombMessageResponder.leaderboard = _leaderboard;
         postGameMessageResponder.leaderboard = _leaderboard;
         miscellaneousMessageResponder.leaderboard = _leaderboard;
+
+        bombMessageResponder.parentService = this;
     }
 
     private void Update()
