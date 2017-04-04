@@ -58,6 +58,8 @@ public static class ComponentSolverFactory
                     case "Round Keypad":  return new RoundKeypadComponentSolver (bombCommander, bombComponent, ircConnection, canceller);
                     case "Safety Safe":   return new SafetySafeComponentSolver  (bombCommander, bombComponent, ircConnection, canceller);
                     case "Simon States":  return new SimonStatesComponentSolver (bombCommander, bombComponent, ircConnection, canceller);
+                    case "Silly Slots":   return new SillySlotsComponentSolver  (bombCommander, bombComponent, ircConnection, canceller);
+                    case "Two Bits":      return new TwoBitsComponentSolver     (bombCommander, bombComponent, ircConnection, canceller);
                     default:
                         throw new NotSupportedException(string.Format("Currently {0} is not supported by 'Twitch Plays'.", (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null)));
                 }
