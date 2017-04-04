@@ -99,7 +99,7 @@ public static class ComponentSolverFactory
         ModComponentSolverDelegate modComponentSolverCreator = GenerateModComponentSolverCreator(bombComponent);
         if (modComponentSolverCreator == null)
         {
-            throw new NotSupportedException(string.Format("Could not generate a valid componentsolver for mod component {0}!", moduleType));
+            throw new NotSupportedException(string.Format("Currently {0} is not supported by 'Twitch Plays' - Could not generate a valid componentsolver for the mod component!", (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null)));
         }
 
         ModComponentSolverCreators[moduleType] = modComponentSolverCreator;
@@ -110,8 +110,8 @@ public static class ComponentSolverFactory
     private static ModComponentSolverDelegate GenerateModComponentSolverCreator(MonoBehaviour bombComponent)
     {
         ModCommandType commandType = ModCommandType.Simple;
-        Component commandComponent = null;
-        MethodInfo method = FindProcessCommandMethod(bombComponent, out commandType, out commandComponent);
+        Type commandComponentType = null;
+        MethodInfo method = FindProcessCommandMethod(bombComponent, out commandType, out commandComponentType);
         if (method != null)
         {
             switch (commandType)
@@ -119,11 +119,13 @@ public static class ComponentSolverFactory
                 case ModCommandType.Simple:
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
+                        Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
                         return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent);
                     };
                 case ModCommandType.Coroutine:
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
+                        Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
                         return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent);
                     };
 
@@ -135,13 +137,13 @@ public static class ComponentSolverFactory
         return null;
     }
 
-    private static MethodInfo FindProcessCommandMethod(MonoBehaviour bombComponent, out ModCommandType commandType, out Component commandComponent)
+    private static MethodInfo FindProcessCommandMethod(MonoBehaviour bombComponent, out ModCommandType commandType, out Type commandComponentType)
     {
         Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
         foreach (Component component in allComponents)
         {
             Type type = component.GetType();
-            MethodInfo candidateMethod = type.GetMethod("ProcessCommand");
+            MethodInfo candidateMethod = type.GetMethod("ProcessCommand", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             if (candidateMethod == null)
             {
                 continue;
@@ -149,13 +151,13 @@ public static class ComponentSolverFactory
 
             if (ValidateMethodCommandMethod(type, candidateMethod, out commandType))
             {
-                commandComponent = component;
+                commandComponentType = type;
                 return candidateMethod;
             }
         }
 
         commandType = ModCommandType.Simple;
-        commandComponent = null;
+        commandComponentType = null;
         return null;
     }
 
@@ -176,7 +178,7 @@ public static class ComponentSolverFactory
             return false;
         }
 
-        if (parameters[0].GetType() != typeof(string))
+        if (parameters[0].ParameterType != typeof(string))
         {
             Debug.LogFormat("Found a potential candidate ProcessCommand method in {0}, but the parameter list does not match the expected parameter list (expected a single string parameter, got a single {1} parameter).", type.FullName, parameters[0].GetType().FullName);
             return false;

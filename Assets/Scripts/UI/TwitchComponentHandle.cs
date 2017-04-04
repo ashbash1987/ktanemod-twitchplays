@@ -105,12 +105,18 @@ public class TwitchComponentHandle : MonoBehaviour
         HighlightArrow.gameObject.SetActive(true);
 
         _solver = ComponentSolverFactory.CreateSolver(bombCommander, bombComponent, componentType, ircConnection, coroutineCanceller);
-        _solver.Code = _code;
+        if (_solver != null)
+        {
+            _solver.Code = _code;
+        }
     }
 
     private void Update()
     {
-        _solver.Update();
+        if (_solver != null)
+        {
+            _solver.Update();
+        }
     }
 
     private void LateUpdate()
@@ -175,10 +181,13 @@ public class TwitchComponentHandle : MonoBehaviour
         }
         highlightGroup.alpha = 1.0f;
 
-        IEnumerator commandResponseCoroutine = _solver.RespondToCommand(userNickName, internalCommand, message);
-        while (commandResponseCoroutine.MoveNext())
+        if (_solver != null)
         {
-            yield return commandResponseCoroutine.Current;
+            IEnumerator commandResponseCoroutine = _solver.RespondToCommand(userNickName, internalCommand, message);
+            while (commandResponseCoroutine.MoveNext())
+            {
+                yield return commandResponseCoroutine.Current;
+            }
         }
 
         time = Time.time;
