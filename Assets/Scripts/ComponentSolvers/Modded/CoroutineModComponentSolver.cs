@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -23,10 +24,26 @@ public class CoroutineModComponentSolver : ComponentSolver
 
         while (responseCoroutine.MoveNext())
         {
-            yield return responseCoroutine.Current;
+            object currentObject = responseCoroutine.Current;
+            if (currentObject.GetType() == typeof(KMSelectable))
+            {
+                KMSelectable selectable = (KMSelectable)currentObject;
+                if (HeldSelectables.Contains(selectable))
+                {
+                    DoInteractionEnd(selectable);
+                    HeldSelectables.Remove(selectable);
+                }
+                else
+                {
+                    DoInteractionStart(selectable);
+                    HeldSelectables.Add(selectable);
+                }
+            }
+            yield return currentObject;
         }
     }
 
     private readonly MethodInfo ProcessMethod = null;
     private readonly Component CommandComponent = null;
+    private readonly List<KMSelectable> HeldSelectables = new List<KMSelectable>();
 }
