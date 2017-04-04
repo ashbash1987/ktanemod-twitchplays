@@ -79,8 +79,6 @@ public class SquareButtonComponentSolver : ComponentSolver
 
         MonoBehaviour timerComponent = (MonoBehaviour)CommonReflectedTypeInfo.GetTimerMethod.Invoke(BombCommander.Bomb, null);
 
-        string secondString = second.ToString();
-
         int timeTarget = sortedTimes[0];
         sortedTimes.RemoveAt(0);
         float timeRemaining = float.PositiveInfinity;

@@ -108,6 +108,11 @@ public class TwitchComponentHandle : MonoBehaviour
         _solver.Code = _code;
     }
 
+    private void Update()
+    {
+        _solver.Update();
+    }
+
     private void LateUpdate()
     {
         Vector3 cameraForward = Camera.main.transform.forward;

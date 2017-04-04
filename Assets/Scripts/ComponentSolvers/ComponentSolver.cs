@@ -62,19 +62,32 @@ public abstract class ComponentSolver : ICommandResponder
 
         while (subcoroutine.MoveNext())
         {
-            yield return subcoroutine.Current;
+            object currentValue = subcoroutine.Current;
+            if (currentValue.GetType() == typeof(string))
+            {
+                string currentString = (string)currentValue;
+                if (currentString.Equals("strike", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    _delegatedStrikeUserNickName = userNickName;
+                    _delegatedStrikeResponseNotifier = responseNotifier;
+                    _delegatedStrikeCount = StrikeCount;
+                }
+                else if (currentString.Equals("solve", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    _delegatedSolveUserNickName = userNickName;
+                    _delegatedSolveResponseNotifier = responseNotifier;
+                }
+            }
+            yield return currentValue;
         }
 
-        if (Solved)
+        if (Solved && _delegatedSolveUserNickName == null)
         {
-            IRCConnection.SendMessage(string.Format("VoteYea Module {0} is solved! +1 solve to {1}", Code, userNickName));
-            responseNotifier.ProcessResponse(CommandResponse.EndComplete);
+            AwardSolve(userNickName, responseNotifier);
         }
-        else if (previousStrikeCount != StrikeCount)
+        else if (previousStrikeCount != StrikeCount && _delegatedStrikeUserNickName == null)
         {
-            int numStrikes = StrikeCount - previousStrikeCount;
-            IRCConnection.SendMessage(string.Format("VoteNay Module {0} got {1} strike{2}! +{3} strike{2} to {4}", Code, numStrikes == 1 ? "a" : numStrikes.ToString(), numStrikes == 1 ? "" : "s", numStrikes, userNickName));
-            responseNotifier.ProcessResponse(CommandResponse.EndError, numStrikes);
+            AwardStrikes(userNickName, responseNotifier, StrikeCount - previousStrikeCount);
         }
         else
         {
@@ -90,6 +103,26 @@ public abstract class ComponentSolver : ICommandResponder
         }
 
         yield return new WaitForSeconds(0.5f);
+    }
+    #endregion
+
+    #region Public Methods
+    public void Update()
+    {
+        if (_delegatedStrikeUserNickName != null && StrikeCount != _delegatedStrikeCount)
+        {
+            AwardStrikes(_delegatedStrikeUserNickName, _delegatedStrikeResponseNotifier, StrikeCount - _delegatedStrikeCount);
+            _delegatedStrikeUserNickName = null;
+            _delegatedStrikeResponseNotifier = null;
+            _delegatedStrikeCount = int.MinValue;
+        }
+
+        if (_delegatedSolveUserNickName != null && Solved)
+        {
+            AwardSolve(_delegatedSolveUserNickName, _delegatedSolveResponseNotifier);
+            _delegatedSolveUserNickName = null;
+            _delegatedSolveResponseNotifier = null;
+        }
     }
     #endregion
 
@@ -109,6 +142,20 @@ public abstract class ComponentSolver : ICommandResponder
         MonoBehaviour selectable = (MonoBehaviour)interactable.GetComponent(_selectableType);
         _interactEndedMethod.Invoke(selectable, null);
         _setHighlightMethod.Invoke(selectable, new object[] { false });
+    }
+    #endregion
+
+    #region Private Methods
+    private void AwardSolve(string userNickName, ICommandResponseNotifier responseNotifier)
+    {
+        IRCConnection.SendMessage(string.Format("VoteYea Module {0} is solved! +1 solve to {1}", Code, userNickName));
+        responseNotifier.ProcessResponse(CommandResponse.EndComplete);
+    }
+
+    private void AwardStrikes(string userNickName, ICommandResponseNotifier responseNotifier, int strikeCount)
+    {
+        IRCConnection.SendMessage(string.Format("VoteNay Module {0} got {1} strike{2}! +{3} strike{2} to {4}", Code, strikeCount == 1 ? "a" : strikeCount.ToString(), strikeCount == 1 ? "" : "s", strikeCount, userNickName));
+        responseNotifier.ProcessResponse(CommandResponse.EndError, strikeCount);
     }
     #endregion
 
@@ -197,5 +244,14 @@ public abstract class ComponentSolver : ICommandResponder
     private static MethodInfo _interactEndedMethod = null;
     private static MethodInfo _setHighlightMethod = null;
     private static MethodInfo _getFocusDistanceMethod = null;
+    #endregion
+
+    #region Private Fields
+    private ICommandResponseNotifier _delegatedStrikeResponseNotifier = null;
+    private string _delegatedStrikeUserNickName = null;
+    private int _delegatedStrikeCount = int.MinValue;
+
+    private ICommandResponseNotifier _delegatedSolveResponseNotifier = null;
+    private string _delegatedSolveUserNickName = null;
     #endregion
 }
