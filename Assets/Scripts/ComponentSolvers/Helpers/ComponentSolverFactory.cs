@@ -143,7 +143,7 @@ public static class ComponentSolverFactory
         foreach (Component component in allComponents)
         {
             Type type = component.GetType();
-            MethodInfo candidateMethod = type.GetMethod("ProcessCommand", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo candidateMethod = type.GetMethod("ProcessTwitchCommand", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             if (candidateMethod == null)
             {
                 continue;
