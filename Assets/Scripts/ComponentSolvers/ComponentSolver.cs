@@ -63,7 +63,7 @@ public abstract class ComponentSolver : ICommandResponder
         while (subcoroutine.MoveNext())
         {
             object currentValue = subcoroutine.Current;
-            if (currentValue.GetType() == typeof(string))
+            if (currentValue is string)
             {
                 string currentString = (string)currentValue;
                 if (currentString.Equals("strike", StringComparison.InvariantCultureIgnoreCase))

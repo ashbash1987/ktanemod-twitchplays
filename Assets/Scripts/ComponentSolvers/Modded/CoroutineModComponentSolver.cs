@@ -25,7 +25,7 @@ public class CoroutineModComponentSolver : ComponentSolver
         while (responseCoroutine.MoveNext())
         {
             object currentObject = responseCoroutine.Current;
-            if (currentObject.GetType() == typeof(KMSelectable))
+            if (currentObject is KMSelectable)
             {
                 KMSelectable selectable = (KMSelectable)currentObject;
                 if (HeldSelectables.Contains(selectable))

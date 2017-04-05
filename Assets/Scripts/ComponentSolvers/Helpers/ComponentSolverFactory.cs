@@ -180,7 +180,7 @@ public static class ComponentSolverFactory
 
         if (parameters[0].ParameterType != typeof(string))
         {
-            Debug.LogFormat("Found a potential candidate ProcessCommand method in {0}, but the parameter list does not match the expected parameter list (expected a single string parameter, got a single {1} parameter).", type.FullName, parameters[0].GetType().FullName);
+            Debug.LogFormat("Found a potential candidate ProcessCommand method in {0}, but the parameter list does not match the expected parameter list (expected a single string parameter, got a single {1} parameter).", type.FullName, parameters[0].ParameterType.FullName);
             return false;
         }
 
