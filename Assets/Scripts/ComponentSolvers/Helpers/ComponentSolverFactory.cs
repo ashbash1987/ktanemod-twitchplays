@@ -68,7 +68,8 @@ public static class ComponentSolverFactory
                 KMNeedyModule needy = bombComponent.GetComponent<KMNeedyModule>();
                 switch (needy.ModuleDisplayName)
                 {
-                    case "Needy Quiz": return new NeedyQuizComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+                    case "Needy Quiz":         return new NeedyQuizComponentSolver       (bombCommander, bombComponent, ircConnection, canceller);
+                    case "Needy Rotary Phone": return new NeedyRotaryPhoneComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
                     default:
                         throw new NotSupportedException(string.Format("Currently {0} is not supported by 'Twitch Plays'.", (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null)));
                 }
