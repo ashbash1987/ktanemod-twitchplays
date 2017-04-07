@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -14,9 +15,25 @@ public class CoroutineModComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
-        IEnumerator responseCoroutine = (IEnumerator)ProcessMethod.Invoke(CommandComponent, new object[] { inputCommand });
-        if (responseCoroutine == null)
+        if (ProcessMethod == null)
         {
+            Debug.LogError("A declared TwitchPlays CoroutineModComponentSolver process method is <null>, yet a component solver has been created; command invokation will not continue.");
+            yield break;
+        }
+
+        IEnumerator responseCoroutine = null;
+        try
+        {
+            responseCoroutine = (IEnumerator)ProcessMethod.Invoke(CommandComponent, new object[] { inputCommand });
+            if (responseCoroutine == null)
+            {
+                yield break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+            Debug.LogException(ex);
             yield break;
         }
 
