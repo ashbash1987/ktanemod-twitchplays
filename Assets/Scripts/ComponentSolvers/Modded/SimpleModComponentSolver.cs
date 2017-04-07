@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Reflection;
 using UnityEngine;
 
@@ -13,9 +14,25 @@ public class SimpleModComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
-        KMSelectable[] selectableSequence = (KMSelectable[])ProcessMethod.Invoke(CommandComponent, new object[] { inputCommand });
-        if (selectableSequence == null)
+        if (ProcessMethod == null)
         {
+            Debug.LogError("A declared TwitchPlays SimpleModComponentSolver process method is <null>, yet a component solver has been created; command invokation will not continue.");
+            yield break;
+        }
+
+        KMSelectable[] selectableSequence = null;
+        try
+        {
+            selectableSequence = (KMSelectable[])ProcessMethod.Invoke(CommandComponent, new object[] { inputCommand });
+            if (selectableSequence == null)
+            {
+                yield break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+            Debug.LogException(ex);
             yield break;
         }
 
@@ -23,12 +40,19 @@ public class SimpleModComponentSolver : ComponentSolver
 
         int beforeInteractionStrikeCount = StrikeCount;
 
-        foreach (KMSelectable selectable in selectableSequence)
+        for(int selectableIndex = 0; selectableIndex < selectableSequence.Length; ++selectableIndex)
         {
             if (Canceller.ShouldCancel)
             {
                 Canceller.ResetCancel();
                 yield break;
+            }
+
+            KMSelectable selectable = selectableSequence[selectableIndex];
+            if (selectable == null)
+            {
+                Debug.LogErrorFormat("An empty selectable has been found at index {0} within the selectable array returned from {1}.{2}; Skipping this index, however this may have unintended sideeffects.", selectableIndex, ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+                continue;
             }
 
             DoInteractionStart(selectable);

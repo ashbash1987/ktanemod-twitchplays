@@ -62,10 +62,6 @@ public class FreeplayCommander : ICommandResponder
         _selectableManagerProperty = _inputManagerType.GetProperty("SelectableManager", BindingFlags.Public | BindingFlags.Instance);
 
         _inputManager = (MonoBehaviour)_instanceProperty.GetValue(null, null);
-
-        _modManagerType = ReflectionHelper.FindType("ModManager");
-        _modManagerInstanceField = _modManagerType.GetField("Instance", BindingFlags.Public | BindingFlags.Static);
-        _getSolvableBombModulesMethod = _modManagerType.GetMethod("GetSolvableBombModules", BindingFlags.Public | BindingFlags.Instance);
     }
 
     public FreeplayCommander(MonoBehaviour freeplayDevice)
@@ -150,7 +146,7 @@ public class FreeplayCommander : ICommandResponder
                 MonoBehaviour startButton = (MonoBehaviour)_startButtonField.GetValue(FreeplayDevice);
                 singlePressButton = (MonoBehaviour)startButton.GetComponent(_selectableType);
             }
-            else if (message.Equals("mods only on", StringComparison.InvariantCultureIgnoreCase) /*&& ModsOnlyToggleEnabled*/)
+            else if (message.Equals("mods only on", StringComparison.InvariantCultureIgnoreCase))
             {
                 object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
                 bool onlyMods = (bool)_onlyModsField.GetValue(currentSettings);
@@ -160,7 +156,7 @@ public class FreeplayCommander : ICommandResponder
                     singlePressButton = (MonoBehaviour)modsToggle.GetComponent(_selectableType);
                 }
             }
-            else if (message.Equals("mods only off", StringComparison.InvariantCultureIgnoreCase) /*&& ModsOnlyToggleEnabled*/)
+            else if (message.Equals("mods only off", StringComparison.InvariantCultureIgnoreCase))
             {
                 object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
                 bool onlyMods = (bool)_onlyModsField.GetValue(currentSettings);
@@ -300,17 +296,6 @@ public class FreeplayCommander : ICommandResponder
     }
     #endregion
 
-    #region Private Properties
-    private static bool ModsOnlyToggleEnabled
-    {
-        get
-        {
-            IList solvableBombModules = (IList)_getSolvableBombModulesMethod.Invoke(_modManagerInstanceField.GetValue(null), null);
-            return solvableBombModules.Count > 0;
-        }
-    }
-    #endregion
-
     #region Readonly Fields
     public readonly MonoBehaviour FreeplayDevice = null;
     public readonly MonoBehaviour Selectable = null;
@@ -359,10 +344,6 @@ public class FreeplayCommander : ICommandResponder
     private static Type _inputManagerType = null;
     private static PropertyInfo _instanceProperty = null;
     private static PropertyInfo _selectableManagerProperty = null;
-
-    private static Type _modManagerType = null;
-    private static FieldInfo _modManagerInstanceField = null;
-    private static MethodInfo _getSolvableBombModulesMethod = null;
 
     private static MonoBehaviour _inputManager = null;
     #endregion
