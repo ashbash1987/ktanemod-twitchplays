@@ -187,7 +187,8 @@ public class FreeplayCommander : ICommandResponder
                         yield break;
                     }
 
-                    int timeIndex = Mathf.Clamp((minutes * 2) + (seconds / 30), 1, 20);
+
+                    int timeIndex = (minutes*2) + (seconds/30);
 
                     object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
                     float currentTime = (float)_timeField.GetValue(currentSettings);
@@ -197,8 +198,11 @@ public class FreeplayCommander : ICommandResponder
 
                     for (int hitCount = 0; hitCount < Mathf.Abs(timeIndex - currentTimeIndex); ++hitCount)
                     {
+                        currentTime = (float) _timeField.GetValue(currentSettings);
                         SelectObject(buttonSelectable);
                         yield return new WaitForSeconds(0.1f);
+                        if (Mathf.FloorToInt(currentTime) == Mathf.FloorToInt((float) _timeField.GetValue(currentSettings)))
+                            yield break;
                     }
                 }
 
@@ -211,8 +215,6 @@ public class FreeplayCommander : ICommandResponder
                         yield break;
                     }
 
-                    moduleCount = Mathf.Clamp(moduleCount, 3, 11);
-
                     object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
                     int currentModuleCount = (int)_moduleCountField.GetValue(currentSettings);
                     MonoBehaviour button = moduleCount > currentModuleCount ? (MonoBehaviour)_moduleCountIncrementField.GetValue(FreeplayDevice) : (MonoBehaviour)_moduleCountDecrementField.GetValue(FreeplayDevice);
@@ -220,8 +222,11 @@ public class FreeplayCommander : ICommandResponder
 
                     for (int hitCount = 0; hitCount < Mathf.Abs(moduleCount - currentModuleCount); ++hitCount)
                     {
+                        int lastModuleCount = (int)_moduleCountField.GetValue(currentSettings);
                         SelectObject(buttonSelectable);
                         yield return new WaitForSeconds(0.1f);
+                        if (lastModuleCount == (int) _moduleCountField.GetValue(currentSettings))
+                            yield break;
                     }
                 }
             }
