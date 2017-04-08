@@ -79,5 +79,5 @@ public class CoroutineModComponentSolver : ComponentSolver
 
     private readonly MethodInfo ProcessMethod = null;
     private readonly Component CommandComponent = null;
-    private readonly List<KMSelectable> HeldSelectables = new List<KMSelectable>();
+    private readonly HashSet<KMSelectable> HeldSelectables = new HashSet<KMSelectable>();
 }
