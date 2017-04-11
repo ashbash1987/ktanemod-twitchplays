@@ -61,5 +61,4 @@ public class ForeignExchangeRatesComponentSolver : ComponentSolver
     private static FieldInfo _buttonsField = null;
 
     private MonoBehaviour[] _buttons = null;
-    private bool _held = false;
 }

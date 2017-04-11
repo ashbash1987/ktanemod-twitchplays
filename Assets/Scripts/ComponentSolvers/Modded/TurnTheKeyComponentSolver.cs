@@ -94,5 +94,4 @@ public class TurnTheKeyComponentSolver : ComponentSolver
     private static FieldInfo _lockField = null;
 
     private MonoBehaviour _lock = null;
-    private bool _held = false;
 }

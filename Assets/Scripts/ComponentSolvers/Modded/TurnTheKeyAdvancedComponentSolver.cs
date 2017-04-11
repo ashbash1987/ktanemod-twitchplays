@@ -52,5 +52,4 @@ public class TurnTheKeyAdvancedComponentSolver : ComponentSolver
 
     private MonoBehaviour _leftKey = null;
     private MonoBehaviour _rightKey = null;
-    private bool _held = false;
 }
