@@ -45,6 +45,7 @@ public class ForeignExchangeRatesComponentSolver : ComponentSolver
         if (button == null)
             yield break;
 
+        yield return "Foreign Exchange Rates Solve Attempt";
         DoInteractionStart(button);
         yield return new WaitForSeconds(0.1f);
         DoInteractionEnd(button);
