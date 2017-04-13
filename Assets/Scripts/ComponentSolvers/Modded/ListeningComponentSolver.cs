@@ -22,22 +22,24 @@ public class ListeningComponentSolver : ComponentSolver
     {
         MonoBehaviour button;
 
+        var beforeStrikes = StrikeCount;
+
         var split = inputCommand.Trim().ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        if (split.Length < 2 || split.Length > 6 || split[0] != "press")
+        if (split.Length < 2 || split[0] != "press")
             yield break;
 
         if (_play == null || _buttons[0] == null || _buttons[1] == null || _buttons[2] == null || _buttons[3] == null)
             yield break;
 
+        var letters = "$@*&";
+
         foreach (var cmd in split.Skip(1))
             switch (cmd)
             {
                 case "play": if (split.Length > 2) yield break; break;
-                case "$": case "#": case "*": case "&": if (split.Length != 6) yield break; break;
                 default:
-                    if (cmd.Length != 5 || split.Length != 2) yield break;
                     foreach(var x in cmd)
-                        if (!"$#*&".Contains(x))
+                        if (!letters.Contains(x))
                             yield break;
                     break;
             }   //Check for any invalid commands.  Abort entire sequence if any invalid commands are present.
@@ -47,24 +49,25 @@ public class ListeningComponentSolver : ComponentSolver
         {
             switch (cmd)
             {
-                case "play": button = _play; break;
-
-                case "$": case "#": case "*": case "&": button = _buttons["$#*&".IndexOf(cmd, StringComparison.Ordinal)]; break;
-
+                case "play":
+                    DoInteractionStart(_play);
+                    yield return new WaitForSeconds(0.1f);
+                    DoInteractionEnd(_play);
+                    break;
                 default:
                     foreach (var x in cmd)
                     {
-                        button = _buttons["$#*&".IndexOf(x)];
+                        button = _buttons[letters.IndexOf(x)];
                         DoInteractionStart(button);
                         yield return new WaitForSeconds(0.1f);
                         DoInteractionEnd(button);
+                        if (StrikeCount != beforeStrikes)
+                            yield break;
                     }
-                    yield break;
+                    break;
             }
 
-            DoInteractionStart(button);
-            yield return new WaitForSeconds(0.1f);
-            DoInteractionEnd(button);
+           
         }
     }
 
