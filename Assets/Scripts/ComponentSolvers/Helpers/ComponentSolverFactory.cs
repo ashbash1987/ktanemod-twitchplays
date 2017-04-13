@@ -32,6 +32,7 @@ public static class ComponentSolverFactory
         ModComponentSolverCreators["ForeignExchangeRates"] = (bombCommander, bombComponent, ircConnection, canceller) => new ForeignExchangeRatesComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["Listening"] = (bombCommander, bombComponent, ircConnection, canceller) => new ListeningComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["OrientationCube"] = (bombCommander, bombComponent, ircConnection, canceller) => new OrientationCubeComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+        ModComponentSolverCreators["Probing"] = (bombCommander, bombComponent, ircConnection, canceller) => new ProbingComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["TurnTheKey"] = (bombCommander, bombComponent, ircConnection, canceller) => new TurnTheKeyComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["TurnTheKeyAdvanced"] = (bombCommander, bombComponent, ircConnection, canceller) => new TurnTheKeyAdvancedComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
