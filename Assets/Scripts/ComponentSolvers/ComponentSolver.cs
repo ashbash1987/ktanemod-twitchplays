@@ -60,6 +60,7 @@ public abstract class ComponentSolver : ICommandResponder
 
         int previousStrikeCount = StrikeCount;
         bool parseError = false;
+        bool needQuaternionReset = false;
 
         while (subcoroutine.MoveNext())
         {
@@ -89,27 +90,41 @@ public abstract class ComponentSolver : ICommandResponder
                     break;
                 }
             }
+            else if (currentValue is Quaternion)
+            {
+                Quaternion localQuaternion = (Quaternion)currentValue;
+                BombCommander.RotateByLocalQuaternion(localQuaternion);
+                needQuaternionReset = true;
+            }
             yield return currentValue;
+        }
+
+        if (needQuaternionReset)
+        {
+            BombCommander.RotateByLocalQuaternion(Quaternion.identity);
         }
 
         if (parseError)
         {
             responseNotifier.ProcessResponse(CommandResponse.NoResponse);
         }
-        else if (Solved && _delegatedSolveUserNickName == null)
-        {
-            AwardSolve(userNickName, responseNotifier);
-        }
-        else if (previousStrikeCount != StrikeCount && _delegatedStrikeUserNickName == null)
-        {
-            AwardStrikes(userNickName, responseNotifier, StrikeCount - previousStrikeCount);
-        }
         else
         {
-            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
-        }
+            if (Solved && _delegatedSolveUserNickName == null)
+            {
+                AwardSolve(userNickName, responseNotifier);
+            }
+            else if (previousStrikeCount != StrikeCount && _delegatedStrikeUserNickName == null)
+            {
+                AwardStrikes(userNickName, responseNotifier, StrikeCount - previousStrikeCount);
+            }
+            else
+            {
+                responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
+            }
 
-        yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.5f);
+        }
 
         IEnumerator defocusCoroutine = BombCommander.Defocus(FrontFace);
         while (defocusCoroutine.MoveNext())

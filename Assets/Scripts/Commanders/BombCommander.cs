@@ -230,6 +230,16 @@ public class BombCommander : ICommandResponder
         yield break;
     }
 
+    public void RotateByLocalQuaternion(Quaternion localQuaternion)
+    {
+        Transform baseTransform = (Transform)_getBaseHeldObjectTransformMethod.Invoke(SelectableManager, null);
+
+        float currentZSpin = _heldFrontFace ? 0.0f : 180.0f;
+
+        _setControlsRotationMethod.Invoke(SelectableManager, new object[] { baseTransform.rotation * Quaternion.Euler(0.0f, 0.0f, currentZSpin) * localQuaternion });
+        _handleFaceSelectionMethod.Invoke(SelectableManager, null);
+    }
+
     private void SelectObject(MonoBehaviour selectable)
     {
         _handleSelectMethod.Invoke(selectable, new object[] { true });
