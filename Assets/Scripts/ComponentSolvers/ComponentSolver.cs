@@ -59,6 +59,8 @@ public abstract class ComponentSolver : ICommandResponder
         yield return new WaitForSeconds(0.5f);
 
         int previousStrikeCount = StrikeCount;
+        bool parseError = false;
+        bool needQuaternionReset = false;
 
         while (subcoroutine.MoveNext())
         {
@@ -77,24 +79,52 @@ public abstract class ComponentSolver : ICommandResponder
                     _delegatedSolveUserNickName = userNickName;
                     _delegatedSolveResponseNotifier = responseNotifier;
                 }
+                else if (currentString.Equals("parseerror", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    parseError = true;
+                    break;
+                }
+                else if (currentString.Equals("trycancel", StringComparison.InvariantCultureIgnoreCase) && Canceller.ShouldCancel)
+                {
+                    Canceller.ResetCancel();
+                    break;
+                }
+            }
+            else if (currentValue is Quaternion)
+            {
+                Quaternion localQuaternion = (Quaternion)currentValue;
+                BombCommander.RotateByLocalQuaternion(localQuaternion);
+                needQuaternionReset = true;
             }
             yield return currentValue;
         }
 
-        if (Solved && _delegatedSolveUserNickName == null)
+        if (needQuaternionReset)
         {
-            AwardSolve(userNickName, responseNotifier);
+            BombCommander.RotateByLocalQuaternion(Quaternion.identity);
         }
-        else if (previousStrikeCount != StrikeCount && _delegatedStrikeUserNickName == null)
+
+        if (parseError)
         {
-            AwardStrikes(userNickName, responseNotifier, StrikeCount - previousStrikeCount);
+            responseNotifier.ProcessResponse(CommandResponse.NoResponse);
         }
         else
         {
-            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
-        }
+            if (Solved && _delegatedSolveUserNickName == null)
+            {
+                AwardSolve(userNickName, responseNotifier);
+            }
+            else if (previousStrikeCount != StrikeCount && _delegatedStrikeUserNickName == null)
+            {
+                AwardStrikes(userNickName, responseNotifier, StrikeCount - previousStrikeCount);
+            }
+            else
+            {
+                responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
+            }
 
-        yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.5f);
+        }
 
         IEnumerator defocusCoroutine = BombCommander.Defocus(FrontFace);
         while (defocusCoroutine.MoveNext())
