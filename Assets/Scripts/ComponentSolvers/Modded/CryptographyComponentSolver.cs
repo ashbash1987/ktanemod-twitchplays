@@ -14,6 +14,8 @@ public class CryptographyComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
+        var BeforeStrikes = StrikeCount;
+
         var split = inputCommand.Trim().ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         if (split.Length < 2 || split[0] != "press")
             yield break;
@@ -35,6 +37,8 @@ public class CryptographyComponentSolver : ComponentSolver
                 DoInteractionStart(_buttons[keytext.IndexOf(y)]);
                 yield return new WaitForSeconds(0.1f);
                 DoInteractionEnd(_buttons[keytext.IndexOf(y)]);
+                if (StrikeCount != BeforeStrikes)
+                    yield break;
             }
         }
     }
