@@ -29,6 +29,7 @@ public static class ComponentSolverFactory
 
         //Perky Modules  (Silly Slots is maintained by Timwi, and as such its handler lives there.)
         ModComponentSolverCreators["CrazyTalk"] = (bombCommander, bombComponent, ircConnection, canceller) => new CrazyTalkComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+        ModComponentSolverCreators["CryptModule"] = (bombCommander, bombComponent, ircConnection, canceller) => new CryptographyComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["ForeignExchangeRates"] = (bombCommander, bombComponent, ircConnection, canceller) => new ForeignExchangeRatesComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["Listening"] = (bombCommander, bombComponent, ircConnection, canceller) => new ListeningComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["OrientationCube"] = (bombCommander, bombComponent, ircConnection, canceller) => new OrientationCubeComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
