@@ -30,11 +30,13 @@ public class OrientationCubeComponentSolver : ComponentSolver
         foreach(var cmd in split.Skip(1))
             switch (cmd)
             {
-                case "left": case "l": break;
-                case "right": case "r": break;
-                case "counterclockwise": case "counter-clockwise": case "ccw":  break;
-                case "clockwise": case "cw": break;
-                case "set": case "submit": break;
+                case "left": case "l":
+                case "right": case "r":
+                case "counterclockwise": case "counter-clockwise": case "ccw":
+                case "anticlockwise": case "anti-clockwise": case "acw":
+                case "clockwise": case "cw":
+                case "set": case "submit":
+                    break;
                 default: yield break;
             }   //Check for any invalid commands.  Abort entire sequence if any invalid commands are present.
 
@@ -44,9 +46,12 @@ public class OrientationCubeComponentSolver : ComponentSolver
             switch (cmd)
             {
                 case "left": case "l": button = _left; break;
+
                 case "right": case "r": button = _right; break;
 
+                case "anticlockwise": case "anti-clockwise": case "acw":
                 case "counterclockwise": case "counter-clockwise": case "ccw": button = _ccw; break;
+
                 case "clockwise": case "cw": button = _cw; break;
 
                 case "set": case "submit": button = _submit; break;
