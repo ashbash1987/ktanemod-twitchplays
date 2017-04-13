@@ -59,6 +59,7 @@ public abstract class ComponentSolver : ICommandResponder
         yield return new WaitForSeconds(0.5f);
 
         int previousStrikeCount = StrikeCount;
+        bool parseError = false;
 
         while (subcoroutine.MoveNext())
         {
@@ -77,11 +78,25 @@ public abstract class ComponentSolver : ICommandResponder
                     _delegatedSolveUserNickName = userNickName;
                     _delegatedSolveResponseNotifier = responseNotifier;
                 }
+                else if (currentString.Equals("parseerror", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    parseError = true;
+                    break;
+                }
+                else if (currentString.Equals("trycancel", StringComparison.InvariantCultureIgnoreCase) && Canceller.ShouldCancel)
+                {
+                    Canceller.ResetCancel();
+                    break;
+                }
             }
             yield return currentValue;
         }
 
-        if (Solved && _delegatedSolveUserNickName == null)
+        if (parseError)
+        {
+            responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+        }
+        else if (Solved && _delegatedSolveUserNickName == null)
         {
             AwardSolve(userNickName, responseNotifier);
         }

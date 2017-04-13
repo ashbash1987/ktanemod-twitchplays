@@ -39,25 +39,25 @@ public class CoroutineModComponentSolver : ComponentSolver
 
         yield return "modcoroutine";
 
-        //This looks slightly nasty, but that's because of a compiler restriction that prevents yielding from within a try block with an associated catch block.
-        //An alternative would've been a try..finally (that is allowable), but then the exception details would get lost.
-        //So, exception-handle the .MoveNext() call separately, then continue on.
+        bool internalParseError = false;
+        try
+        {
+            internalParseError = !responseCoroutine.MoveNext();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+            Debug.LogException(ex);
+            internalParseError = true;
+        }
+        if (internalParseError)
+        {
+            yield return "parseerror";
+            yield break;
+        }
+
         while (true)
         {
-            try
-            {
-                if (!responseCoroutine.MoveNext())
-                {
-                    break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
-                Debug.LogException(ex);
-                break;
-            }
-
             object currentObject = responseCoroutine.Current;
             if (currentObject is KMSelectable)
             {
@@ -74,6 +74,20 @@ public class CoroutineModComponentSolver : ComponentSolver
                 }
             }
             yield return currentObject;
+
+            try
+            {
+                if (!responseCoroutine.MoveNext())
+                {
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+                Debug.LogException(ex);
+                break;
+            }
         }        
     }
 
