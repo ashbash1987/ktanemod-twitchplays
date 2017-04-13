@@ -31,7 +31,7 @@ public class ListeningComponentSolver : ComponentSolver
         if (_play == null || _buttons[0] == null || _buttons[1] == null || _buttons[2] == null || _buttons[3] == null)
             yield break;
 
-        var letters = "$@*&";
+        var letters = "$#*&";
 
         foreach (var cmd in split.Skip(1))
             switch (cmd)
