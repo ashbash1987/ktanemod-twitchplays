@@ -19,6 +19,7 @@ public static class InputInterceptor
             }
             catch (Exception ex)
             {
+                Debug.LogException(ex);
             }
         }
     }
@@ -33,6 +34,7 @@ public static class InputInterceptor
             }
             catch (Exception ex)
             {
+                Debug.LogException(ex);
             }
         }
     }

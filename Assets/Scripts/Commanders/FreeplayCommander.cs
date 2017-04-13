@@ -37,7 +37,6 @@ public class FreeplayCommander : ICommandResponder
 
         _selectableType = ReflectionHelper.FindType("Selectable");
         _handleSelectMethod = _selectableType.GetMethod("HandleSelect", BindingFlags.Public | BindingFlags.Instance);
-        _handleDeselectMethod = _selectableType.GetMethod("HandleDeselect", BindingFlags.Public | BindingFlags.Instance);
         _onInteractEndedMethod = _selectableType.GetMethod("OnInteractEnded", BindingFlags.Public | BindingFlags.Instance);
 
         _selectableManagerType = ReflectionHelper.FindType("SelectableManager");
@@ -301,7 +300,6 @@ public class FreeplayCommander : ICommandResponder
     public readonly MonoBehaviour Selectable = null;
     public readonly MonoBehaviour FloatingHoldable = null;
     private readonly MonoBehaviour SelectableManager = null;
-    private readonly CoroutineCanceller CoroutineCanceller = null;
     #endregion
 
     #region Private Static Fields
@@ -329,7 +327,6 @@ public class FreeplayCommander : ICommandResponder
 
     private static Type _selectableType = null;
     private static MethodInfo _handleSelectMethod = null;
-    private static MethodInfo _handleDeselectMethod = null;
     private static MethodInfo _onInteractEndedMethod = null;
 
     private static Type _selectableManagerType = null;

@@ -289,7 +289,6 @@ public class BombBinderCommander : ICommandResponder
     public readonly MonoBehaviour Selectable = null;
     public readonly MonoBehaviour FloatingHoldable = null;
     private readonly MonoBehaviour SelectableManager = null;
-    private readonly CoroutineCanceller CoroutineCanceller = null;
     #endregion
 
     #region Private Static Fields

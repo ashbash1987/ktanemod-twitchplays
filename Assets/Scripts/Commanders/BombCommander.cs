@@ -169,8 +169,6 @@ public class BombCommander : ICommandResponder
             yield return holdCoroutine.Current;
         }
 
-        Transform baseTransform = (Transform)_getBaseHeldObjectTransformMethod.Invoke(SelectableManager, null);
-
         float initialZSpin = _heldFrontFace ? 0.0f : 180.0f;
 
         IEnumerator firstEdge = DoFreeRotate(initialZSpin, 0.0f, 90.0f, 0.0f, 0.3f);
@@ -311,7 +309,6 @@ public class BombCommander : ICommandResponder
     public readonly MonoBehaviour Selectable = null;
     public readonly MonoBehaviour FloatingHoldable = null;
     private readonly MonoBehaviour SelectableManager = null;
-    private readonly CoroutineCanceller CoroutineCanceller = null;
     #endregion
 
     #region Private Static Fields
