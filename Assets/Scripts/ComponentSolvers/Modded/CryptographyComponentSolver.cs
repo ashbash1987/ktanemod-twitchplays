@@ -22,16 +22,20 @@ public class CryptographyComponentSolver : ComponentSolver
 
         foreach (var x in split.Skip(1))
         {
-            if (x.Length != 1 || !keytext.Contains(x))
-                yield break;
+            foreach (var y in x)
+                if (!keytext.Contains(y))
+                    yield break;
         }
 
         yield return "Cryptography Solve Attempt";
         foreach (var x in split.Skip(1))
         {
-            DoInteractionStart(_buttons[keytext.IndexOf(x, StringComparison.Ordinal)]);
-            yield return new WaitForSeconds(0.1f);
-            DoInteractionEnd(_buttons[keytext.IndexOf(x, StringComparison.Ordinal)]);
+            foreach (var y in x)
+            {
+                DoInteractionStart(_buttons[keytext.IndexOf(y)]);
+                yield return new WaitForSeconds(0.1f);
+                DoInteractionEnd(_buttons[keytext.IndexOf(y)]);
+            }
         }
     }
 
