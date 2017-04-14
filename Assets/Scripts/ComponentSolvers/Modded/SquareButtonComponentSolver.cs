@@ -81,11 +81,22 @@ public class SquareButtonComponentSolver : ComponentSolver
 
         int timeTarget = sortedTimes[0];
         sortedTimes.RemoveAt(0);
+
+        int waitTime = (int)((float)CommonReflectedTypeInfo.TimeRemainingField.GetValue(timerComponent) + 0.25f);
+        waitTime -= timeTarget;
+        if (waitTime >= 30)
+        {
+            _musicPlayer = MusicPlayer.StartRandomMusic();
+        }
+
         float timeRemaining = float.PositiveInfinity;
         while (timeRemaining > 0.0f)
         {
             if (Canceller.ShouldCancel)
             {
+                if (waitTime >= 30)
+                    _musicPlayer.StopMusic();
+
                 Canceller.ResetCancel();
                 yield break;
             }
@@ -94,9 +105,18 @@ public class SquareButtonComponentSolver : ComponentSolver
 
             if (timeRemaining < timeTarget)
             {
+                if (waitTime >= 30)
+                    _musicPlayer.StopMusic();
+
                 if(sortedTimes.Count == 0) yield break;
                 timeTarget = sortedTimes[0];
                 sortedTimes.RemoveAt(0);
+
+                waitTime = (int)timeRemaining;
+                waitTime -= timeTarget;
+                if (waitTime >= 30)
+                    _musicPlayer = MusicPlayer.StartRandomMusic();
+
                 continue;
             }
             if (timeRemaining == timeTarget)
@@ -108,6 +128,8 @@ public class SquareButtonComponentSolver : ComponentSolver
                 }
                 DoInteractionEnd(_button);
                 _held = false;
+                if (waitTime >= 30)
+                    _musicPlayer.StopMusic();
                 break;
             }
 
@@ -126,4 +148,5 @@ public class SquareButtonComponentSolver : ComponentSolver
 
     private MonoBehaviour _button = null;
     private bool _held = false;
+    private MusicPlayer _musicPlayer = null;
 }
