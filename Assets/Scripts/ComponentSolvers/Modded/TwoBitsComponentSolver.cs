@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ public class TwoBitsComponentSolver : ComponentSolver
 {
     private Component c;
 
-    private string pressedQuery;
+    private const string ButtonLabels = "bcdegkptvz";
 
     public TwoBitsComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
         base(bombCommander, bombComponent, ircConnection, canceller)
@@ -16,68 +17,67 @@ public class TwoBitsComponentSolver : ComponentSolver
 
         _submit = (MonoBehaviour)_submitButtonField.GetValue(c);
         _query = (MonoBehaviour)_queryButtonField.GetValue(c);
-        _buttons = (Array)_buttonsField.GetValue(c);
+        _buttons = (MonoBehaviour[])_buttonsField.GetValue(c);
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
+        var split = inputCommand.ToLowerInvariant().Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
         int beforeTwoBitsStrikeCount = StrikeCount;
-        string correctresponse = (string)_calculateCorrectSubmissionMethod.Invoke(c, null);
-        pressedQuery = string.Empty;
+        string correctresponse = ((string)_calculateCorrectSubmissionMethod.Invoke(c, null)).ToLowerInvariant();
 
-        if (inputCommand.StartsWith("query ", StringComparison.InvariantCultureIgnoreCase))
+
+        if (split[0] != "query" && split[0] != "submit")
         {
-            var querystring = inputCommand.Substring(5).ToLowerInvariant();
-            foreach (var q in querystring)
-            {
-                yield return HandlePress(q);
-                if (beforeTwoBitsStrikeCount != StrikeCount) break;
-            }
-            if (beforeTwoBitsStrikeCount != StrikeCount) yield break;
-            yield return HandleQuery();
+            yield break;
         }
-        else if (inputCommand.StartsWith("submit ", StringComparison.InvariantCultureIgnoreCase))
+        foreach (var x in split.Skip(1))
         {
-            var querystring = inputCommand.Substring(6).ToLowerInvariant();
-            foreach (var q in querystring)
+            foreach (var y in x)
             {
-                yield return HandlePress(q);
-                if (beforeTwoBitsStrikeCount != StrikeCount) break;
+                if (!ButtonLabels.Contains(y))
+                {
+                    yield break;
+                }
             }
-            if (beforeTwoBitsStrikeCount != StrikeCount) yield break;
-            yield return correctresponse.Equals(pressedQuery) ? "solve" : "strike";
-            yield return HandleSubmit();
         }
-    }
 
-    private IEnumerator HandleQuery()
-    {
-        yield return "query";
-        DoInteractionStart(_query);
-        yield return new WaitForSeconds(0.1f);
-        DoInteractionEnd(_query);
-    }
+        yield return "TwoBits Solve Attempt";
+        foreach (var x in split.Skip(1))
+        {
+            foreach (var y in x)
+            {
+                yield return HandlePress(y);
+                /*if (beforeTwoBitsStrikeCount != StrikeCount)
+                {
+                    yield break;
+                }*/
+                yield return "trycancel";
+            }
+        }
 
-    private IEnumerator HandleSubmit()
-    {
-        yield return "submit";
-        DoInteractionStart(_submit);
-        yield return new WaitForSeconds(0.1f);
-        DoInteractionEnd(_submit);
+        if (split[0] == "query")
+        {
+            DoInteractionStart(_query);
+            yield return new WaitForSeconds(0.1f);
+            DoInteractionEnd(_query);
+        }
+        else
+        {
+            string currentQuery = ((string)_getCurrentQueryStringMethod.Invoke(c, null)).ToLowerInvariant();
+            yield return correctresponse.Equals(currentQuery) ? "solve" : "strike";
+            DoInteractionStart(_submit);
+            yield return new WaitForSeconds(0.1f);
+            DoInteractionEnd(_submit);
+        }
     }
 
     private IEnumerator HandlePress(char c)
     {
-        var buttonLabels = "bcdegkptvz";
-        var pos = buttonLabels.IndexOf(c);
-        if (pos < 0) yield break;
-        pressedQuery += c;
-
-        yield return c;
-        MonoBehaviour button = (MonoBehaviour)_buttons.GetValue(pos);
-        DoInteractionStart(button);
+        var pos = ButtonLabels.IndexOf(c);
+        DoInteractionStart(_buttons[pos]);
         yield return new WaitForSeconds(0.1f);
-        DoInteractionEnd(button);
+        DoInteractionEnd(_buttons[pos]);
     }
 
     static TwoBitsComponentSolver()
@@ -88,6 +88,8 @@ public class TwoBitsComponentSolver : ComponentSolver
         _buttonsField = _componentSolverType.GetField("Buttons", BindingFlags.Public | BindingFlags.Instance);
         _calculateCorrectSubmissionMethod = _componentSolverType.GetMethod("CalculateCorrectSubmission",
             BindingFlags.NonPublic | BindingFlags.Instance);
+        _getCurrentQueryStringMethod = _componentSolverType.GetMethod("GetCurrentQueryString",
+            BindingFlags.NonPublic | BindingFlags.Instance);
     }
 
     private static Type _componentSolverType = null;
@@ -95,9 +97,10 @@ public class TwoBitsComponentSolver : ComponentSolver
     private static FieldInfo _queryButtonField = null;
     private static FieldInfo _buttonsField = null;
     private static MethodInfo _calculateCorrectSubmissionMethod = null;
+    private static MethodInfo _getCurrentQueryStringMethod = null;
 
 
-    private Array _buttons = null;
+    private MonoBehaviour[] _buttons = null;
     private MonoBehaviour _query = null;
     private MonoBehaviour _submit = null;
 }
