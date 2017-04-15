@@ -18,7 +18,7 @@ public class ProbingComponentSolver : ComponentSolver
             _wires[4] == null || _wires[5] == null)
             yield break;
 
-
+        var beforeStrikes = StrikeCount;
         if (split.Length == 1 && split[0] == "cycle")
         {
             yield return "Reading the frequencies";
@@ -27,6 +27,13 @@ public class ProbingComponentSolver : ComponentSolver
             for (var i = 1; i < 6; i++)
             {
                 yield return ConnectWires(i, 0);
+                if (beforeStrikes != StrikeCount)
+                {
+                    //A strike somewhere else on the bomb has the possibility to change the frequencies, and thus
+                    //ruin the reading.
+                    yield return EnsureWiresConnected(4, 4);
+                    yield break;
+                }
                 yield return new WaitForSeconds(2.0f);
             }
             yield return ConnectWires(4, 4);  //Leave the blue wire disconnected.
@@ -41,7 +48,16 @@ public class ProbingComponentSolver : ComponentSolver
 
         yield return "Probing Solve Attempt";
         yield return EnsureWiresConnected(red-1, blue-1);
-        yield return new WaitForSeconds(6.5f);
+
+        for (var i = 0; i < 65; i++)
+        {
+            yield return new WaitForSeconds(0.1f);
+            if (beforeStrikes == StrikeCount) continue;
+
+            //A strike somewhere else on the bomb has the possibility to cause a strike here.
+            yield return EnsureWiresConnected(4, 4);
+            yield break;
+        }
     }
 
 
