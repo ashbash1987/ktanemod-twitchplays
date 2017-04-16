@@ -67,9 +67,9 @@ public class SafetySafeComponentSolver : ComponentSolver
             {
                 int val = 0;
                 if (!int.TryParse(split[1], out val)) yield break;
+                val %= 12;
                 while (val < 0)
                     val += 12;
-                val %= 12;
                 yield return split[0];
                 for (int z = 0; z < val; z++)
                 {
@@ -89,9 +89,9 @@ public class SafetySafeComponentSolver : ComponentSolver
             {
                 if (!int.TryParse(split[a], out values[a]))
                     yield break;
+                values[a] %= 12;
                 while (values[a] < 0)
                     values[a] += 12;
-                values[a] %= 12;
             }
 
             yield return inputCommand;
