@@ -16,6 +16,10 @@ public abstract class ComponentSolver : ICommandResponder
         _interactEndedMethod = _selectableType.GetMethod("OnInteractEnded", BindingFlags.Public | BindingFlags.Instance);
         _setHighlightMethod = _selectableType.GetMethod("SetHighlight", BindingFlags.Public | BindingFlags.Instance);
         _getFocusDistanceMethod = _selectableType.GetMethod("GetFocusDistance", BindingFlags.Public | BindingFlags.Instance);
+
+        Type thisType = typeof(ComponentSolver);
+        _onPassInternalMethod = thisType.GetMethod("OnPass", BindingFlags.NonPublic | BindingFlags.Instance);
+        _onStrikeInternalMethod = thisType.GetMethod("OnStrike", BindingFlags.NonPublic | BindingFlags.Instance);
     }
 
     public ComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller)
@@ -25,6 +29,8 @@ public abstract class ComponentSolver : ICommandResponder
         Selectable = (MonoBehaviour)bombComponent.GetComponent(_selectableType);
         IRCConnection = ircConnection;
         Canceller = canceller;
+    
+        HookUpEvents();
     }
     #endregion
 
@@ -37,6 +43,9 @@ public abstract class ComponentSolver : ICommandResponder
             yield break;
         }
 
+        _currentResponseNotifier = responseNotifier;
+        _currentUserNickName = userNickName;
+
         IEnumerator subcoroutine = RespondToCommandCommon(message);
         if (subcoroutine == null || !subcoroutine.MoveNext())
         {
@@ -44,6 +53,8 @@ public abstract class ComponentSolver : ICommandResponder
             if (subcoroutine == null || !subcoroutine.MoveNext())
             {
                 responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+                _currentResponseNotifier = null;
+                _currentUserNickName = null;
                 yield break;
             }
         }
@@ -72,7 +83,6 @@ public abstract class ComponentSolver : ICommandResponder
                 {
                     _delegatedStrikeUserNickName = userNickName;
                     _delegatedStrikeResponseNotifier = responseNotifier;
-                    _delegatedStrikeCount = StrikeCount;
                 }
                 else if (currentString.Equals("solve", StringComparison.InvariantCultureIgnoreCase))
                 {
@@ -110,15 +120,7 @@ public abstract class ComponentSolver : ICommandResponder
         }
         else
         {
-            if (Solved && _delegatedSolveUserNickName == null)
-            {
-                AwardSolve(userNickName, responseNotifier);
-            }
-            else if (previousStrikeCount != StrikeCount && _delegatedStrikeUserNickName == null)
-            {
-                AwardStrikes(userNickName, responseNotifier, StrikeCount - previousStrikeCount);
-            }
-            else
+            if (!Solved && (previousStrikeCount == StrikeCount))
             {
                 responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
             }
@@ -133,26 +135,9 @@ public abstract class ComponentSolver : ICommandResponder
         }
 
         yield return new WaitForSeconds(0.5f);
-    }
-    #endregion
 
-    #region Public Methods
-    public void Update()
-    {
-        if (_delegatedStrikeUserNickName != null && StrikeCount != _delegatedStrikeCount)
-        {
-            AwardStrikes(_delegatedStrikeUserNickName, _delegatedStrikeResponseNotifier, StrikeCount - _delegatedStrikeCount);
-            _delegatedStrikeUserNickName = null;
-            _delegatedStrikeResponseNotifier = null;
-            _delegatedStrikeCount = int.MinValue;
-        }
-
-        if (_delegatedSolveUserNickName != null && Solved)
-        {
-            AwardSolve(_delegatedSolveUserNickName, _delegatedSolveResponseNotifier);
-            _delegatedSolveUserNickName = null;
-            _delegatedSolveResponseNotifier = null;
-        }
+        _currentResponseNotifier = null;
+        _currentUserNickName = null;
     }
     #endregion
 
@@ -176,6 +161,51 @@ public abstract class ComponentSolver : ICommandResponder
     #endregion
 
     #region Private Methods
+    private void HookUpEvents()
+    {
+        Delegate gameOnPassDelegate = (Delegate)CommonReflectedTypeInfo.OnPassField.GetValue(BombComponent);
+        Delegate internalOnPassDelegate = Delegate.CreateDelegate(CommonReflectedTypeInfo.PassEventType, this, _onPassInternalMethod);
+        CommonReflectedTypeInfo.OnPassField.SetValue(BombComponent, Delegate.Combine(internalOnPassDelegate, gameOnPassDelegate));
+
+        Delegate gameOnStrikeDelegate = (Delegate)CommonReflectedTypeInfo.OnStrikeField.GetValue(BombComponent);
+        Delegate internalOnStrikeDelegate = Delegate.CreateDelegate(CommonReflectedTypeInfo.StrikeEventType, this, _onStrikeInternalMethod);
+        CommonReflectedTypeInfo.OnStrikeField.SetValue(BombComponent, Delegate.Combine(internalOnStrikeDelegate, gameOnStrikeDelegate));
+    }
+
+    private bool OnPass(object _ignore)
+    {
+        if (_delegatedSolveUserNickName != null && _delegatedSolveResponseNotifier != null)
+        {
+            AwardSolve(_delegatedSolveUserNickName, _delegatedSolveResponseNotifier);
+            _delegatedSolveUserNickName = null;
+            _delegatedSolveResponseNotifier = null;
+        }
+        else if (_currentUserNickName != null && _currentResponseNotifier != null)
+        {
+            AwardSolve(_currentUserNickName, _currentResponseNotifier);
+        }
+
+        return false;
+    }
+
+    private bool OnStrike(object _ignore)
+    {
+        _strikeCount++;
+
+        if (_delegatedStrikeUserNickName != null && _delegatedStrikeResponseNotifier != null)
+        {
+            AwardStrikes(_delegatedStrikeUserNickName, _delegatedStrikeResponseNotifier, 1);
+            _delegatedStrikeUserNickName = null;
+            _delegatedStrikeResponseNotifier = null;
+        }
+        else if (_currentUserNickName != null && _currentResponseNotifier != null)
+        {
+            AwardStrikes(_currentUserNickName, _currentResponseNotifier, 1);
+        }
+
+        return false;
+    }
+
     private void AwardSolve(string userNickName, ICommandResponseNotifier responseNotifier)
     {
         IRCConnection.SendMessage(string.Format("VoteYea Module {0} is solved! +1 solve to {1}", Code, userNickName));
@@ -212,19 +242,12 @@ public abstract class ComponentSolver : ICommandResponder
         }
     }
 
+    private int _strikeCount = 0;
     protected int StrikeCount
     {
         get
         {
-            //This extra check is required, since it doesn't increment the NumStrikes field on the last strike of the bomb!
-            if (Detonated)
-            {
-                return (int)CommonReflectedTypeInfo.NumStrikesToLoseField.GetValue(BombCommander.Bomb);
-            }
-            else
-            {
-                return (int)CommonReflectedTypeInfo.NumStrikesField.GetValue(BombCommander.Bomb);
-            }
+            return _strikeCount;
         }
     }
 
@@ -274,14 +297,19 @@ public abstract class ComponentSolver : ICommandResponder
     private static MethodInfo _interactEndedMethod = null;
     private static MethodInfo _setHighlightMethod = null;
     private static MethodInfo _getFocusDistanceMethod = null;
+
+    private static MethodInfo _onPassInternalMethod = null;
+    private static MethodInfo _onStrikeInternalMethod = null;
     #endregion
 
     #region Private Fields
     private ICommandResponseNotifier _delegatedStrikeResponseNotifier = null;
     private string _delegatedStrikeUserNickName = null;
-    private int _delegatedStrikeCount = int.MinValue;
 
     private ICommandResponseNotifier _delegatedSolveResponseNotifier = null;
     private string _delegatedSolveUserNickName = null;
+
+    private ICommandResponseNotifier _currentResponseNotifier = null;
+    private string _currentUserNickName = null;
     #endregion
 }

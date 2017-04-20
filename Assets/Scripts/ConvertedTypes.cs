@@ -29,8 +29,6 @@ public static class CommonReflectedTypeInfo
     {
         BombType = ReflectionHelper.FindType("Bomb");
         BombComponentsField = BombType.GetField("BombComponents", BindingFlags.Public | BindingFlags.Instance);
-        NumStrikesField = BombType.GetField("NumStrikes", BindingFlags.Public | BindingFlags.Instance);
-        NumStrikesToLoseField = BombType.GetField("NumStrikesToLose", BindingFlags.Public | BindingFlags.Instance);
         HasDetonatedProperty = BombType.GetProperty("HasDetonated", BindingFlags.Public | BindingFlags.Instance);
         GetTimerMethod = BombType.GetMethod("GetTimer", BindingFlags.Public | BindingFlags.Instance);
 
@@ -38,12 +36,17 @@ public static class CommonReflectedTypeInfo
         ComponentTypeField = BombComponentType.GetField("ComponentType", BindingFlags.Public | BindingFlags.Instance);
         ModuleDisplayNameField = BombComponentType.GetMethod("GetModuleDisplayName", BindingFlags.Public | BindingFlags.Instance);
         IsSolvedField = BombComponentType.GetField("IsSolved", BindingFlags.Public | BindingFlags.Instance);
+        OnPassField = BombComponentType.GetField("OnPass", BindingFlags.Public | BindingFlags.Instance);
+        OnStrikeField = BombComponentType.GetField("OnStrike", BindingFlags.Public | BindingFlags.Instance);
 
         TimerComponentType = ReflectionHelper.FindType("TimerComponent");
         TimeRemainingField = TimerComponentType.GetField("TimeRemaining", BindingFlags.Public | BindingFlags.Instance);
         GetFormattedTimeMethod = TimerComponentType.GetMethod("GetFormattedTime", BindingFlags.Public | BindingFlags.Static);
 
         ResultPageType = ReflectionHelper.FindType("ResultPage");
+
+        PassEventType = ReflectionHelper.FindType("PassEvent");
+        StrikeEventType = ReflectionHelper.FindType("StrikeEvent");
 
         BombBinderType = ReflectionHelper.FindType("BombBinder");
 
@@ -58,18 +61,6 @@ public static class CommonReflectedTypeInfo
     }
 
     public static FieldInfo BombComponentsField
-    {
-        get;
-        private set;
-    }
-
-    public static FieldInfo NumStrikesField
-    {
-        get;
-        private set;
-    }
-
-    public static FieldInfo NumStrikesToLoseField
     {
         get;
         private set;
@@ -112,6 +103,18 @@ public static class CommonReflectedTypeInfo
         get;
         private set;
     }
+
+    public static FieldInfo OnPassField
+    {
+        get;
+        private set;
+    }
+
+    public static FieldInfo OnStrikeField
+    {
+        get;
+        private set;
+    }
     #endregion
 
     #region Timer Component
@@ -136,6 +139,20 @@ public static class CommonReflectedTypeInfo
 
     #region Result Page
     public static Type ResultPageType
+    {
+        get;
+        private set;
+    }
+    #endregion
+
+    #region Events
+    public static Type PassEventType
+    {
+        get;
+        private set;
+    }
+
+    public static Type StrikeEventType
     {
         get;
         private set;
