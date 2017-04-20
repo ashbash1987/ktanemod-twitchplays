@@ -1,98 +1,120 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
 public class SafetySafeComponentSolver : ComponentSolver
 {
-    private static string[] DialPosNames = {"TL", "TM", "TR", "BL", "BM", "BR"};
+    private static Dictionary<string, int> DialPosNames = new Dictionary<string, int>()
+    {
+        {"tl",0}, {"tm",1}, {"tc",1}, {"tr",2},
+        {"lt",0}, {"mt",1}, {"ct",1}, {"rt",2},
+        {"bl",3}, {"bm",4}, {"bc",4}, {"br",5},
+        {"lb",3}, {"mb",4}, {"cb",4}, {"rb",5},
+        {"topleft",0}, {"topmiddle",1}, {"topcenter",1}, {"topcentre",1}, {"topright",2},
+        {"lefttop",0}, {"middletop",1}, {"centertop",1}, {"centretop",1}, {"righttop",2},
+        {"bottomleft",3}, {"bottommiddle",4}, {"bottomcenter",4}, {"bottomcentre",4}, {"bottomright",5},
+        {"leftbottom",3}, {"middlebottom",4}, {"centerbottom",4}, {"centrebottom",4}, {"rightbottom",5},
+    };
 
     public SafetySafeComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
-        _buttons = (Array)_buttonsField.GetValue(bombComponent.GetComponent(_componentType));
+        _buttons = (MonoBehaviour[])_buttonsField.GetValue(bombComponent.GetComponent(_componentType));
         _lever = (MonoBehaviour)_leverField.GetValue(bombComponent.GetComponent(_componentType));
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
-        if (inputCommand.Equals("submit"))
+        var split = inputCommand.ToLowerInvariant().Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
+        int pos;
+
+        if (split[0] == "submit" && split.Length == 1)
         {
             yield return "submit";
             DoInteractionStart(_lever);
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(_lever);
-            yield break;
         }
-        for(int a = 0; a < DialPosNames.Length; a++)
+        else if (split[0] == "cycle" && split.Length == 1)
         {
-            string id = DialPosNames[a];
-            if (inputCommand.StartsWith(id, StringComparison.InvariantCultureIgnoreCase))
+            yield return "cycle";
+            for (var i = 0; i < 6; i++)
             {
-                string after = inputCommand.Substring(id.Length);
-                if (after.Length == 0)
+                for (var j = 0; j < 12; j++)
                 {
-                    IEnumerator coroutine = HandlePress(a);
-                    while (coroutine.MoveNext())
+                    yield return HandlePress(i);
+                    yield return new WaitForSeconds(0.3f);
+                    if (Canceller.ShouldCancel)
                     {
-                        yield return coroutine.Current;
+                        Canceller.ResetCancel();
+                        yield break;
                     }
                 }
-                else
-                {
-                    int val = 0;
-                    if(!int.TryParse(inputCommand.Substring(2), out val)) yield break;
-                    if(val < 0) yield break;
-                    for(int z = 0; z < val; z++)
-                    {
-                        IEnumerator coroutine = HandlePress(a);
-                        while (coroutine.MoveNext())
-                        {
-                            yield return coroutine.Current;
-                        }
-                        if (Canceller.ShouldCancel)
-                        {
-                            Canceller.ResetCancel();
-                            yield break;
-                        }
-                        yield return new WaitForSeconds(0.5f);
-                    }
-                }
-                yield break;
+                if(i < 5)
+                    yield return new WaitForSeconds(0.5f);
             }
         }
-
-        string[] values = inputCommand.Split(new string[]{" "}, 99, StringSplitOptions.RemoveEmptyEntries);
-        if (values.Length != 6) yield break;
-
-        for (int a = 0; a < 6; a++)
+        else if (DialPosNames.TryGetValue(split[0], out pos))
         {
-            int val = 0;
-            if(!int.TryParse(values[a], out val)) yield break;
-            if(val < 0) yield break;
-            for(int z = 0; z < val; z++)
+            if (split.Length == 1)
             {
-                IEnumerator coroutine = HandlePress(a);
-                while (coroutine.MoveNext())
+                yield return split[0];
+                yield return HandlePress(pos);
+            }
+            else if (split.Length == 2)
+            {
+                int val = 0;
+                if (!int.TryParse(split[1], out val)) yield break;
+                val %= 12;
+                while (val < 0)
+                    val += 12;
+                yield return split[0];
+                for (int z = 0; z < val; z++)
                 {
-                    yield return coroutine.Current;
+                    yield return HandlePress(pos);
+                    if (Canceller.ShouldCancel)
+                    {
+                        Canceller.ResetCancel();
+                        yield break;
+                    }
                 }
-                if (Canceller.ShouldCancel)
-                {
-                    Canceller.ResetCancel();
+            }
+        }
+        else if (split.Length == 6)
+        {
+            int[] values = new int[6];
+            for (int a = 0; a < 6; a++)
+            {
+                if (!int.TryParse(split[a], out values[a]))
                     yield break;
+                values[a] %= 12;
+                while (values[a] < 0)
+                    values[a] += 12;
+            }
+
+            yield return inputCommand;
+            for (int a = 0; a < 6; a++)
+            {
+                for (int z = 0; z < values[a]; z++)
+                {
+                    yield return HandlePress(a);
+                    if (Canceller.ShouldCancel)
+                    {
+                        Canceller.ResetCancel();
+                        yield break;
+                    }
                 }
-                yield return new WaitForSeconds(0.2f);
             }
         }
     }
 
     private IEnumerator HandlePress(int pos)
     {
-        MonoBehaviour button = (MonoBehaviour)_buttons.GetValue(pos);
-        DoInteractionStart(button);
+        DoInteractionStart(_buttons[pos]);
         yield return new WaitForSeconds(0.1f);
-        DoInteractionEnd(button);
+        DoInteractionEnd(_buttons[pos]);
     }
 
     static SafetySafeComponentSolver()
@@ -105,6 +127,6 @@ public class SafetySafeComponentSolver : ComponentSolver
     private static Type _componentType = null;
     private static FieldInfo _buttonsField, _leverField = null;
 
-    private Array _buttons = null;
+    private MonoBehaviour[] _buttons = null;
     private MonoBehaviour _lever = null;
 }

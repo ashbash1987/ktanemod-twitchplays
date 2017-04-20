@@ -54,13 +54,21 @@ public class TurnTheKeyComponentSolver : ComponentSolver
 
         int timeTarget = sortedTimes[0];
         sortedTimes.RemoveAt(0);
+        int waitingTime = (int)((float)CommonReflectedTypeInfo.TimeRemainingField.GetValue(timerComponent) + 0.25f);
+        waitingTime -= timeTarget;
+
+        if (waitingTime >= 30)
+        {
+            _musicPlayer = MusicPlayer.StartRandomMusic();
+        }
+
         float timeRemaining = float.PositiveInfinity;
         while (timeRemaining > 0.0f)
         {
             if (Canceller.ShouldCancel)
             {
                 Canceller.ResetCancel();
-                yield break;
+                break;
             }
 
             timeRemaining = (int)((float)CommonReflectedTypeInfo.TimeRemainingField.GetValue(timerComponent) + 0.25f);
@@ -82,6 +90,12 @@ public class TurnTheKeyComponentSolver : ComponentSolver
 
             yield return null;
         }
+
+        if (waitingTime >= 30)
+        {
+            _musicPlayer.StopMusic();
+        }
+
     }
 
     static TurnTheKeyComponentSolver()
@@ -94,4 +108,5 @@ public class TurnTheKeyComponentSolver : ComponentSolver
     private static FieldInfo _lockField = null;
 
     private MonoBehaviour _lock = null;
+    private MusicPlayer _musicPlayer = null;
 }
