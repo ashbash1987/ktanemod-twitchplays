@@ -99,6 +99,10 @@ public abstract class ComponentSolver : ICommandResponder
                     Canceller.ResetCancel();
                     break;
                 }
+                else if (currentString.StartsWith("sendtochat ", StringComparison.InvariantCultureIgnoreCase) && currentString.Substring(11).Trim() != string.Empty)
+                {
+                    IRCConnection.SendMessage(currentString.Substring(11));
+                }
             }
             else if (currentValue is Quaternion)
             {

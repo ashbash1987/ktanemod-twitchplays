@@ -86,6 +86,11 @@ public class TwitchBombHandle : MonoBehaviour
         IEnumerator commandResponseCoroutine = bombCommander.RespondToCommand(userNickName, internalCommand, message);
         while (commandResponseCoroutine.MoveNext())
         {
+            string chatmessage = commandResponseCoroutine.Current as string;
+            if (chatmessage != null && chatmessage.StartsWith("sendtochat "))
+            {
+                ircConnection.SendMessage(chatmessage.Substring(11));
+            }
             yield return commandResponseCoroutine.Current;
         }
 
