@@ -7,15 +7,12 @@ using UnityEngine;
 
 public class ListeningComponentSolver : ComponentSolver
 {
+    private Component _bc;
     public ListeningComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
+        _bc = bombComponent.GetComponent(_componentType);
         _buttons = new MonoBehaviour[4];
-        _play = (MonoBehaviour)_playField.GetValue(bombComponent.GetComponent(_componentType));
-        _buttons[0] = (MonoBehaviour)_dollarField.GetValue(bombComponent.GetComponent(_componentType));
-        _buttons[1] = (MonoBehaviour)_poundField.GetValue(bombComponent.GetComponent(_componentType));
-        _buttons[2] = (MonoBehaviour)_starField.GetValue(bombComponent.GetComponent(_componentType));
-        _buttons[3] = (MonoBehaviour)_ampersandField.GetValue(bombComponent.GetComponent(_componentType));
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -29,7 +26,15 @@ public class ListeningComponentSolver : ComponentSolver
             yield break;
 
         if (_play == null || _buttons[0] == null || _buttons[1] == null || _buttons[2] == null || _buttons[3] == null)
-            yield break;
+        {
+            _play = (MonoBehaviour)_playField.GetValue(_bc);
+            _buttons[0] = (MonoBehaviour)_dollarField.GetValue(_bc);
+            _buttons[1] = (MonoBehaviour)_poundField.GetValue(_bc);
+            _buttons[2] = (MonoBehaviour)_starField.GetValue(_bc);
+            _buttons[3] = (MonoBehaviour)_ampersandField.GetValue(_bc);
+            if (_play == null || _buttons[0] == null || _buttons[1] == null || _buttons[2] == null || _buttons[3] == null)
+                yield break;
+        }
 
         var letters = "$#*&";
 
