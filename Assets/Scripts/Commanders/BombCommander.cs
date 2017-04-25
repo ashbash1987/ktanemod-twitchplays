@@ -108,11 +108,15 @@ public class BombCommander : ICommandResponder
             message.Equals("edgework right", StringComparison.InvariantCultureIgnoreCase) ||
             message.Equals("edgework bottom", StringComparison.InvariantCultureIgnoreCase) ||
             message.Equals("edgework left", StringComparison.InvariantCultureIgnoreCase) ||
-            message.Equals("edgework top", StringComparison.InvariantCultureIgnoreCase))
+            message.Equals("edgework top", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("right", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("bottom", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("left", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("top", StringComparison.InvariantCultureIgnoreCase))
         {
             responseNotifier.ProcessResponse(CommandResponse.Start);
 
-            IEnumerator edgeworkCoroutine = ShowEdgework(message.Substring(8).Trim().ToLowerInvariant());
+            IEnumerator edgeworkCoroutine = ShowEdgework(message.Replace("edgework","").Trim().ToLowerInvariant());
             while (edgeworkCoroutine.MoveNext())
             {
                 yield return edgeworkCoroutine.Current;
