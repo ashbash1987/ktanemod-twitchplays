@@ -54,43 +54,38 @@ public class Leaderboard
         }
     }
 
-    public void AddSolve(string userName, Color userColor)
+    private bool GetEntry(string UserName, out LeaderboardEntry entry)
+    {
+        return _entryDictionary.TryGetValue(UserName.ToLowerInvariant(), out entry);
+    }
+
+    private LeaderboardEntry GetEntry(string userName, Color userColor)
     {
         LeaderboardEntry entry = null;
-
-        if (!_entryDictionary.ContainsKey(userName))
+        if (!GetEntry(userName, out entry))
         {
-            entry = new LeaderboardEntry() { UserName = userName, UserColor = userColor };
-            _entryDictionary[userName] = entry;
+            entry = new LeaderboardEntry();
+            _entryDictionary[userName.ToLowerInvariant()] = entry;
             _entryList.Add(entry);
         }
-        else
-        {
-            entry = _entryDictionary[userName];
-        }
+        entry.UserName = userName;
+        entry.UserColor = userColor;
+        return entry;
+    }
+
+    public void AddSolve(string userName, Color userColor)
+    {
+        LeaderboardEntry entry = GetEntry(userName, userColor);
 
         entry.AddSolve();
-
         ResetSortFlag();
     }
 
     public void AddStrike(string userName, Color userColor, int numStrikes)
     {
-        LeaderboardEntry entry = null;
-
-        if (!_entryDictionary.ContainsKey(userName))
-        {
-            entry = new LeaderboardEntry() { UserName = userName, UserColor = userColor };
-            _entryDictionary[userName] = entry;
-            _entryList.Add(entry);
-        }
-        else
-        {
-            entry = _entryDictionary[userName];
-        }
+        LeaderboardEntry entry = GetEntry(userName, userColor);
 
         entry.AddStrike(numStrikes);
-
         ResetSortFlag();
     }
 
@@ -102,14 +97,12 @@ public class Leaderboard
 
     public int GetRank(string userName, out LeaderboardEntry entry)
     {
-        if (!_entryDictionary.ContainsKey(userName))
+        if (!GetEntry(userName, out entry))
         {
-            entry = null;
             return _entryList.Count + 1;
         }
 
         CheckAndSort();
-        entry = _entryDictionary[userName];
         return _entryList.IndexOf(entry) + 1;
     }
 
