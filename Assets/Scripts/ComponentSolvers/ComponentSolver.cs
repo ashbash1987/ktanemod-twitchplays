@@ -103,6 +103,15 @@ public abstract class ComponentSolver : ICommandResponder
                 {
                     IRCConnection.SendMessage(currentString.Substring(11));
                 }
+                else if (currentString.Equals("add strike"))
+                {
+                    _strikeCount++;
+                }
+                else if (currentString.Equals("award strikes"))
+                {
+                    AwardStrikes(_currentUserNickName, _currentResponseNotifier, StrikeCount - previousStrikeCount);
+                    previousStrikeCount = StrikeCount;
+                }
             }
             else if (currentValue is Quaternion)
             {
