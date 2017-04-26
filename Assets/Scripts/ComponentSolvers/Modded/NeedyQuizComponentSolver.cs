@@ -11,6 +11,9 @@ public class NeedyQuizComponentSolver : ComponentSolver
         _yesButton = (MonoBehaviour)_yesButtonField.GetValue(bombComponent.GetComponent(_componentSolverType));
         _noButton = (MonoBehaviour)_noButtonField.GetValue(bombComponent.GetComponent(_componentSolverType));
         _display = (TextMesh) _displayField.GetValue(bombComponent.GetComponent(_componentSolverType));
+
+        _service = (KMGameCommands) _serviceField.GetValue(bombComponent.GetComponent(_componentSolverType));
+        _thisLoggingID = (int) _thisLoggingIDField.GetValue(bombComponent.GetComponent(_componentSolverType));
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -24,12 +27,25 @@ public class NeedyQuizComponentSolver : ComponentSolver
 
             if (_display.text.Equals("Abort?"))
             {
+                Debug.Log("[Answering Questions #" + _thisLoggingID + "] Quiz: " + _display.text.Replace("\n", ""));
+                Debug.Log("[Answering Questions #" + _thisLoggingID + "] Given answer: Y");
+                Debug.Log("[Answering Questions #" + _thisLoggingID + "] ABORT! ABORT!!! ABOOOOOOORT!!!!!");
                 yield return "sendtochat ABORT! ABORT!!! ABOOOOOOORT!!!!!";
+
+                while (!Detonated)
+                {
+                    yield return "add strike";
+                    _service.CauseStrike("ABORT!");
+                }
+                yield return "award strikes";
+                yield break;
             }
 
             DoInteractionStart(_yesButton);
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(_yesButton);
+
+            
         }
         else if (inputCommand.Equals("n", StringComparison.InvariantCultureIgnoreCase) ||
                  inputCommand.Equals("no", StringComparison.InvariantCultureIgnoreCase) ||
@@ -50,14 +66,20 @@ public class NeedyQuizComponentSolver : ComponentSolver
         _yesButtonField = _componentSolverType.GetField("YesButton", BindingFlags.Public | BindingFlags.Instance);
         _noButtonField = _componentSolverType.GetField("NoButton", BindingFlags.Public | BindingFlags.Instance);
         _displayField = _componentSolverType.GetField("Display", BindingFlags.Public | BindingFlags.Instance);
+        _serviceField = _componentSolverType.GetField("Service", BindingFlags.Public | BindingFlags.Instance);
+        _thisLoggingIDField = _componentSolverType.GetField("thisLoggingID", BindingFlags.Public | BindingFlags.Instance);
     }
 
     private static Type _componentSolverType = null;
     private static FieldInfo _yesButtonField = null;
     private static FieldInfo _noButtonField = null;
     private static FieldInfo _displayField = null;
+    private static FieldInfo _serviceField = null;
+    private static FieldInfo _thisLoggingIDField = null;
 
     private MonoBehaviour _yesButton = null;
     private MonoBehaviour _noButton = null;
     private TextMesh _display = null;
+    private KMGameCommands _service = null;
+    private int _thisLoggingID = 0;
 }
