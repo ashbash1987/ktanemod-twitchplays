@@ -123,6 +123,8 @@ public static class ComponentSolverFactory
         ModCommandType commandType = ModCommandType.Simple;
         Type commandComponentType = null;
         MethodInfo method = FindProcessCommandMethod(bombComponent, out commandType, out commandComponentType);
+        string help = FindHelpMessage(bombComponent);
+        string manual = FindManualCode(bombComponent);
         if (method != null)
         {
             switch (commandType)
@@ -131,13 +133,13 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent);
+                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help);
                     };
                 case ModCommandType.Coroutine:
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent);
+                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help);
                     };
 
                 default:
@@ -145,6 +147,40 @@ public static class ComponentSolverFactory
             }
         }
 
+        return null;
+    }
+
+    private static string FindManualCode(MonoBehaviour bombComponent)
+    {
+        Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
+        foreach (Component component in allComponents)
+        {
+            Type type = component.GetType();
+            FieldInfo candidateString = type.GetField("TwitchManualCode", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (candidateString == null)
+            {
+                continue;
+            }
+            if (candidateString.GetValue(bombComponent.GetComponent(type)) is string)
+                return (string)candidateString.GetValue(bombComponent.GetComponent(type));
+        }
+        return null;
+    }
+
+    private static string FindHelpMessage(MonoBehaviour bombComponent)
+    {
+        Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
+        foreach (Component component in allComponents)
+        {
+            Type type = component.GetType();
+            FieldInfo candidateString = type.GetField("TwitchHelpMessage", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (candidateString == null)
+            {
+                continue;
+            }
+            if (candidateString.GetValue(bombComponent.GetComponent(type)) is string)
+                return (string)candidateString.GetValue(bombComponent.GetComponent(type));
+        }
         return null;
     }
 

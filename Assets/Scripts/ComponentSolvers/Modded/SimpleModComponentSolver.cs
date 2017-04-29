@@ -5,11 +5,13 @@ using UnityEngine;
 
 public class SimpleModComponentSolver : ComponentSolver
 {
-    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent) :
+    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual = null, string help = null) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
         CommandComponent = commandComponent;
+        helpMessage = help;
+        manualCode = manual;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
