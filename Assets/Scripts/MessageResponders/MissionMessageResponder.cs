@@ -10,7 +10,7 @@ public class MissionMessageResponder : MessageResponder
     #region Unity Lifecycle
     private void OnEnable()
     {
-        InputInterceptor.DisableInput();
+        // InputInterceptor.DisableInput();
 
         StartCoroutine(CheckForBombBinderAndFreeplayDevice());
     }
