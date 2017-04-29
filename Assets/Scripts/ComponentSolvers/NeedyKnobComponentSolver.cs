@@ -22,7 +22,8 @@ public class NeedyKnobComponentSolver : ComponentSolver
             yield break;
         }
 
-        if (!commandParts[0].Equals("rotate", StringComparison.InvariantCultureIgnoreCase))
+        if (!commandParts[0].Equals("rotate", StringComparison.InvariantCultureIgnoreCase) &&
+            !commandParts[0].Equals("turn", StringComparison.InvariantCultureIgnoreCase))
         {
             yield break;
         }

@@ -30,7 +30,8 @@ public class MemoryComponentSolver : ComponentSolver
 
         if (buttonNumber >= 1 && buttonNumber <= 4)
         {
-            if (commandParts[0].Equals("position", StringComparison.InvariantCultureIgnoreCase))
+            if (commandParts[0].Equals("position", StringComparison.InvariantCultureIgnoreCase) ||
+                commandParts[0].Equals("pos", StringComparison.InvariantCultureIgnoreCase))
             {
                 yield return "position";
 
