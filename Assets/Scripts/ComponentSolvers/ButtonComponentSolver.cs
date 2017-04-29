@@ -9,6 +9,8 @@ public class ButtonComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _button = (MonoBehaviour)_buttonField.GetValue(bombComponent);
+        
+        helpMessage = "Press and release with !{0} tap. Hold with !{0} hold. Release on digit 7 with !{0} release 7.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -52,6 +54,7 @@ public class ButtonComponentSolver : ComponentSolver
                 }
             }
         }
+
     }
 
     private IEnumerator ReleaseCoroutine(int second)
@@ -96,4 +99,5 @@ public class ButtonComponentSolver : ComponentSolver
 
     private MonoBehaviour _button = null;
     private bool _held = false;
+
 }

@@ -237,7 +237,7 @@ public abstract class ComponentSolver : ICommandResponder
         get;
         set;
     }
-
+    
     #region Protected Properties
     protected bool Solved
     {
@@ -325,4 +325,7 @@ public abstract class ComponentSolver : ICommandResponder
     private ICommandResponseNotifier _currentResponseNotifier = null;
     private string _currentUserNickName = null;
     #endregion
+    
+    public string helpMessage = null;
+    public string manualCode = null;
 }

@@ -9,6 +9,8 @@ public class SimonComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
+        
+        helpMessage = "Press a sequence of colours with !{0} press r g b y.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

@@ -11,6 +11,9 @@ public class WireSequenceComponentSolver : ComponentSolver
         _wireSequence = (IList)_wireSequenceField.GetValue(bombComponent);
         _upButton = (MonoBehaviour)_upButtonField.GetValue(bombComponent);
         _downButton = (MonoBehaviour)_downButtonField.GetValue(bombComponent);
+        
+        helpMessage = "Cut wire 7 with !{0} cut 7. Cut multiple wires with !{0} cut 4 5 6. Move forward with !{0} down. Backtrack with !{0} up. Numbers are those shown on the module.";
+        manualCode = "Wire Sequences";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

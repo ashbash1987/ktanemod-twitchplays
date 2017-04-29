@@ -9,6 +9,9 @@ public class NeedyDischargeComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _dischargeButton = (MonoBehaviour)_dischargeButtonField.GetValue(bombComponent);
+        
+        helpMessage = "Hold the lever for 7 seconds with !{0} hold 7.";
+        manualCode = "Capacitor Discharge";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

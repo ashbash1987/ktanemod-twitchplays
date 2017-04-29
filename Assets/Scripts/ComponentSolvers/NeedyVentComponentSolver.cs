@@ -10,6 +10,8 @@ public class NeedyVentComponentSolver : ComponentSolver
     {
         _yesButton = (MonoBehaviour)_yesButtonField.GetValue(bombComponent);
         _noButton = (MonoBehaviour)_noButtonField.GetValue(bombComponent);
+        
+        helpMessage = "Answer Yes with !{0} y. Answer No with !{0} n.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
