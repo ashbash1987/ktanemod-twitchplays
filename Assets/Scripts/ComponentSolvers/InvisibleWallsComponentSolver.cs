@@ -9,6 +9,9 @@ public class InvisibleWallsComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (IList)_buttonsField.GetValue(bombComponent);
+        
+        helpMessage = "Move with !{0} move u d l r.";
+        manualCode = "Mazes";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

@@ -9,6 +9,8 @@ public class NeedyKnobComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _pointingKnob = (MonoBehaviour)_pointingKnobField.GetValue(bombComponent);
+        
+        helpMessage = "Rotate the knob 3 quarter-turns with !{0} rotate 3.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

@@ -9,6 +9,9 @@ public class KeypadComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
+        
+        helpMessage = "Press the buttons with !{0} press 1 2 3 4. Order is TL, TR, BL, BR.";
+        manualCode = "Keypads";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

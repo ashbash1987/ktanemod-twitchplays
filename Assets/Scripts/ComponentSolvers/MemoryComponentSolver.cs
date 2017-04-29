@@ -9,6 +9,8 @@ public class MemoryComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
+        
+        helpMessage = "Press the button at position 2 with !{0} position 2. Press the button with label 3 with !{0} label 3.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

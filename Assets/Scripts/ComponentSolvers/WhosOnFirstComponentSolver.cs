@@ -9,6 +9,8 @@ public class WhosOnFirstComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
+        
+        helpMessage = "Press a button with !{0} phrase. Phrase must match exactly, not case sensitive.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
