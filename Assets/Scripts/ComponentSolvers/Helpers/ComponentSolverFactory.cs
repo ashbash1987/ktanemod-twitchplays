@@ -140,10 +140,13 @@ public static class ComponentSolverFactory
                         return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help);
                     };
                 case ModCommandType.Coroutine:
+                    FieldInfo cancelfield;
+                    Type canceltype;
+                    FindCancelBool(bombComponent, out cancelfield, out canceltype);
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help);
+                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, cancelfield, canceltype);
                     };
 
                 default:
@@ -186,6 +189,29 @@ public static class ComponentSolverFactory
                 return (string)candidateString.GetValue(bombComponent.GetComponent(type));
         }
         return null;
+    }
+
+    private static bool FindCancelBool(MonoBehaviour bombComponent, out FieldInfo CancelField, out Type CancelType)
+    {
+        Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
+        foreach (Component component in allComponents)
+        {
+            Type type = component.GetType();
+            FieldInfo candidateBoolField = type.GetField("TwitchShouldCancelCommand", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (candidateBoolField == null)
+            {
+                continue;
+            }
+            if (candidateBoolField.GetValue(bombComponent.GetComponent(type)) is bool)
+            {
+                CancelField = candidateBoolField;
+                CancelType = type;
+                return true;
+            }
+        }
+        CancelField = null;
+        CancelType = null;
+        return false;
     }
 
     private static MethodInfo FindProcessCommandMethod(MonoBehaviour bombComponent, out ModCommandType commandType, out Type commandComponentType)
