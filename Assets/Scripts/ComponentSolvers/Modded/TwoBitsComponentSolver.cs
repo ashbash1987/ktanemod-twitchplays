@@ -30,6 +30,8 @@ public class TwoBitsComponentSolver : ComponentSolver
         _submit = (MonoBehaviour)_submitButtonField.GetValue(c);
         _query = (MonoBehaviour)_queryButtonField.GetValue(c);
         _buttons = (MonoBehaviour[])_buttonsField.GetValue(c);
+
+        helpMessage = "Query the answer with !{0} press K T query. Submit the answer with !{0} press G Z submit.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

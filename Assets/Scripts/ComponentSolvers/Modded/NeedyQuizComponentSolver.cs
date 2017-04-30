@@ -14,6 +14,9 @@ public class NeedyQuizComponentSolver : ComponentSolver
 
         _service = (KMGameCommands) _serviceField.GetValue(bombComponent.GetComponent(_componentSolverType));
         _thisLoggingID = (int) _thisLoggingIDField.GetValue(bombComponent.GetComponent(_componentSolverType));
+
+        helpMessage = "Answer the question with !{0} Y or !{0} N.";
+        manualCode = "Answering%20Questions";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
