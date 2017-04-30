@@ -6,13 +6,15 @@ using UnityEngine;
 
 public class CoroutineModComponentSolver : ComponentSolver
 {
-    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual = null, string help = null) :
+    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, FieldInfo cancelfield, Type canceltype) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
         CommandComponent = commandComponent;
         helpMessage = help;
         manualCode = manual;
+        TryCancelField = cancelfield;
+        TryCancelComponentSolverType = canceltype;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -75,6 +77,15 @@ public class CoroutineModComponentSolver : ComponentSolver
                     HeldSelectables.Add(selectable);
                 }
             }
+            if (currentObject is string)
+            {
+                string str = (string) currentObject;
+                if (str.Equals("cancelled", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    Canceller.ResetCancel();
+                    TryCancel = false;
+                }
+            }
             yield return currentObject;
 
             try
@@ -90,6 +101,9 @@ public class CoroutineModComponentSolver : ComponentSolver
                 Debug.LogException(ex);
                 break;
             }
+
+            if (Canceller.ShouldCancel)
+                TryCancel = true;
         }        
     }
 

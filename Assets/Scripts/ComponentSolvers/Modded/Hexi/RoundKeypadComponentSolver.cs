@@ -3,12 +3,13 @@ using System.Collections;
 using System.Reflection;
 using UnityEngine;
 
-public class ForgetMeNotComponentSolver : ComponentSolver
+public class RoundKeypadComponentSolver : ComponentSolver
 {
-    public ForgetMeNotComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
+    public RoundKeypadComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent.GetComponent(_componentType));
+        helpMessage = "Solve the module with !{0} press 2 4 6 7 8. Button 1 is the top most botton, and are numbered in clockwise order.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -21,14 +22,14 @@ public class ForgetMeNotComponentSolver : ComponentSolver
 
         int beforeButtonStrikeCount = StrikeCount;
 
-        string[] sequence = inputCommand.Split(new string[] { "" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         foreach (string buttonString in sequence)
         {
             int val = -1;
-            if(int.TryParse(buttonString, out val) && val >= 0 && val <= 9)
+            if(int.TryParse(buttonString, out val) && val >= 1 && val <= 8)
             {
-                MonoBehaviour button = (MonoBehaviour)_buttons.GetValue(val);
+                MonoBehaviour button = (MonoBehaviour)_buttons.GetValue(val-1);
 
                 yield return buttonString;
 
@@ -51,9 +52,9 @@ public class ForgetMeNotComponentSolver : ComponentSolver
         }
     }
 
-    static ForgetMeNotComponentSolver()
+    static RoundKeypadComponentSolver()
     {
-        _componentType = ReflectionHelper.FindType("AdvancedMemory");
+        _componentType = ReflectionHelper.FindType("AdvancedKeypad");
         _buttonsField = _componentType.GetField("Buttons", BindingFlags.NonPublic | BindingFlags.Instance);
     }
 

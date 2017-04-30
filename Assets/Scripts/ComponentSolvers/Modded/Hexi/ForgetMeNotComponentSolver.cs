@@ -3,12 +3,13 @@ using System.Collections;
 using System.Reflection;
 using UnityEngine;
 
-public class RoundKeypadComponentSolver : ComponentSolver
+public class ForgetMeNotComponentSolver : ComponentSolver
 {
-    public RoundKeypadComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
+    public ForgetMeNotComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent.GetComponent(_componentType));
+        helpMessage = "Enter forget me not sequence with !{0} press 5 3 1 8 2 0... The Sequence length depends on how many modules were on the bomb.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -21,14 +22,12 @@ public class RoundKeypadComponentSolver : ComponentSolver
 
         int beforeButtonStrikeCount = StrikeCount;
 
-        string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (string buttonString in sequence)
+        foreach (char buttonString in inputCommand)
         {
-            int val = -1;
-            if(int.TryParse(buttonString, out val) && val >= 1 && val <= 8)
+            int val = buttonString - '0';
+            if(val >= 0 && val <= 9)
             {
-                MonoBehaviour button = (MonoBehaviour)_buttons.GetValue(val-1);
+                MonoBehaviour button = (MonoBehaviour)_buttons.GetValue(val);
 
                 yield return buttonString;
 
@@ -51,9 +50,9 @@ public class RoundKeypadComponentSolver : ComponentSolver
         }
     }
 
-    static RoundKeypadComponentSolver()
+    static ForgetMeNotComponentSolver()
     {
-        _componentType = ReflectionHelper.FindType("AdvancedKeypad");
+        _componentType = ReflectionHelper.FindType("AdvancedMemory");
         _buttonsField = _componentType.GetField("Buttons", BindingFlags.NonPublic | BindingFlags.Instance);
     }
 

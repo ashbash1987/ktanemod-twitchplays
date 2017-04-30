@@ -283,6 +283,26 @@ public abstract class ComponentSolver : ICommandResponder
             return angleBetween < 90.0f;
         }
     }
+
+    protected FieldInfo TryCancelField { get; set; }
+    protected Type TryCancelComponentSolverType { get; set; }
+
+    protected bool TryCancel
+    {
+        get
+        {
+            if (TryCancelField == null || TryCancelComponentSolverType == null ||
+                !(TryCancelField.GetValue(TryCancelComponentSolverType) is bool))
+                return false;
+            return (bool)TryCancelField.GetValue(BombComponent.GetComponent(TryCancelComponentSolverType));
+        }
+        set
+        {
+            if (TryCancelField != null && TryCancelComponentSolverType != null &&
+                (TryCancelField.GetValue(BombComponent.GetComponent(TryCancelComponentSolverType)) is bool))
+                TryCancelField.SetValue(BombComponent.GetComponent(TryCancelComponentSolverType), value);
+        }
+    }
     #endregion
 
     #region Private Methods
