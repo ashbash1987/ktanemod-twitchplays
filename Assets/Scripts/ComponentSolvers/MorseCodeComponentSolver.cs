@@ -31,7 +31,7 @@ public class MorseCodeComponentSolver : ComponentSolver
         }
 
         int targetFrequency = 0;
-        if (!int.TryParse(commandParts[1], out targetFrequency))
+        if (!int.TryParse(commandParts[1].Substring(commandParts[1].Length - 3), out targetFrequency))
         {
             yield break;
         }

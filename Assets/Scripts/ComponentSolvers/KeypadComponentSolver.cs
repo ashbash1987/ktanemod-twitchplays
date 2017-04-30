@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class KeypadComponentSolver : ComponentSolver
@@ -24,12 +25,10 @@ public class KeypadComponentSolver : ComponentSolver
 
         int beforeButtonStrikeCount = StrikeCount;
 
-        string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (string buttonIndexString in sequence)
+        foreach (Match buttonIndexString in Regex.Matches(inputCommand, @"[1-4]"))
         {
             int buttonIndex = 0;
-            if (!int.TryParse(buttonIndexString, out buttonIndex))
+            if (!int.TryParse(buttonIndexString.Value, out buttonIndex))
             {
                 continue;
             }
@@ -38,7 +37,7 @@ public class KeypadComponentSolver : ComponentSolver
 
             if (buttonIndex >= 0 && buttonIndex < _buttons.Length)
             {
-                yield return buttonIndexString;
+                yield return buttonIndexString.Value;
 
                 if (Canceller.ShouldCancel)
                 {

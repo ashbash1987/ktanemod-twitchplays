@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class VennWireComponentSolver : ComponentSolver
@@ -23,12 +24,10 @@ public class VennWireComponentSolver : ComponentSolver
 
         int beforeButtonStrikeCount = StrikeCount;
 
-        string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (string wireIndexString in sequence)
+        foreach (Match wireIndexString in Regex.Matches(inputCommand, @"[1-6]"))
         {
             int wireIndex = 0;
-            if (!int.TryParse(wireIndexString, out wireIndex))
+            if (!int.TryParse(wireIndexString.Value, out wireIndex))
             {
                 continue;
             }
@@ -37,7 +36,7 @@ public class VennWireComponentSolver : ComponentSolver
 
             if (wireIndex >= 0 && wireIndex < _wires.Length)
             {
-                yield return wireIndexString;
+                yield return wireIndexString.Value;
 
                 if (Canceller.ShouldCancel)
                 {
