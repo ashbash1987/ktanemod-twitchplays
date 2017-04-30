@@ -18,13 +18,14 @@ public static class ComponentSolverFactory
     static ComponentSolverFactory()
     {
         ModComponentSolverCreators = new Dictionary<string, ModComponentSolverDelegate>();
+
+        //Hexi Modules
         ModComponentSolverCreators["MemoryV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new ForgetMeNotComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["KeypadV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new RoundKeypadComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["ButtonV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new SquareButtonComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["SimonV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new SimonStatesComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["PasswordV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new SafetySafeComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["NeedyVentV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new NeedyQuizComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
-        ModComponentSolverCreators["TwoBits"] = (bombCommander, bombComponent, ircConnection, canceller) => new TwoBitsComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 		ModComponentSolverCreators["NeedyKnobV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new NeedyRotaryPhoneComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
         //Perky Modules  (Silly Slots is maintained by Timwi, and as such its handler lives there.)
@@ -36,6 +37,9 @@ public static class ComponentSolverFactory
         ModComponentSolverCreators["Probing"] = (bombCommander, bombComponent, ircConnection, canceller) => new ProbingComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["TurnTheKey"] = (bombCommander, bombComponent, ircConnection, canceller) => new TurnTheKeyComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["TurnTheKeyAdvanced"] = (bombCommander, bombComponent, ircConnection, canceller) => new TurnTheKeyAdvancedComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+
+        //Kaneb Modules
+        ModComponentSolverCreators["TwoBits"] = (bombCommander, bombComponent, ircConnection, canceller) => new TwoBitsComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
     }
 
