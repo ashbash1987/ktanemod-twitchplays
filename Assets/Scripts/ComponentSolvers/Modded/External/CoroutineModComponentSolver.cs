@@ -77,6 +77,19 @@ public class CoroutineModComponentSolver : ComponentSolver
                     HeldSelectables.Add(selectable);
                 }
             }
+            if (currentObject is KMSelectable[])
+            {
+                int beforeStrikeCount = StrikeCount;
+                KMSelectable[] selectables = (KMSelectable[]) currentObject;
+                foreach (KMSelectable selectable in selectables)
+                {
+                    DoInteractionStart(selectable);
+                    yield return new WaitForSeconds(0.1f);
+                    DoInteractionEnd(selectable);
+                    if (beforeStrikeCount != StrikeCount || Canceller.ShouldCancel)
+                        break;
+                }
+            }
             if (currentObject is string)
             {
                 string str = (string) currentObject;
