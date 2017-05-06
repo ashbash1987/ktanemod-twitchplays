@@ -19,7 +19,6 @@ public class BombCommander : ICommandResponder
         _focusTimeField = _floatingHoldableType.GetField("FocusTime", BindingFlags.Public | BindingFlags.Instance);
         _pickupTimeField = _floatingHoldableType.GetField("PickupTime", BindingFlags.Public | BindingFlags.Instance);
         _holdStateProperty = _floatingHoldableType.GetProperty("HoldState", BindingFlags.Public | BindingFlags.Instance);
-        _bombTimeStamp = DateTime.Now;
 
         _selectableType = ReflectionHelper.FindType("Selectable");
         _handleSelectMethod = _selectableType.GetMethod("HandleSelect", BindingFlags.Public | BindingFlags.Instance);
@@ -55,6 +54,7 @@ public class BombCommander : ICommandResponder
         Selectable = (MonoBehaviour)Bomb.GetComponent(_selectableType);
         FloatingHoldable = (MonoBehaviour)Bomb.GetComponent(_floatingHoldableType);
         SelectableManager = (MonoBehaviour)_selectableManagerProperty.GetValue(_inputManager, null);
+        _bombTimeStamp = DateTime.Now;
     }
     #endregion
 
