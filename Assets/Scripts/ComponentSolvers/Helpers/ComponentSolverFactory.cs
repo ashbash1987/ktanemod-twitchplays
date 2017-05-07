@@ -93,6 +93,7 @@ public static class ComponentSolverFactory
         //ModComponentSolverHelpMessages["WordSearchModule"] = "";
         //ModComponentSolverHelpMessages["http"] = "";
         //ModComponentSolverHelpMessages["LightsOut"] = "";
+        ModComponentSolverHelpMessages["RubiksCubeModule"] = "View the colors on all sides with !{0} rotate. Reset the cube to starting state with !{0} reset. Solve the Cube with !{0} r' d u f' r' d' u b' u' f";
 
         //Manual Codes
         ModComponentSolverManualCodes["ColourFlash"] = "Color Flash";
