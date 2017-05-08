@@ -33,7 +33,11 @@ public class BombMessageResponder : MessageResponder
         }
         else
         {
-            bombMessage = "PraiseIt PraiseIt The bomb has been defused! PraiseIt PraiseIt";
+            MonoBehaviour timerComponent = (MonoBehaviour)CommonReflectedTypeInfo.GetTimerMethod.Invoke(_bombCommander.Bomb, null);
+            float timeRemaining = (float)CommonReflectedTypeInfo.TimeRemainingField.GetValue(timerComponent);
+            string formattedTime = (string)CommonReflectedTypeInfo.GetFormattedTimeMethod.Invoke(null, new object[] { timeRemaining, true });
+            
+            bombMessage = string.Format("PraiseIt PraiseIt The bomb has been defused, with {0} remaining! PraiseIt PraiseIt", formattedTime);
         }
 
         parentService.StartCoroutine(SendDelayedMessage(1.5f, bombMessage));
