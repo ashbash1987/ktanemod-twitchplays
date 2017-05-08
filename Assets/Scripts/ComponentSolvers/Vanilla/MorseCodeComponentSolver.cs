@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class MorseCodeComponentSolver : ComponentSolver
@@ -25,7 +26,10 @@ public class MorseCodeComponentSolver : ComponentSolver
             yield break;
         }
 
-        if (!commandParts[0].Equals("transmit", StringComparison.InvariantCultureIgnoreCase))
+        if (!commandParts[0].Equals("transmit", StringComparison.InvariantCultureIgnoreCase) &&
+            !commandParts[0].Equals("trans", StringComparison.InvariantCultureIgnoreCase) &&
+            !commandParts[0].Equals("xmit", StringComparison.InvariantCultureIgnoreCase) &&
+            !commandParts[0].Equals("tx", StringComparison.InvariantCultureIgnoreCase))
         {
             yield break;
         }
