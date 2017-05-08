@@ -100,6 +100,7 @@ public class WireSequenceComponentSolver : ComponentSolver
                     //Escape the sequence if a part of the given sequence is wrong
                     if (StrikeCount != beforeButtonStrikeCount)
                     {
+                        yield return string.Format("sendtochat BibleThump Wire {0} caused a strike!", wireIndex + 1);
                         break;
                     }
                 }
