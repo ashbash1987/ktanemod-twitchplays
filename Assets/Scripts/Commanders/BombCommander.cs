@@ -340,11 +340,13 @@ public class BombCommander : ICommandResponder
 
     private IEnumerator DoFreeYRotate(float initialYSpin, float initialPitch, float targetYSpin, float targetPitch, float duration)
     {
+        if (!_heldFrontFace)
         {
             initialPitch *= -1;
             initialYSpin *= -1;
             targetPitch *= -1;
             targetYSpin *= -1;
+        }
 
         float initialTime = Time.time;
         while (Time.time - initialTime < duration)
