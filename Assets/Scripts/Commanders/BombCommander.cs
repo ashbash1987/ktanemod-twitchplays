@@ -198,11 +198,9 @@ public class BombCommander : ICommandResponder
         }
         IEnumerator returnToFace;
 
-        float initialZSpin = _heldFrontFace ? 0.0f : 180.0f;
-
         if (edge == "" || edge == "right")
         {
-            IEnumerator firstEdge = DoFreeRotate(initialZSpin, 0.0f, 90.0f, 0.0f, 0.3f);
+            IEnumerator firstEdge = DoFreeYRotate(0.0f, 0.0f, 90.0f, 90.0f, 0.3f);
             while (firstEdge.MoveNext())
             {
                 yield return firstEdge.Current;
@@ -214,8 +212,8 @@ public class BombCommander : ICommandResponder
         {
 
             IEnumerator secondEdge = edge == ""
-                ? DoFreeRotate(90.0f, 0.0f, initialZSpin, 90.0f, 0.3f)
-                : DoFreeRotate(initialZSpin, 0.0f, initialZSpin, 90.0f, 0.3f);
+                ? DoFreeYRotate(90.0f, 90.0f, 0.0f, 90.0f, 0.3f)
+                : DoFreeYRotate(0.0f, 0.0f, 0.0f, 90.0f, 0.3f);
             while (secondEdge.MoveNext())
             {
                 yield return secondEdge.Current;
@@ -227,8 +225,8 @@ public class BombCommander : ICommandResponder
         if (edge == "" || edge == "left")
         {
             IEnumerator thirdEdge = edge == ""
-                ? DoFreeRotate(initialZSpin, 90.0f, -90.0f, 0.0f, 0.3f)
-                : DoFreeRotate(initialZSpin, 0.0f, -90.0f, 0.0f, 0.3f);
+                ? DoFreeYRotate(0.0f, 90.0f, -90.0f, 90.0f, 0.3f)
+                : DoFreeYRotate(0.0f, 0.0f, -90.0f, 90.0f, 0.3f);
             while (thirdEdge.MoveNext())
             {
                 yield return thirdEdge.Current;
@@ -239,8 +237,8 @@ public class BombCommander : ICommandResponder
         if (edge == "" || edge == "top")
         {
             IEnumerator fourthEdge = edge == ""
-                ? DoFreeRotate(-90.0f, 0.0f, initialZSpin, -90.0f, 0.3f)
-                : DoFreeRotate(initialZSpin, 0.0f, initialZSpin, -90.0f, 0.3f);
+                ? DoFreeYRotate(-90.0f, 90.0f, -180.0f, 90.0f, 0.3f)
+                : DoFreeYRotate(0.0f, 0.0f, -180.0f, 90.0f, 0.3f);
             while (fourthEdge.MoveNext())
             {
                 yield return fourthEdge.Current;
@@ -251,17 +249,17 @@ public class BombCommander : ICommandResponder
         switch (edge)
         {
             case "right":
-                returnToFace = DoFreeRotate(90.0f, 0.0f, initialZSpin, 0.0f, 0.3f);
+                returnToFace = DoFreeYRotate(90.0f, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
             case "bottom":
-                returnToFace = DoFreeRotate(initialZSpin, 90.0f, initialZSpin, 0.0f, 0.3f);
+                returnToFace = DoFreeYRotate(0.0f, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
             case "left":
-                returnToFace = DoFreeRotate(-90.0f, 0.0f, initialZSpin, 0.0f, 0.3f);
+                returnToFace = DoFreeYRotate(-90.0f, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
             case "top":
             default:
-                returnToFace = DoFreeRotate(initialZSpin, -90.0f, initialZSpin, 0.0f, 0.3f);
+                returnToFace = DoFreeYRotate(-180.0f, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
         }
         
@@ -338,6 +336,29 @@ public class BombCommander : ICommandResponder
         _handleFaceSelectionMethod.Invoke(SelectableManager, null);
 
         _heldFrontFace = frontFace;
+    }
+
+    private IEnumerator DoFreeYRotate(float initialYSpin, float initialPitch, float targetYSpin, float targetPitch, float duration)
+    {
+        {
+            initialPitch *= -1;
+            initialYSpin *= -1;
+            targetPitch *= -1;
+            targetYSpin *= -1;
+
+        float initialTime = Time.time;
+        while (Time.time - initialTime < duration)
+        {
+            float lerp = (Time.time - initialTime) / duration;
+            float currentYSpin = Mathf.SmoothStep(initialYSpin, targetYSpin, lerp);
+            float currentPitch = Mathf.SmoothStep(initialPitch, targetPitch, lerp);
+
+            Quaternion currentRotation = Quaternion.Euler(currentPitch, 0, 0) * Quaternion.Euler(0, currentYSpin, 0);
+            RotateByLocalQuaternion(currentRotation);
+            yield return null;
+        }
+        Quaternion target = Quaternion.Euler(targetPitch, 0, 0) * Quaternion.Euler(0, targetYSpin, 0);
+        RotateByLocalQuaternion(target);
     }
 
     private IEnumerator DoFreeRotate(float initialZSpin, float initialPitch, float targetZSpin, float targetPitch, float duration)
