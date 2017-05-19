@@ -17,6 +17,11 @@ public class PasswordComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
+        if (inputCommand.Equals("claim", StringComparison.InvariantCultureIgnoreCase))
+        {
+            yield break;
+        }
+
         if (Regex.IsMatch(inputCommand, @"^[a-zA-Z]{5}$"))
         {
             yield return "password";
