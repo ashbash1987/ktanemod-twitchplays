@@ -140,6 +140,14 @@ public class BombCommander : ICommandResponder
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
+        else if (message.Equals("help", StringComparison.InvariantCultureIgnoreCase))
+        {
+            responseNotifier.ProcessResponse(CommandResponse.Start);
+
+            yield return "sendtochat The Bomb: Pick up with !bomb hold. Turn with !bomb turn. Show the edges with !bomb edgework. Show a specific edge with !bomb top. Display the bomb start time with !bomb time. Edges are top, bottom, left and right.";
+
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
+        }
         else if (message.Equals("time", StringComparison.InvariantCultureIgnoreCase) ||
                 message.Equals("timer", StringComparison.InvariantCultureIgnoreCase) ||
                 message.Equals("clock", StringComparison.InvariantCultureIgnoreCase))
