@@ -143,13 +143,14 @@ public class TwitchComponentHandle : MonoBehaviour
     #region Message Interface
     public void OnMessageReceived(string userNickName, string userColor, string text)
     {
-        Match match = Regex.Match(text, string.Format("^!{0} (.+)", _code), RegexOptions.IgnoreCase);
+        Match match = Regex.Match(text, string.Format("^!({0}) (.+)", _code), RegexOptions.IgnoreCase);
         if (!match.Success)
         {
             return;
         }
 
-        string internalCommand = match.Groups[1].Value;
+        string targetModule = match.Groups[1].Value;
+        string internalCommand = match.Groups[2].Value;
         
         string messageOut = null;
         if (internalCommand.Equals("help", StringComparison.InvariantCultureIgnoreCase)) {
