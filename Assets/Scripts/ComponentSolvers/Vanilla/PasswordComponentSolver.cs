@@ -21,8 +21,15 @@ public class PasswordComponentSolver : ComponentSolver
         {
             yield break;
         }
-
-        if (Regex.IsMatch(inputCommand, @"^[a-zA-Z]{5}$"))
+        else if (inputCommand.Equals("cycle", StringComparison.InvariantCultureIgnoreCase))
+        {
+            IEnumerator spinnerCoroutine = CycleCharacterSpinnerCoroutine(GetCharSpinner(0));
+            while (spinnerCoroutine.MoveNext())
+            {
+                yield return spinnerCoroutine.Current;
+            }
+        }
+        else if (Regex.IsMatch(inputCommand, @"^[a-zA-Z]{5}$"))
         {
             yield return "password";
 
