@@ -170,6 +170,11 @@ public class TwitchComponentHandle : MonoBehaviour
             }
             messageOut = string.Format("{0}: https://ktane.timwi.de/HTML/{1}.html", manualText, Uri.EscapeDataString(manualText));
         }
+        else if (Regex.IsMatch(internalCommand, "^(bomb|queue) (turn( a?round)?|flip|spin)$", RegexOptions.IgnoreCase))
+        {
+            _solver._turnQueued = true;
+            messageOut = string.Format("Turning to the other side when Module {0} is solved", targetModule);
+        }
         if (messageOut != null) {
             ircConnection.SendMessage(string.Format(messageOut, _code, headerText.text));
             return;

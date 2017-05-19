@@ -192,6 +192,15 @@ public class BombCommander : ICommandResponder
         }
     }
 
+    public IEnumerator TurnBomb()
+    {
+        IEnumerator holdBombCoroutine = HoldBomb(!_heldFrontFace);
+        while (holdBombCoroutine.MoveNext())
+        {
+            yield return holdBombCoroutine.Current;
+        }
+    }
+
     public IEnumerator LetGoBomb()
     {
         int holdState = (int)_holdStateProperty.GetValue(FloatingHoldable, null);
