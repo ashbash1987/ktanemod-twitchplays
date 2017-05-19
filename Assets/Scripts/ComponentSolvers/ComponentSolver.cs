@@ -239,6 +239,13 @@ public abstract class ComponentSolver : ICommandResponder
     }
     
     #region Protected Properties
+
+    protected string StrikeMessage
+    {
+        get;
+        set;
+    }
+
     protected bool Solved
     {
         get

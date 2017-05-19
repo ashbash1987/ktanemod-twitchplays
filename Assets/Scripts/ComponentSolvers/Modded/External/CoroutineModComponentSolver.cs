@@ -60,6 +60,7 @@ public class CoroutineModComponentSolver : ComponentSolver
             yield break;
         }
 
+        int beforeStrikeCount = StrikeCount;
         while (true)
         {
             object currentObject = responseCoroutine.Current;
@@ -79,7 +80,6 @@ public class CoroutineModComponentSolver : ComponentSolver
             }
             if (currentObject is KMSelectable[])
             {
-                int beforeStrikeCount = StrikeCount;
                 KMSelectable[] selectables = (KMSelectable[]) currentObject;
                 foreach (KMSelectable selectable in selectables)
                 {
@@ -117,6 +117,13 @@ public class CoroutineModComponentSolver : ComponentSolver
 
             if (Canceller.ShouldCancel)
                 TryCancel = true;
+
+            if (StrikeCount != beforeStrikeCount)
+            {
+                Debug.LogWarningFormat("A Strike was caused by a submitted command to the invokation of {0}.{1}; Command invokation is being aborted.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+                Debug.LogWarning(inputCommand);
+                break;
+            }
         }        
     }
 
