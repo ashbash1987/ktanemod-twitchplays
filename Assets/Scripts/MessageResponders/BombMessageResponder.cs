@@ -117,6 +117,8 @@ public class BombMessageResponder : MessageResponder
         CreateComponentHandlesForBomb(bomb);
 
         _ircConnection.SendMessage("The next bomb is now live! Start sending your commands! MrDestructoid");
+
+        _bombHandle.OnMessageReceived("The Bomb", "red", "!bomb hold");
     }
 
     protected override void OnMessageReceived(string userNickName, string userColorCode, string text)
