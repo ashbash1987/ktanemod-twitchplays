@@ -198,6 +198,10 @@ public abstract class ComponentSolver : ICommandResponder
             AwardSolve(_currentUserNickName, _currentResponseNotifier);
         }
 
+        BombCommander._bombSolvedModules++;
+
+        ComponentHandle.OnPass();
+
         return false;
     }
 
@@ -348,4 +352,6 @@ public abstract class ComponentSolver : ICommandResponder
     
     public string helpMessage = null;
     public string manualCode = null;
+
+    public TwitchComponentHandle ComponentHandle = null;
 }

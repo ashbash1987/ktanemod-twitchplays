@@ -147,6 +147,11 @@ public class BombMessageResponder : MessageResponder
 
         IList bombComponents = (IList)CommonReflectedTypeInfo.BombComponentsField.GetValue(bomb);
 
+        if (bombComponents.Count > 12)
+        {
+            _bombCommander._multiDecker = true;
+        }
+
         foreach (MonoBehaviour bombComponent in bombComponents)
         {
             object componentType = CommonReflectedTypeInfo.ComponentTypeField.GetValue(bombComponent);

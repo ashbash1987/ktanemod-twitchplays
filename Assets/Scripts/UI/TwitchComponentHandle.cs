@@ -19,8 +19,10 @@ public class TwitchComponentHandle : MonoBehaviour
 
     public CanvasGroup canvasGroup = null;
     public CanvasGroup highlightGroup = null;
+    public CanvasGroup canvasGroupMultiDecker = null;
     public Text headerText = null;
     public Text idText = null;
+    public Text idTextMultiDecker = null;
     public ScrollRect messageScroll = null;
     public GameObject messageScrollContents = null;
 
@@ -98,9 +100,12 @@ public class TwitchComponentHandle : MonoBehaviour
         }
 
         idText.text = string.Format("!{0}", _code);
+        idTextMultiDecker.text = _code;
 
         canvasGroup.alpha = 0.0f;
         highlightGroup.alpha = 0.0f;
+
+        canvasGroupMultiDecker.alpha = bombCommander._multiDecker ? 1.0f : 0.0f;
 
         Arrow.gameObject.SetActive(true);
         HighlightArrow.gameObject.SetActive(true);
@@ -109,21 +114,29 @@ public class TwitchComponentHandle : MonoBehaviour
         if (_solver != null)
         {
             _solver.Code = _code;
+            _solver.ComponentHandle = this;
         }
     }
 
     private void LateUpdate()
     {
-        Vector3 cameraForward = Camera.main.transform.forward;
-        Vector3 componentForward = transform.up;
+        if (!bombCommander._multiDecker)
+        {
+            Vector3 cameraForward = Camera.main.transform.forward;
+            Vector3 componentForward = transform.up;
 
-        float angle = Vector3.Angle(cameraForward, -componentForward);
-        float lerpAmount = Mathf.InverseLerp(60.0f, 20.0f, angle);
-        lerpAmount = Mathf.Lerp(canvasGroup.alpha, lerpAmount, Time.deltaTime * 5.0f);
-        canvasGroup.alpha = lerpAmount;
-        transform.localPosition = basePosition + Vector3.Lerp(Vector3.zero, idealHandlePositionOffset, Mathf.SmoothStep(0.0f, 1.0f, lerpAmount));
+            float angle = Vector3.Angle(cameraForward, -componentForward);
+            float lerpAmount = Mathf.InverseLerp(60.0f, 20.0f, angle);
+            lerpAmount = Mathf.Lerp(canvasGroup.alpha, lerpAmount, Time.deltaTime * 5.0f);
+            canvasGroup.alpha = lerpAmount;
+            transform.localPosition = basePosition + Vector3.Lerp(Vector3.zero, idealHandlePositionOffset, Mathf.SmoothStep(0.0f, 1.0f, lerpAmount));
+            messageScroll.verticalNormalizedPosition = 0.0f;
+        }
+    }
 
-        messageScroll.verticalNormalizedPosition = 0.0f;
+    public void OnPass()
+    {
+        canvasGroupMultiDecker.alpha = 0.0f;
     }
     #endregion
 

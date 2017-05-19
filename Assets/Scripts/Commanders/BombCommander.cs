@@ -446,5 +446,6 @@ public class BombCommander : ICommandResponder
     public int _bombSolvableModules;
     public int _bombSolvedModules;
     public float _bombStartingTimer;
+    public bool _multiDecker = false;
 }
 
