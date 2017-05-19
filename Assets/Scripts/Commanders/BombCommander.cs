@@ -55,6 +55,7 @@ public class BombCommander : ICommandResponder
         FloatingHoldable = (MonoBehaviour)Bomb.GetComponent(_floatingHoldableType);
         SelectableManager = (MonoBehaviour)_selectableManagerProperty.GetValue(_inputManager, null);
         _bombTimeStamp = DateTime.Now;
+        _bombStartingTimer = CurrentTimer;
     }
     #endregion
 
@@ -386,6 +387,23 @@ public class BombCommander : ICommandResponder
         _setControlsRotationMethod.Invoke(SelectableManager, new object[] { baseTransform.rotation * Quaternion.Euler(targetPitch, 0.0f, targetZSpin) });
         _handleFaceSelectionMethod.Invoke(SelectableManager, null);
     }
+
+    public float CurrentTimer
+    {
+        get
+        {
+            MonoBehaviour timerComponent = (MonoBehaviour)CommonReflectedTypeInfo.GetTimerMethod.Invoke(Bomb, null);
+            return (float)CommonReflectedTypeInfo.TimeRemainingField.GetValue(timerComponent);
+        }
+    }
+
+    public string CurrentTimerFormatted
+    {
+        get
+        {
+            return (string)CommonReflectedTypeInfo.GetFormattedTimeMethod.Invoke(null, new object[] { CurrentTimer, true });
+        }
+    }
     #endregion
 
     #region Readonly Fields
@@ -425,5 +443,8 @@ public class BombCommander : ICommandResponder
     #endregion
 
     private bool _heldFrontFace = true;
+    public int _bombSolvableModules;
+    public int _bombSolvedModules;
+    public float _bombStartingTimer;
 }
 
