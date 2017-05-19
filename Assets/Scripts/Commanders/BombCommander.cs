@@ -125,8 +125,7 @@ public class BombCommander : ICommandResponder
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
-        else if (message.Equals("time", StringComparison.InvariantCultureIgnoreCase) ||
-                 message.Equals("timestamp", StringComparison.InvariantCultureIgnoreCase) ||
+        else if (message.Equals("timestamp", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("date", StringComparison.InvariantCultureIgnoreCase))
         {
             //Some modules depend on the date/time the bomb, and therefore that Module instance has spawned, in the bomb defusers timezone.
@@ -138,6 +137,16 @@ public class BombCommander : ICommandResponder
             sb.Append("The Date/Time this bomb started is ");
             sb.Append(string.Format("{0:F}", _bombTimeStamp));
             yield return sb.ToString();
+
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+        else if (message.Equals("time", StringComparison.InvariantCultureIgnoreCase) ||
+                message.Equals("timer", StringComparison.InvariantCultureIgnoreCase) ||
+                message.Equals("clock", StringComparison.InvariantCultureIgnoreCase))
+        {
+            responseNotifier.ProcessResponse(CommandResponse.Start);
+
+            yield return string.Format("sendtochat panicBasket [{0}]", CurrentTimerFormatted);
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
