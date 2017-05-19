@@ -24,8 +24,7 @@ public class ButtonComponentSolver : ComponentSolver
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(_button);
         }
-        else if (!_held && (inputCommand.Equals("hold", StringComparison.InvariantCultureIgnoreCase) ||
-                            inputCommand.Equals("press", StringComparison.InvariantCultureIgnoreCase)))
+        else if (!_held && (inputCommand.Equals("hold", StringComparison.InvariantCultureIgnoreCase)))
         {
             yield return "hold";
 
