@@ -41,5 +41,9 @@ public class MiscellaneousMessageResponder : MessageResponder
                 _ircConnection.SendMessage(string.Format("{0}, you don't have any solves or strikes yet!", userNickName));
             }
         }
+        else if (text.Equals("!mouse", StringComparison.InvariantCultureIgnoreCase))
+        {
+            InputInterceptor.EnableInput();
+        }
     }
 }

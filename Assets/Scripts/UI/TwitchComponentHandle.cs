@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -136,7 +137,31 @@ public class TwitchComponentHandle : MonoBehaviour
         }
 
         string internalCommand = match.Groups[1].Value;
-
+        
+        string messageOut = null;
+        if (internalCommand.Equals("help", StringComparison.InvariantCultureIgnoreCase)) {
+            if (_solver.helpMessage == null) {
+                messageOut = "No help message for {1}!";
+            }
+            else {
+                messageOut = string.Format("{0}: {1}", headerText.text, _solver.helpMessage);
+            }
+        }
+        else if (internalCommand.Equals("manual", StringComparison.InvariantCultureIgnoreCase)) {
+            string manualText = null;
+            if (_solver.manualCode == null) {
+                manualText = headerText.text;
+            }
+            else {
+              manualText = _solver.manualCode;
+            }
+            messageOut = string.Format("{0}: https://ktane.timwi.de/HTML/{1}.html", manualText, Uri.EscapeDataString(manualText));
+        }
+        if (messageOut != null) {
+            ircConnection.SendMessage(string.Format(messageOut, _code, headerText.text));
+            return;
+        }
+        
         TwitchMessage message = (TwitchMessage)Instantiate(messagePrefab, messageScrollContents.transform, false);
         message.leaderboard = leaderboard;
         message.userName = userNickName;

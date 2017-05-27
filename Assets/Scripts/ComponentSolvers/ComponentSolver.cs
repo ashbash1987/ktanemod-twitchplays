@@ -99,6 +99,19 @@ public abstract class ComponentSolver : ICommandResponder
                     Canceller.ResetCancel();
                     break;
                 }
+                else if (currentString.StartsWith("sendtochat ", StringComparison.InvariantCultureIgnoreCase) && currentString.Substring(11).Trim() != string.Empty)
+                {
+                    IRCConnection.SendMessage(currentString.Substring(11));
+                }
+                else if (currentString.Equals("add strike"))
+                {
+                    _strikeCount++;
+                }
+                else if (currentString.Equals("award strikes"))
+                {
+                    AwardStrikes(_currentUserNickName, _currentResponseNotifier, StrikeCount - previousStrikeCount);
+                    previousStrikeCount = StrikeCount;
+                }
             }
             else if (currentValue is Quaternion)
             {
@@ -224,7 +237,7 @@ public abstract class ComponentSolver : ICommandResponder
         get;
         set;
     }
-
+    
     #region Protected Properties
     protected bool Solved
     {
@@ -270,6 +283,26 @@ public abstract class ComponentSolver : ICommandResponder
             return angleBetween < 90.0f;
         }
     }
+
+    protected FieldInfo TryCancelField { get; set; }
+    protected Type TryCancelComponentSolverType { get; set; }
+
+    protected bool TryCancel
+    {
+        get
+        {
+            if (TryCancelField == null || TryCancelComponentSolverType == null ||
+                !(TryCancelField.GetValue(TryCancelComponentSolverType) is bool))
+                return false;
+            return (bool)TryCancelField.GetValue(BombComponent.GetComponent(TryCancelComponentSolverType));
+        }
+        set
+        {
+            if (TryCancelField != null && TryCancelComponentSolverType != null &&
+                (TryCancelField.GetValue(BombComponent.GetComponent(TryCancelComponentSolverType)) is bool))
+                TryCancelField.SetValue(BombComponent.GetComponent(TryCancelComponentSolverType), value);
+        }
+    }
     #endregion
 
     #region Private Methods
@@ -312,4 +345,7 @@ public abstract class ComponentSolver : ICommandResponder
     private ICommandResponseNotifier _currentResponseNotifier = null;
     private string _currentUserNickName = null;
     #endregion
+    
+    public string helpMessage = null;
+    public string manualCode = null;
 }

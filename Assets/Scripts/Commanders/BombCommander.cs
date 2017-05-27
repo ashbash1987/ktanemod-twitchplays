@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 
 public class BombCommander : ICommandResponder
@@ -53,6 +54,7 @@ public class BombCommander : ICommandResponder
         Selectable = (MonoBehaviour)Bomb.GetComponent(_selectableType);
         FloatingHoldable = (MonoBehaviour)Bomb.GetComponent(_floatingHoldableType);
         SelectableManager = (MonoBehaviour)_selectableManagerProperty.GetValue(_inputManager, null);
+        _bombTimeStamp = DateTime.Now;
     }
     #endregion
 
@@ -102,15 +104,39 @@ public class BombCommander : ICommandResponder
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
-        else if (message.Equals("edgework", StringComparison.InvariantCultureIgnoreCase))
+        else if (message.Equals("edgework", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("edgework right", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("edgework bottom", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("edgework left", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("edgework top", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("right", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("bottom", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("left", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("top", StringComparison.InvariantCultureIgnoreCase))
         {
             responseNotifier.ProcessResponse(CommandResponse.Start);
 
-            IEnumerator edgeworkCoroutine = ShowEdgework();
+            IEnumerator edgeworkCoroutine = ShowEdgework(message.Replace("edgework","").Trim().ToLowerInvariant());
             while (edgeworkCoroutine.MoveNext())
             {
                 yield return edgeworkCoroutine.Current;
             }
+
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+        else if (message.Equals("time", StringComparison.InvariantCultureIgnoreCase) ||
+                 message.Equals("timestamp", StringComparison.InvariantCultureIgnoreCase) ||
+                 message.Equals("date", StringComparison.InvariantCultureIgnoreCase))
+        {
+            //Some modules depend on the date/time the bomb, and therefore that Module instance has spawned, in the bomb defusers timezone.
+
+            responseNotifier.ProcessResponse(CommandResponse.Start);
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("sendtochat ");
+            sb.Append("The Date/Time this bomb started is ");
+            sb.Append(string.Format("{0:F}", _bombTimeStamp));
+            yield return sb.ToString();
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
@@ -163,49 +189,80 @@ public class BombCommander : ICommandResponder
         }
     }
 
-    public IEnumerator ShowEdgework()
+    public IEnumerator ShowEdgework(string edge)
     {
         IEnumerator holdCoroutine = HoldBomb(_heldFrontFace);
         while (holdCoroutine.MoveNext())
         {
             yield return holdCoroutine.Current;
         }
+        IEnumerator returnToFace;
 
-        float initialZSpin = _heldFrontFace ? 0.0f : 180.0f;
-
-        IEnumerator firstEdge = DoFreeRotate(initialZSpin, 0.0f, 90.0f, 0.0f, 0.3f);
-        while (firstEdge.MoveNext())
+        if (edge == "" || edge == "right")
         {
-            yield return firstEdge.Current;
+            IEnumerator firstEdge = DoFreeYRotate(0.0f, 0.0f, 90.0f, 90.0f, 0.3f);
+            while (firstEdge.MoveNext())
+            {
+                yield return firstEdge.Current;
+            }
+            yield return new WaitForSeconds(2.0f);
         }
 
-        yield return new WaitForSeconds(2.0f);
-
-        IEnumerator secondEdge = DoFreeRotate(90.0f, 0.0f, initialZSpin, 90.0f, 0.3f);
-        while (secondEdge.MoveNext())
+        if (edge == "" || edge == "bottom")
         {
-            yield return secondEdge.Current;
+
+            IEnumerator secondEdge = edge == ""
+                ? DoFreeYRotate(90.0f, 90.0f, 0.0f, 90.0f, 0.3f)
+                : DoFreeYRotate(0.0f, 0.0f, 0.0f, 90.0f, 0.3f);
+            while (secondEdge.MoveNext())
+            {
+                yield return secondEdge.Current;
+            }
+            yield return new WaitForSeconds(2.0f);
         }
 
-        yield return new WaitForSeconds(2.0f);
 
-        IEnumerator thirdEdge = DoFreeRotate(initialZSpin, 90.0f, -90.0f, 0.0f, 0.3f);
-        while (thirdEdge.MoveNext())
+        if (edge == "" || edge == "left")
         {
-            yield return thirdEdge.Current;
+            IEnumerator thirdEdge = edge == ""
+                ? DoFreeYRotate(0.0f, 90.0f, -90.0f, 90.0f, 0.3f)
+                : DoFreeYRotate(0.0f, 0.0f, -90.0f, 90.0f, 0.3f);
+            while (thirdEdge.MoveNext())
+            {
+                yield return thirdEdge.Current;
+            }
+            yield return new WaitForSeconds(2.0f);
         }
 
-        yield return new WaitForSeconds(2.0f);
-
-        IEnumerator fourthEdge = DoFreeRotate(-90.0f, 0.0f, initialZSpin, -90.0f, 0.3f);
-        while (fourthEdge.MoveNext())
+        if (edge == "" || edge == "top")
         {
-            yield return fourthEdge.Current;
+            IEnumerator fourthEdge = edge == ""
+                ? DoFreeYRotate(-90.0f, 90.0f, -180.0f, 90.0f, 0.3f)
+                : DoFreeYRotate(0.0f, 0.0f, -180.0f, 90.0f, 0.3f);
+            while (fourthEdge.MoveNext())
+            {
+                yield return fourthEdge.Current;
+            }
+            yield return new WaitForSeconds(2.0f);
         }
 
-        yield return new WaitForSeconds(2.0f);
-
-        IEnumerator returnToFace = DoFreeRotate(initialZSpin, -90.0f, initialZSpin, 0.0f, 0.3f);
+        switch (edge)
+        {
+            case "right":
+                returnToFace = DoFreeYRotate(90.0f, 90.0f, 0.0f, 0.0f, 0.3f);
+                break;
+            case "bottom":
+                returnToFace = DoFreeYRotate(0.0f, 90.0f, 0.0f, 0.0f, 0.3f);
+                break;
+            case "left":
+                returnToFace = DoFreeYRotate(-90.0f, 90.0f, 0.0f, 0.0f, 0.3f);
+                break;
+            case "top":
+            default:
+                returnToFace = DoFreeYRotate(-180.0f, 90.0f, 0.0f, 0.0f, 0.3f);
+                break;
+        }
+        
         while (returnToFace.MoveNext())
         {
             yield return returnToFace.Current;
@@ -281,6 +338,31 @@ public class BombCommander : ICommandResponder
         _heldFrontFace = frontFace;
     }
 
+    private IEnumerator DoFreeYRotate(float initialYSpin, float initialPitch, float targetYSpin, float targetPitch, float duration)
+    {
+        if (!_heldFrontFace)
+        {
+            initialPitch *= -1;
+            initialYSpin *= -1;
+            targetPitch *= -1;
+            targetYSpin *= -1;
+        }
+
+        float initialTime = Time.time;
+        while (Time.time - initialTime < duration)
+        {
+            float lerp = (Time.time - initialTime) / duration;
+            float currentYSpin = Mathf.SmoothStep(initialYSpin, targetYSpin, lerp);
+            float currentPitch = Mathf.SmoothStep(initialPitch, targetPitch, lerp);
+
+            Quaternion currentRotation = Quaternion.Euler(currentPitch, 0, 0) * Quaternion.Euler(0, currentYSpin, 0);
+            RotateByLocalQuaternion(currentRotation);
+            yield return null;
+        }
+        Quaternion target = Quaternion.Euler(targetPitch, 0, 0) * Quaternion.Euler(0, targetYSpin, 0);
+        RotateByLocalQuaternion(target);
+    }
+
     private IEnumerator DoFreeRotate(float initialZSpin, float initialPitch, float targetZSpin, float targetPitch, float duration)
     {
         Transform baseTransform = (Transform)_getBaseHeldObjectTransformMethod.Invoke(SelectableManager, null);
@@ -320,6 +402,7 @@ public class BombCommander : ICommandResponder
     private static FieldInfo _focusTimeField = null;
     private static FieldInfo _pickupTimeField = null;
     private static PropertyInfo _holdStateProperty = null;
+    private static DateTime _bombTimeStamp;
 
     private static Type _selectableType = null;
     private static MethodInfo _handleSelectMethod = null;
