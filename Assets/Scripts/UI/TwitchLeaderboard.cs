@@ -51,7 +51,7 @@ public class TwitchLeaderboard : MonoBehaviour
             int countOnRight = prioritiseSolo ? leaderboard.SoloCount : leaderboard.Count;
             int countOnLeft = prioritiseSolo ? leaderboard.Count : leaderboard.SoloCount;
             int maxOnRight = prioritiseSolo ? soloTable.maximumRowCount : mainTable.maximumRowCount;
-            bool statsOnRight = ((countOnRight - statsTable.entriesLess) <= maxOnRight) // Right (priority) wouldn't be made smaller than its total count by fitting the stats in
+            bool statsOnRight = (countOnRight <= maxOnRight) // Right (priority) wouldn't be made smaller than its total count by fitting the stats in
                 && (countOnRight < countOnLeft); // and right is smaller than left (only possible if solo is on right)
 
             // Make the leaderboard that's sharing with the stats smaller
