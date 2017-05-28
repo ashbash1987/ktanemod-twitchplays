@@ -24,7 +24,7 @@ public class SafetySafeComponentSolver : ComponentSolver
         _buttons = (MonoBehaviour[])_buttonsField.GetValue(bombComponent.GetComponent(_componentType));
         _lever = (MonoBehaviour)_leverField.GetValue(bombComponent.GetComponent(_componentType));
 
-        helpMessage = "Listen to the dials with !{0} cycle. Make a correction to a single dial with !{0} BM 3. Enter the solution with !{0} 6 0 6 8 2 5. Submit the answer with !{0} submit. Dial positions are TL, TM, TR, BL, BM, BR.";
+        helpMessage = "Listen to the dials with !{0} cycle. Listen to a single dial with !{0} cycle BR. Make a correction to a single dial with !{0} BM 3. Enter the solution with !{0} 6 0 6 8 2 5. Submit the answer with !{0} submit. Dial positions are TL, TM, TR, BL, BM, BR.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -39,14 +39,32 @@ public class SafetySafeComponentSolver : ComponentSolver
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(_lever);
         }
-        else if (split[0] == "cycle" && split.Length == 1)
+        else if (split[0] == "cycle" && split.Length <= 2)
         {
             yield return "cycle";
-            for (var i = 0; i < 6; i++)
+            if (split.Length == 1)
+            {
+                for (var i = 0; i < 6; i++)
+                {
+                    for (var j = 0; j < 12; j++)
+                    {
+                        yield return HandlePress(i);
+                        yield return new WaitForSeconds(0.3f);
+                        if (Canceller.ShouldCancel)
+                        {
+                            Canceller.ResetCancel();
+                            yield break;
+                        }
+                    }
+                    if (i < 5)
+                        yield return new WaitForSeconds(0.5f);
+                }
+            }
+            else if (DialPosNames.TryGetValue(split[1], out pos))
             {
                 for (var j = 0; j < 12; j++)
                 {
-                    yield return HandlePress(i);
+                    yield return HandlePress(pos);
                     yield return new WaitForSeconds(0.3f);
                     if (Canceller.ShouldCancel)
                     {
@@ -54,8 +72,6 @@ public class SafetySafeComponentSolver : ComponentSolver
                         yield break;
                     }
                 }
-                if(i < 5)
-                    yield return new WaitForSeconds(0.5f);
             }
         }
         else if (DialPosNames.TryGetValue(split[0], out pos))
