@@ -61,7 +61,8 @@ public class CoroutineModComponentSolver : ComponentSolver
         }
 
         int beforeStrikeCount = StrikeCount;
-        while (true)
+        bool moveNext = true;
+        while (moveNext && beforeStrikeCount == StrikeCount)
         {
             object currentObject = responseCoroutine.Current;
             if (currentObject is KMSelectable)
@@ -89,6 +90,7 @@ public class CoroutineModComponentSolver : ComponentSolver
                     if (beforeStrikeCount != StrikeCount || Canceller.ShouldCancel)
                         break;
                 }
+
             }
             if (currentObject is string)
             {
@@ -101,29 +103,26 @@ public class CoroutineModComponentSolver : ComponentSolver
             }
             yield return currentObject;
 
-            try
-            {
-                if (!responseCoroutine.MoveNext())
-                {
-                    break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
-                Debug.LogException(ex);
-                break;
-            }
-
-            if (Canceller.ShouldCancel)
-                TryCancel = true;
-
             if (StrikeCount != beforeStrikeCount)
             {
                 Debug.LogWarningFormat("A Strike was caused by a submitted command to the invokation of {0}.{1}; Command invokation is being aborted.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
                 Debug.LogWarning(inputCommand);
                 break;
             }
+
+            try
+            {
+                moveNext = responseCoroutine.MoveNext();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+                Debug.LogException(ex);
+                moveNext = false;
+            }
+
+            if (Canceller.ShouldCancel)
+                TryCancel = true;
         }        
     }
 
