@@ -44,7 +44,7 @@ public class SimonStatesComponentSolver : ComponentSolver
             {
                 button = _buttons[0];
             }
-            else if (buttonString.Equals("y", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("blue", StringComparison.InvariantCultureIgnoreCase))
+            else if (buttonString.Equals("y", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("yellow", StringComparison.InvariantCultureIgnoreCase))
             {
                 button = _buttons[1];
             }
@@ -52,7 +52,7 @@ public class SimonStatesComponentSolver : ComponentSolver
             {
                 button = _buttons[2];
             }
-            else if (buttonString.Equals("b", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("yellow", StringComparison.InvariantCultureIgnoreCase))
+            else if (buttonString.Equals("b", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("blue", StringComparison.InvariantCultureIgnoreCase))
             {
                 button = _buttons[3];
             }
