@@ -35,6 +35,7 @@ public class NeedyQuizComponentSolver : ComponentSolver
                 Debug.Log("[Answering Questions #" + _thisLoggingID + "] ABORT! ABORT!!! ABOOOOOOORT!!!!!");
                 yield return "sendtochat ABORT! ABORT!!! ABOOOOOOORT!!!!!";
                 int strikeCount = 0;
+                yield return "multiple strikes";
                 while (!Detonated)
                 {
                     strikeCount++;
