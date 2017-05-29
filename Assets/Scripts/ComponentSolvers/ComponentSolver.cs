@@ -115,7 +115,7 @@ public abstract class ComponentSolver : ICommandResponder
                 {
                     OnStrike(null);
                 }
-                else if (currentString.Equals("disablestriketracker", StringComparison.InvariantCultureIgnoreCase))
+                else if (currentString.Equals("multiple strikes", StringComparison.InvariantCultureIgnoreCase))
                 {
                     DisableOnStrike = true;
                 }
