@@ -54,6 +54,7 @@ public class SimpleModComponentSolver : ComponentSolver
             if (selectable == null)
             {
                 Debug.LogErrorFormat("An empty selectable has been found at index {0} within the selectable array returned from {1}.{2}; Skipping this index, however this may have unintended sideeffects.", selectableIndex, ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+                yield return new WaitForSeconds(0.1f);
                 continue;
             }
 
@@ -61,8 +62,9 @@ public class SimpleModComponentSolver : ComponentSolver
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(selectable);
 
-            //Escape the sequence if a part of the given sequence is wrong
-            if (StrikeCount != beforeInteractionStrikeCount)
+            //Escape the sequence if a part of the given sequence is wrong, or if part of the sequence solved the module.
+            //This means it is no longer possible to death warp a bomb in twitch plays. Kappa Keepo
+            if (StrikeCount != beforeInteractionStrikeCount || Solved)
             {
                 yield break;
             }

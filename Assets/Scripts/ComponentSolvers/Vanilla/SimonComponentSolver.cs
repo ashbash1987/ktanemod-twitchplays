@@ -61,7 +61,7 @@ public class SimonComponentSolver : ComponentSolver
                 DoInteractionEnd(button);
 
                 //Escape the sequence if a part of the given sequence is wrong
-                if (StrikeCount != beforeButtonStrikeCount)
+                if (StrikeCount != beforeButtonStrikeCount || Solved)
                 {
                     break;
                 }

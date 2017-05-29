@@ -67,7 +67,7 @@ public class ListeningComponentSolver : ComponentSolver
                         DoInteractionStart(button);
                         yield return new WaitForSeconds(0.1f);
                         DoInteractionEnd(button);
-                        if (StrikeCount != beforeStrikes)
+                        if (StrikeCount != beforeStrikes || Solved)
                             yield break;
                     }
                     break;

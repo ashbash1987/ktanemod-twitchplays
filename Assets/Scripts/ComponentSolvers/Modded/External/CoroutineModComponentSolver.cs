@@ -87,10 +87,9 @@ public class CoroutineModComponentSolver : ComponentSolver
                     DoInteractionStart(selectable);
                     yield return new WaitForSeconds(0.1f);
                     DoInteractionEnd(selectable);
-                    if (beforeStrikeCount != StrikeCount || Canceller.ShouldCancel)
+                    if (beforeStrikeCount != StrikeCount || Canceller.ShouldCancel || Solved)
                         break;
                 }
-
             }
             if (currentObject is string)
             {
@@ -102,6 +101,13 @@ public class CoroutineModComponentSolver : ComponentSolver
                 }
             }
             yield return currentObject;
+
+            if (Solved)
+            {
+                Debug.LogWarningFormat("The Module was solved possibly early by a submitted command to the invokation of {0}.{1}; Command invokation is being aborted to prevent strikes.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+                Debug.LogWarning(inputCommand);
+                break;
+            }
 
             if (StrikeCount != beforeStrikeCount)
             {
