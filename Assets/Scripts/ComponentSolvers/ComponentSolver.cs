@@ -76,6 +76,7 @@ public abstract class ComponentSolver : ICommandResponder
         while (subcoroutine.MoveNext())
         {
             object currentValue = subcoroutine.Current;
+            int temp;
             if (currentValue is string)
             {
                 string currentString = (string)currentValue;
@@ -89,28 +90,42 @@ public abstract class ComponentSolver : ICommandResponder
                     _delegatedSolveUserNickName = userNickName;
                     _delegatedSolveResponseNotifier = responseNotifier;
                 }
+                else if (currentString.StartsWith("strikemessage ", StringComparison.InvariantCultureIgnoreCase) && 
+                    currentString.Substring(14).Trim() != string.Empty)
+                {
+                    StrikeMessage = currentString.Substring(14);
+                }
                 else if (currentString.Equals("parseerror", StringComparison.InvariantCultureIgnoreCase))
                 {
                     parseError = true;
                     break;
                 }
-                else if (currentString.Equals("trycancel", StringComparison.InvariantCultureIgnoreCase) && Canceller.ShouldCancel)
+                else if (currentString.Equals("trycancel", StringComparison.InvariantCultureIgnoreCase) && 
+                    Canceller.ShouldCancel)
                 {
                     Canceller.ResetCancel();
                     break;
                 }
-                else if (currentString.StartsWith("sendtochat ", StringComparison.InvariantCultureIgnoreCase) && currentString.Substring(11).Trim() != string.Empty)
+                else if (currentString.StartsWith("sendtochat ", StringComparison.InvariantCultureIgnoreCase) && 
+                    currentString.Substring(11).Trim() != string.Empty)
                 {
                     IRCConnection.SendMessage(currentString.Substring(11));
                 }
-                else if (currentString.Equals("add strike"))
+                else if (currentString.StartsWith("add strike", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    _strikeCount++;
+                    OnStrike(null);
                 }
-                else if (currentString.Equals("award strikes"))
+                else if (currentString.Equals("disablestriketracker", StringComparison.InvariantCultureIgnoreCase))
                 {
+                    DisableOnStrike = true;
+                }
+                else if (currentString.StartsWith("award strikes ", StringComparison.CurrentCultureIgnoreCase) &&
+                         int.TryParse(currentString.Substring(14), out temp))
+                {
+                    _strikeCount += temp;
                     AwardStrikes(_currentUserNickName, _currentResponseNotifier, StrikeCount - previousStrikeCount);
                     previousStrikeCount = StrikeCount;
+                    DisableOnStrike = false;
                 }
             }
             else if (currentValue is Quaternion)
@@ -201,8 +216,11 @@ public abstract class ComponentSolver : ICommandResponder
         return false;
     }
 
+    private bool DisableOnStrike;
     private bool OnStrike(object _ignore)
     {
+        if (DisableOnStrike) return false;
+
         _strikeCount++;
 
         if (_delegatedStrikeUserNickName != null && _delegatedStrikeResponseNotifier != null)
@@ -227,8 +245,9 @@ public abstract class ComponentSolver : ICommandResponder
 
     private void AwardStrikes(string userNickName, ICommandResponseNotifier responseNotifier, int strikeCount)
     {
-        IRCConnection.SendMessage(string.Format("VoteNay Module {0} got {1} strike{2}! +{3} strike{2} to {4}", Code, strikeCount == 1 ? "a" : strikeCount.ToString(), strikeCount == 1 ? "" : "s", strikeCount, userNickName));
+        IRCConnection.SendMessage(string.Format("VoteNay Module {0} got {1} strike{2}! +{3} strike{2} to {4}{5}", Code, strikeCount == 1 ? "a" : strikeCount.ToString(), strikeCount == 1 ? "" : "s", strikeCount, userNickName, string.IsNullOrEmpty(StrikeMessage) ? "" : " caused by " + StrikeMessage));
         responseNotifier.ProcessResponse(CommandResponse.EndError, strikeCount);
+        StrikeMessage = string.Empty;
     }
     #endregion
 
