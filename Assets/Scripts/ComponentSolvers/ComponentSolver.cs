@@ -123,8 +123,7 @@ public abstract class ComponentSolver : ICommandResponder
                          int.TryParse(currentString.Substring(14), out temp))
                 {
                     _strikeCount += temp;
-                    AwardStrikes(_currentUserNickName, _currentResponseNotifier, StrikeCount - previousStrikeCount);
-                    previousStrikeCount = StrikeCount;
+                    AwardStrikes(_currentUserNickName, _currentResponseNotifier, temp);
                     DisableOnStrike = false;
                 }
             }
