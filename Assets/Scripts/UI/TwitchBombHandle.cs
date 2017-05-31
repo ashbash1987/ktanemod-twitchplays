@@ -13,6 +13,8 @@ public class TwitchBombHandle : MonoBehaviour
     public Text idText = null;
     public ScrollRect messageScroll = null;
     public GameObject messageScrollContents = null;
+    public RectTransform mainWindowTransform = null;
+    public RectTransform highlightTransform = null;
 
     [HideInInspector]
     public IRCConnection ircConnection = null;
@@ -51,7 +53,8 @@ public class TwitchBombHandle : MonoBehaviour
         highlightGroup.alpha = 0.0f;
         if (bombID > -1)
         {
-            transform.localPosition = new Vector3(0,0, bombID * 0.2f);
+            mainWindowTransform.localPosition -= new Vector3(0, 160.0f * bombID, 0);
+            highlightTransform.localPosition -= new Vector3(0, 160.0f * bombID, 0);
         }
     }
     #endregion
