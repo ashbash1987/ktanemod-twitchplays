@@ -25,6 +25,9 @@ public class TwitchBombHandle : MonoBehaviour
 
     [HideInInspector]
     public CoroutineCanceller coroutineCanceller = null;
+
+    [HideInInspector]
+    public int bombID = -1;
     #endregion
 
     #region Private Fields
@@ -39,10 +42,17 @@ public class TwitchBombHandle : MonoBehaviour
 
     private void Start()
     {
+        if(bombID > -1)
+            _code = "bomb" + (bombID + 1);
+
         idText.text = string.Format("!{0}", _code);
 
         canvasGroup.alpha = 1.0f;
         highlightGroup.alpha = 0.0f;
+        if (bombID > -1)
+        {
+            transform.localPosition = new Vector3(0,0, bombID * 0.2f);
+        }
     }
     #endregion
 
