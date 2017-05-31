@@ -57,6 +57,11 @@ public class TwitchBombHandle : MonoBehaviour
             highlightTransform.localPosition -= new Vector3(0, 160.0f * bombID, 0);
         }
     }
+
+    private void LateUpdate()
+    {
+        messageScroll.verticalNormalizedPosition = 0.0f;
+    }
     #endregion
 
     #region Message Interface    
