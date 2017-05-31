@@ -31,7 +31,8 @@ public class MemoryComponentSolver : ComponentSolver
         if (buttonNumber >= 1 && buttonNumber <= 4)
         {
             if (commandParts[0].Equals("position", StringComparison.InvariantCultureIgnoreCase) ||
-                commandParts[0].Equals("pos", StringComparison.InvariantCultureIgnoreCase))
+                commandParts[0].Equals("pos", StringComparison.InvariantCultureIgnoreCase) ||
+                commandParts[0].Equals("p", StringComparison.InvariantCultureIgnoreCase))
             {
                 yield return "position";
 
@@ -40,7 +41,9 @@ public class MemoryComponentSolver : ComponentSolver
                 yield return new WaitForSeconds(0.1f);
                 DoInteractionEnd(button);
             }
-            else if (commandParts[0].Equals("label", StringComparison.InvariantCultureIgnoreCase))
+            else if (commandParts[0].Equals("label", StringComparison.InvariantCultureIgnoreCase) ||
+                    commandParts[0].Equals("lab", StringComparison.InvariantCultureIgnoreCase) ||
+                    commandParts[0].Equals("l", StringComparison.InvariantCultureIgnoreCase))
             {
                 foreach(object buttonObject in _buttons)
                 {

@@ -55,6 +55,7 @@ public class BombCommander : ICommandResponder
         FloatingHoldable = (MonoBehaviour)Bomb.GetComponent(_floatingHoldableType);
         SelectableManager = (MonoBehaviour)_selectableManagerProperty.GetValue(_inputManager, null);
         _bombTimeStamp = DateTime.Now;
+        _bombStartingTimer = CurrentTimer;
     }
     #endregion
 
@@ -124,8 +125,7 @@ public class BombCommander : ICommandResponder
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
-        else if (message.Equals("time", StringComparison.InvariantCultureIgnoreCase) ||
-                 message.Equals("timestamp", StringComparison.InvariantCultureIgnoreCase) ||
+        else if (message.Equals("timestamp", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("date", StringComparison.InvariantCultureIgnoreCase))
         {
             //Some modules depend on the date/time the bomb, and therefore that Module instance has spawned, in the bomb defusers timezone.
@@ -137,6 +137,24 @@ public class BombCommander : ICommandResponder
             sb.Append("The Date/Time this bomb started is ");
             sb.Append(string.Format("{0:F}", _bombTimeStamp));
             yield return sb.ToString();
+
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+        else if (message.Equals("help", StringComparison.InvariantCultureIgnoreCase))
+        {
+            responseNotifier.ProcessResponse(CommandResponse.Start);
+
+            yield return "sendtochat The Bomb: Pick up with !bomb hold. Turn with !bomb turn. Show the edges with !bomb edgework. Show a specific edge with !bomb top. Display the bomb start time with !bomb time. Edges are top, bottom, left and right.";
+
+            responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+        else if (message.Equals("time", StringComparison.InvariantCultureIgnoreCase) ||
+                message.Equals("timer", StringComparison.InvariantCultureIgnoreCase) ||
+                message.Equals("clock", StringComparison.InvariantCultureIgnoreCase))
+        {
+            responseNotifier.ProcessResponse(CommandResponse.Start);
+
+            yield return string.Format("sendtochat panicBasket [{0}]", CurrentTimerFormatted);
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
@@ -171,6 +189,15 @@ public class BombCommander : ICommandResponder
             {
                 yield return forceRotationCoroutine.Current;
             }
+        }
+    }
+
+    public IEnumerator TurnBomb()
+    {
+        IEnumerator holdBombCoroutine = HoldBomb(!_heldFrontFace);
+        while (holdBombCoroutine.MoveNext())
+        {
+            yield return holdBombCoroutine.Current;
         }
     }
 
@@ -386,6 +413,23 @@ public class BombCommander : ICommandResponder
         _setControlsRotationMethod.Invoke(SelectableManager, new object[] { baseTransform.rotation * Quaternion.Euler(targetPitch, 0.0f, targetZSpin) });
         _handleFaceSelectionMethod.Invoke(SelectableManager, null);
     }
+
+    public float CurrentTimer
+    {
+        get
+        {
+            MonoBehaviour timerComponent = (MonoBehaviour)CommonReflectedTypeInfo.GetTimerMethod.Invoke(Bomb, null);
+            return (float)CommonReflectedTypeInfo.TimeRemainingField.GetValue(timerComponent);
+        }
+    }
+
+    public string CurrentTimerFormatted
+    {
+        get
+        {
+            return (string)CommonReflectedTypeInfo.GetFormattedTimeMethod.Invoke(null, new object[] { CurrentTimer, true });
+        }
+    }
     #endregion
 
     #region Readonly Fields
@@ -425,5 +469,9 @@ public class BombCommander : ICommandResponder
     #endregion
 
     private bool _heldFrontFace = true;
+    public int _bombSolvableModules;
+    public int _bombSolvedModules;
+    public float _bombStartingTimer;
+    public bool _multiDecker = false;
 }
 

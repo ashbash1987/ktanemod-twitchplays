@@ -19,8 +19,10 @@ public class TwitchComponentHandle : MonoBehaviour
 
     public CanvasGroup canvasGroup = null;
     public CanvasGroup highlightGroup = null;
+    public CanvasGroup canvasGroupMultiDecker = null;
     public Text headerText = null;
     public Text idText = null;
+    public Text idTextMultiDecker = null;
     public ScrollRect messageScroll = null;
     public GameObject messageScrollContents = null;
 
@@ -98,9 +100,12 @@ public class TwitchComponentHandle : MonoBehaviour
         }
 
         idText.text = string.Format("!{0}", _code);
+        idTextMultiDecker.text = _code;
 
         canvasGroup.alpha = 0.0f;
         highlightGroup.alpha = 0.0f;
+
+        canvasGroupMultiDecker.alpha = bombCommander._multiDecker ? 1.0f : 0.0f;
 
         Arrow.gameObject.SetActive(true);
         HighlightArrow.gameObject.SetActive(true);
@@ -109,34 +114,43 @@ public class TwitchComponentHandle : MonoBehaviour
         if (_solver != null)
         {
             _solver.Code = _code;
+            _solver.ComponentHandle = this;
         }
     }
 
     private void LateUpdate()
     {
-        Vector3 cameraForward = Camera.main.transform.forward;
-        Vector3 componentForward = transform.up;
+        if (!bombCommander._multiDecker)
+        {
+            Vector3 cameraForward = Camera.main.transform.forward;
+            Vector3 componentForward = transform.up;
 
-        float angle = Vector3.Angle(cameraForward, -componentForward);
-        float lerpAmount = Mathf.InverseLerp(60.0f, 20.0f, angle);
-        lerpAmount = Mathf.Lerp(canvasGroup.alpha, lerpAmount, Time.deltaTime * 5.0f);
-        canvasGroup.alpha = lerpAmount;
-        transform.localPosition = basePosition + Vector3.Lerp(Vector3.zero, idealHandlePositionOffset, Mathf.SmoothStep(0.0f, 1.0f, lerpAmount));
+            float angle = Vector3.Angle(cameraForward, -componentForward);
+            float lerpAmount = Mathf.InverseLerp(60.0f, 20.0f, angle);
+            lerpAmount = Mathf.Lerp(canvasGroup.alpha, lerpAmount, Time.deltaTime * 5.0f);
+            canvasGroup.alpha = lerpAmount;
+            transform.localPosition = basePosition + Vector3.Lerp(Vector3.zero, idealHandlePositionOffset, Mathf.SmoothStep(0.0f, 1.0f, lerpAmount));
+            messageScroll.verticalNormalizedPosition = 0.0f;
+        }
+    }
 
-        messageScroll.verticalNormalizedPosition = 0.0f;
+    public void OnPass()
+    {
+        canvasGroupMultiDecker.alpha = 0.0f;
     }
     #endregion
 
     #region Message Interface
     public void OnMessageReceived(string userNickName, string userColor, string text)
     {
-        Match match = Regex.Match(text, string.Format("^!{0} (.+)", _code), RegexOptions.IgnoreCase);
+        Match match = Regex.Match(text, string.Format("^!({0}) (.+)", _code), RegexOptions.IgnoreCase);
         if (!match.Success)
         {
             return;
         }
 
-        string internalCommand = match.Groups[1].Value;
+        string targetModule = match.Groups[1].Value;
+        string internalCommand = match.Groups[2].Value;
         
         string messageOut = null;
         if (internalCommand.Equals("help", StringComparison.InvariantCultureIgnoreCase)) {
@@ -156,6 +170,11 @@ public class TwitchComponentHandle : MonoBehaviour
               manualText = _solver.manualCode;
             }
             messageOut = string.Format("{0}: https://ktane.timwi.de/HTML/{1}.html", manualText, Uri.EscapeDataString(manualText));
+        }
+        else if (Regex.IsMatch(internalCommand, "^(bomb|queue) (turn( a?round)?|flip|spin)$", RegexOptions.IgnoreCase))
+        {
+            _solver._turnQueued = true;
+            messageOut = string.Format("Turning to the other side when Module {0} is solved", targetModule);
         }
         if (messageOut != null) {
             ircConnection.SendMessage(string.Format(messageOut, _code, headerText.text));

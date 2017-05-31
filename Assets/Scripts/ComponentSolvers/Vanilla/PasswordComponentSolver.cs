@@ -17,7 +17,19 @@ public class PasswordComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
-        if (Regex.IsMatch(inputCommand, @"^[a-zA-Z]{5}$"))
+        if (inputCommand.Equals("claim", StringComparison.InvariantCultureIgnoreCase))
+        {
+            yield break;
+        }
+        else if (inputCommand.Equals("cycle", StringComparison.InvariantCultureIgnoreCase))
+        {
+            IEnumerator spinnerCoroutine = CycleCharacterSpinnerCoroutine(GetCharSpinner(0));
+            while (spinnerCoroutine.MoveNext())
+            {
+                yield return spinnerCoroutine.Current;
+            }
+        }
+        else if (Regex.IsMatch(inputCommand, @"^[a-zA-Z]{5}$"))
         {
             yield return "password";
 
