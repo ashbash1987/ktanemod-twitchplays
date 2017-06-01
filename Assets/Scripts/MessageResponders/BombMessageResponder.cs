@@ -129,6 +129,11 @@ public class BombMessageResponder : MessageResponder
         {
             yield return null;
             bombs = FindObjectsOfType(CommonReflectedTypeInfo.BombType);
+            if (bombs.Length > 0)
+            {
+                yield return new WaitForSeconds(0.1f);
+                bombs = FindObjectsOfType(CommonReflectedTypeInfo.BombType);
+            }
 
             if (bombs.Length == 1)
             {
