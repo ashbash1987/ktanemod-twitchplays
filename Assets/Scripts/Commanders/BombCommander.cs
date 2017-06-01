@@ -60,17 +60,6 @@ public class BombCommander : ICommandResponder
     #endregion
 
     #region Interface Implementation
-    public string GetFullFormattedTime()
-    {
-        string formattedTime = CurrentTimerFormatted;
-        if (CurrentTimer >= 3600.0f)
-        {
-            int hours = (int)(CurrentTimer / 3600);
-            formattedTime = hours + ":" + formattedTime;
-        }
-        return formattedTime;
-    }
-
     public IEnumerator RespondToCommand(string userNickName, string message, ICommandResponseNotifier responseNotifier)
     {
         if (message.Equals("hold", StringComparison.InvariantCultureIgnoreCase) ||
@@ -165,7 +154,7 @@ public class BombCommander : ICommandResponder
         {
             responseNotifier.ProcessResponse(CommandResponse.Start);
 
-            yield return string.Format("sendtochat panicBasket [{0}]", GetFullFormattedTime());
+            yield return string.Format("sendtochat panicBasket [{0}]", GetFullFormattedTime);
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
@@ -439,6 +428,20 @@ public class BombCommander : ICommandResponder
         get
         {
             return (string)CommonReflectedTypeInfo.GetFormattedTimeMethod.Invoke(null, new object[] { CurrentTimer, true });
+        }
+    }
+
+    public string GetFullFormattedTime
+    {
+        get
+        {
+            string formattedTime = CurrentTimerFormatted;
+            if (CurrentTimer >= 3600.0f)
+            {
+                int hours = (int) (CurrentTimer / 3600);
+                formattedTime = hours + ":" + formattedTime;
+            }
+            return formattedTime;
         }
     }
     #endregion

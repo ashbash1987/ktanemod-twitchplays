@@ -46,11 +46,11 @@ public class BombMessageResponder : MessageResponder
 
             if (!string.IsNullOrEmpty(timeRemainingFormatted))
             {
-                timeRemainingFormatted += ", " + commander.GetFullFormattedTime();
+                timeRemainingFormatted += ", " + commander.GetFullFormattedTime;
             }
             else
             {
-                timeRemainingFormatted = commander.GetFullFormattedTime();
+                timeRemainingFormatted = commander.GetFullFormattedTime;
             }
         }
         
