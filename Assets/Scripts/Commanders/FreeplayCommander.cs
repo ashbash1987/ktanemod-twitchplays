@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -38,6 +39,8 @@ public class FreeplayCommander : ICommandResponder
         _selectableType = ReflectionHelper.FindType("Selectable");
         _handleSelectMethod = _selectableType.GetMethod("HandleSelect", BindingFlags.Public | BindingFlags.Instance);
         _onInteractEndedMethod = _selectableType.GetMethod("OnInteractEnded", BindingFlags.Public | BindingFlags.Instance);
+        _childrenField = _selectableType.GetField("Children", BindingFlags.Public | BindingFlags.Instance);
+        
 
         _selectableManagerType = ReflectionHelper.FindType("SelectableManager");
         if (_selectableManagerType == null)
@@ -67,6 +70,8 @@ public class FreeplayCommander : ICommandResponder
     {
         FreeplayDevice = freeplayDevice;
         Selectable = (MonoBehaviour)FreeplayDevice.GetComponent(_selectableType);
+        Debug.Log("Freeplay device: Attempting to get the Selectable list.");
+        SelectableChildren = (MonoBehaviour[]) _childrenField.GetValue(Selectable);
         FloatingHoldable = (MonoBehaviour)FreeplayDevice.GetComponent(_floatingHoldableType);
         SelectableManager = (MonoBehaviour)_selectableManagerProperty.GetValue(_inputManager, null);
     }
@@ -139,14 +144,35 @@ public class FreeplayCommander : ICommandResponder
             message = message.Remove(timerMatch.Index, timerMatch.Length);
 
             Match modulesMatch = Regex.Match(message, "[0-9]+");
-            if (modulesMatch.Success)
+
+            bool setBombs = false;
+            bool setModules = false;
+            while (modulesMatch.Success)
             {
-                Debug.Log(string.Format("Setting modules to {0}", modulesMatch.Value));
-                IEnumerator setModulesCoroutine = SetBombModules(modulesMatch.Value);
-                while (setModulesCoroutine.MoveNext())
+                int count = 0;
+                
+                if (int.TryParse(modulesMatch.Value, out count))
                 {
-                    yield return setModulesCoroutine.Current;
+                    if ((count <= 2 && !setBombs) || (count >= 3 && !setModules))
+                    {
+                        setBombs |= count <= 2;
+                        setModules |= count >= 3;
+
+                        IEnumerator setBombsModulesCoroutine;
+                        setBombsModulesCoroutine = count <= 2
+                            ? SetBombCount(modulesMatch.Value)
+                            : SetBombModules(modulesMatch.Value);
+
+                        Debug.Log(string.Format("Setting {1} to {0}", modulesMatch.Value,
+                            count <= 2 ? "bombs" : "modules"));
+                        while (setBombsModulesCoroutine.MoveNext())
+                        {
+                            yield return setBombsModulesCoroutine.Current;
+                        }
+                    }
                 }
+                message = message.Remove(modulesMatch.Index, modulesMatch.Length);
+                modulesMatch = Regex.Match(message, "[0-9]+");
             }
 
             string messageLower = message.ToLowerInvariant();
@@ -176,7 +202,17 @@ public class FreeplayCommander : ICommandResponder
                     yield return setTimerCoroutine.Current;
                 }
             }
-            
+
+            Match bombsMatch = Regex.Match(message, "^bombs ([0-9]+)$", RegexOptions.IgnoreCase);
+            if (bombsMatch.Success)
+            {
+                IEnumerator setBombsCoroutine = SetBombCount(bombsMatch.Groups[1].Value);
+                while (setBombsCoroutine.MoveNext())
+                {
+                    yield return setBombsCoroutine.Current;
+                }
+            }
+
             Match modulesMatch = Regex.Match(message, "^modules ([0-9]+)$", RegexOptions.IgnoreCase);
             if (modulesMatch.Success)
             {
@@ -221,6 +257,28 @@ public class FreeplayCommander : ICommandResponder
             yield return new WaitForSeconds(0.1f);
             if (Mathf.FloorToInt(currentTime) == Mathf.FloorToInt((float)_timeField.GetValue(currentSettings)))
                 yield break;
+        }
+    }
+
+    public IEnumerator SetBombCount(string bombs)
+    {
+        int bombCount = 0;
+        if (!int.TryParse(bombs, out bombCount))
+        {
+            yield break;
+        }
+
+        object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
+        int currentModuleCount = (int)_moduleCountField.GetValue(currentSettings);
+
+        Debug.Log("Attempting to set the number of bombs");
+        SelectObject(bombCount <= 1 ? SelectableChildren[2] : SelectableChildren[3]);
+
+        if (currentModuleCount != (int) _moduleCountField.GetValue(currentSettings))
+        {
+            Debug.Log("Failed - Multiple bombs not loaded - Reverting the module count.");
+            yield return new WaitForSeconds(0.1f);
+            SelectObject(bombCount <= 1 ? SelectableChildren[3] : SelectableChildren[2]);
         }
     }
 
@@ -350,6 +408,7 @@ public class FreeplayCommander : ICommandResponder
     #region Readonly Fields
     public readonly MonoBehaviour FreeplayDevice = null;
     public readonly MonoBehaviour Selectable = null;
+    public readonly MonoBehaviour[] SelectableChildren = null;
     public readonly MonoBehaviour FloatingHoldable = null;
     private readonly MonoBehaviour SelectableManager = null;
     #endregion
@@ -380,6 +439,7 @@ public class FreeplayCommander : ICommandResponder
     private static Type _selectableType = null;
     private static MethodInfo _handleSelectMethod = null;
     private static MethodInfo _onInteractEndedMethod = null;
+    private static FieldInfo _childrenField = null;
 
     private static Type _selectableManagerType = null;
     private static MethodInfo _selectMethod = null;
