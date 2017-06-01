@@ -43,13 +43,14 @@ public class BombMessageResponder : MessageResponder
                 timeStarting = commander._bombStartingTimer;
                 timeRemaining = commander.CurrentTimer;
             }
+
             if (!string.IsNullOrEmpty(timeRemainingFormatted))
             {
-                timeRemainingFormatted += ", " + commander.CurrentTimerFormatted;
+                timeRemainingFormatted += ", " + commander.GetFullFormattedTime();
             }
             else
             {
-                timeRemainingFormatted = commander.CurrentTimerFormatted;
+                timeRemainingFormatted = commander.GetFullFormattedTime();
             }
         }
         
@@ -164,7 +165,7 @@ public class BombMessageResponder : MessageResponder
         }
         else if (id == 0)
         {
-            _ircConnection.SendMessage("The next set of bombs are now live! Start sending your commands! MeDestructoid");
+            _ircConnection.SendMessage("The next set of bombs are now live! Start sending your commands! MrDestructoid");
 
             _bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold");
         }
