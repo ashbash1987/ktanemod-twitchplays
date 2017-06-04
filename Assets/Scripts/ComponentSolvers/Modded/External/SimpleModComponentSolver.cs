@@ -26,7 +26,7 @@ public class SimpleModComponentSolver : ComponentSolver
         try
         {
             selectableSequence = (KMSelectable[])ProcessMethod.Invoke(CommandComponent, new object[] { inputCommand });
-            if (selectableSequence == null)
+            if (selectableSequence == null || selectableSequence.Length == 0)
             {
                 yield break;
             }
@@ -37,7 +37,7 @@ public class SimpleModComponentSolver : ComponentSolver
             Debug.LogException(ex);
             yield break;
         }
-
+        
         yield return "modsequence";
 
         int beforeInteractionStrikeCount = StrikeCount;
@@ -53,7 +53,6 @@ public class SimpleModComponentSolver : ComponentSolver
             KMSelectable selectable = selectableSequence[selectableIndex];
             if (selectable == null)
             {
-                Debug.LogErrorFormat("An empty selectable has been found at index {0} within the selectable array returned from {1}.{2}; Skipping this index, however this may have unintended sideeffects.", selectableIndex, ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
                 yield return new WaitForSeconds(0.1f);
                 continue;
             }
