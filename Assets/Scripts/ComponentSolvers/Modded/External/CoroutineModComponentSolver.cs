@@ -25,6 +25,7 @@ public class CoroutineModComponentSolver : ComponentSolver
             yield break;
         }
 
+        int beforeStrikeCount = StrikeCount;
         IEnumerator responseCoroutine = null;
         try
         {
@@ -41,33 +42,32 @@ public class CoroutineModComponentSolver : ComponentSolver
             yield break;
         }
 
-        yield return "modcoroutine";
+        bool moveNext = false;
+        while (beforeStrikeCount == StrikeCount && !Solved)
+        {
+            try
+            {
+                if (!responseCoroutine.MoveNext())
+                    yield break;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogErrorFormat(
+                    "An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.",
+                    ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+                Debug.LogException(ex);
+                yield break;
+            }
+            if (!moveNext)
+            {
+                moveNext = true;
+                yield return "CoroutineModComponentSolver";
+            }
 
-        bool internalParseError = false;
-        try
-        {
-            internalParseError = !responseCoroutine.MoveNext();
-        }
-        catch (Exception ex)
-        {
-            Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
-            Debug.LogException(ex);
-            internalParseError = true;
-        }
-        if (internalParseError)
-        {
-            yield return "parseerror";
-            yield break;
-        }
-
-        int beforeStrikeCount = StrikeCount;
-        bool moveNext = true;
-        while (moveNext && beforeStrikeCount == StrikeCount)
-        {
             object currentObject = responseCoroutine.Current;
             if (currentObject is KMSelectable)
             {
-                KMSelectable selectable = (KMSelectable)currentObject;
+                KMSelectable selectable = (KMSelectable) currentObject;
                 if (HeldSelectables.Contains(selectable))
                 {
                     DoInteractionEnd(selectable);
@@ -102,34 +102,9 @@ public class CoroutineModComponentSolver : ComponentSolver
             }
             yield return currentObject;
 
-            if (Solved)
-            {
-                Debug.LogWarningFormat("The Module was solved possibly early by a submitted command to the invokation of {0}.{1}; Command invokation is being aborted to prevent strikes.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
-                Debug.LogWarning(inputCommand);
-                break;
-            }
-
-            if (StrikeCount != beforeStrikeCount)
-            {
-                Debug.LogWarningFormat("A Strike was caused by a submitted command to the invokation of {0}.{1}; Command invokation is being aborted.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
-                Debug.LogWarning(inputCommand);
-                break;
-            }
-
-            try
-            {
-                moveNext = responseCoroutine.MoveNext();
-            }
-            catch (Exception ex)
-            {
-                Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
-                Debug.LogException(ex);
-                moveNext = false;
-            }
-
             if (Canceller.ShouldCancel)
                 TryCancel = true;
-        }        
+        } 
     }
 
     private readonly MethodInfo ProcessMethod = null;
