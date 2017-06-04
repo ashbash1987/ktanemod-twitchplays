@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -60,6 +60,8 @@ public class CoroutineModComponentSolver : ComponentSolver
             yield break;
         }
 
+        int beforeStrikeCount = StrikeCount;
+
         while (true)
         {
             object currentObject = responseCoroutine.Current;
@@ -77,20 +79,17 @@ public class CoroutineModComponentSolver : ComponentSolver
                     HeldSelectables.Add(selectable);
                 }
             }
-            if (currentObject is KMSelectable[])
+            else if (currentObject is KMSelectable[])
             {
-                int beforeStrikeCount = StrikeCount;
                 KMSelectable[] selectables = (KMSelectable[]) currentObject;
                 foreach (KMSelectable selectable in selectables)
                 {
                     DoInteractionStart(selectable);
                     yield return new WaitForSeconds(0.1f);
                     DoInteractionEnd(selectable);
-                    if (beforeStrikeCount != StrikeCount || Canceller.ShouldCancel)
-                        break;
                 }
             }
-            if (currentObject is string)
+            else if (currentObject is string)
             {
                 string str = (string) currentObject;
                 if (str.Equals("cancelled", StringComparison.InvariantCultureIgnoreCase))
@@ -100,6 +99,9 @@ public class CoroutineModComponentSolver : ComponentSolver
                 }
             }
             yield return currentObject;
+
+            if (beforeStrikeCount != StrikeCount || Solved || Canceller.ShouldCancel)
+                break;
 
             try
             {
@@ -117,7 +119,7 @@ public class CoroutineModComponentSolver : ComponentSolver
 
             if (Canceller.ShouldCancel)
                 TryCancel = true;
-        }        
+        }
     }
 
     private readonly MethodInfo ProcessMethod = null;
