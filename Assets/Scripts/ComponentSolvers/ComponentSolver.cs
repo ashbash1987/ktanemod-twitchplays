@@ -46,13 +46,35 @@ public abstract class ComponentSolver : ICommandResponder
         _currentResponseNotifier = responseNotifier;
         _currentUserNickName = userNickName;
 
+
+        int beforeStrikeCount = StrikeCount;
         IEnumerator subcoroutine = RespondToCommandCommon(message);
         if (subcoroutine == null || !subcoroutine.MoveNext())
         {
             subcoroutine = RespondToCommandInternal(message);
-            if (subcoroutine == null || !subcoroutine.MoveNext())
+            if (subcoroutine == null || !subcoroutine.MoveNext() || Solved || beforeStrikeCount != StrikeCount)
             {
-                responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+                if (Solved || beforeStrikeCount != StrikeCount)
+                {
+                    IEnumerator focusDefocus = BombCommander.Focus(Selectable, FocusDistance, FrontFace);
+                    while (focusDefocus.MoveNext())
+                    {
+                        yield return focusDefocus.Current;
+                    }
+                    yield return new WaitForSeconds(0.5f);
+
+                    responseNotifier.ProcessResponse(Solved ? CommandResponse.EndComplete : CommandResponse.EndError);
+
+                    focusDefocus = BombCommander.Defocus(FrontFace);
+                    while (focusDefocus.MoveNext())
+                    {
+                        yield return focusDefocus.Current;
+                    }
+                    yield return new WaitForSeconds(0.5f);
+                }
+                else
+                    responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+
                 _currentResponseNotifier = null;
                 _currentUserNickName = null;
                 yield break;
