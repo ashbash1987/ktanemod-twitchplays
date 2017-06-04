@@ -173,7 +173,11 @@ public class TwitchComponentHandle : MonoBehaviour
         }
         else if (Regex.IsMatch(internalCommand, "^(bomb|queue) (turn( a?round)?|flip|spin)$", RegexOptions.IgnoreCase))
         {
-            _solver._turnQueued = true;
+            if (!_solver._turnQueued)
+            {
+                _solver._turnQueued = true;
+                StartCoroutine(_solver.TurnBombOnSolve());
+            }
             messageOut = string.Format("Turning to the other side when Module {0} is solved", targetModule);
         }
         if (messageOut != null) {

@@ -37,9 +37,11 @@ public abstract class ComponentSolver : ICommandResponder
     #region Interface Implementation
     public IEnumerator RespondToCommand(string userNickName, string message, ICommandResponseNotifier responseNotifier)
     {
+        _processingTwitchCommand = true;
         if (Solved)
         {
             responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+            _processingTwitchCommand = false;
             yield break;
         }
 
@@ -77,6 +79,7 @@ public abstract class ComponentSolver : ICommandResponder
 
                 _currentResponseNotifier = null;
                 _currentUserNickName = null;
+                _processingTwitchCommand = false;
                 yield break;
             }
         }
@@ -185,19 +188,9 @@ public abstract class ComponentSolver : ICommandResponder
 
         yield return new WaitForSeconds(0.5f);
 
-        if (_readyToTurn)
-        {
-            _readyToTurn = false;
-            IEnumerator turnCoroutine = BombCommander.TurnBomb();
-            while (turnCoroutine.MoveNext())
-            {
-                yield return turnCoroutine.Current;
-            }
-            yield return new WaitForSeconds(0.5f);
-        }
-
         _currentResponseNotifier = null;
         _currentUserNickName = null;
+        _processingTwitchCommand = false;
     }
     #endregion
 
@@ -256,6 +249,24 @@ public abstract class ComponentSolver : ICommandResponder
         ComponentHandle.OnPass();
 
         return false;
+    }
+
+    public IEnumerator TurnBombOnSolve()
+    {
+        if (!_turnQueued)
+            yield break;
+
+        while (!_readyToTurn || _processingTwitchCommand)
+            yield return new WaitForSeconds(0.1f);
+
+        _readyToTurn = false;
+        IEnumerator turnCoroutine = BombCommander.TurnBomb();
+        while (turnCoroutine.MoveNext())
+        {
+            yield return turnCoroutine.Current;
+        }
+
+        yield return new WaitForSeconds(0.5f);
     }
 
     private bool DisableOnStrike;
@@ -418,6 +429,7 @@ public abstract class ComponentSolver : ICommandResponder
     public string manualCode = null;
     public bool _turnQueued = false;
     private bool _readyToTurn = false;
+    private bool _processingTwitchCommand = false;
 
     public TwitchComponentHandle ComponentHandle = null;
 }
