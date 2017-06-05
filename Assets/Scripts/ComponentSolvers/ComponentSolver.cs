@@ -244,6 +244,7 @@ public abstract class ComponentSolver : ICommandResponder
         {
             Debug.Log("[bmn] Activating queued turn for completed module.");
             _readyToTurn = true;
+            _turnQueued = false;
         }
 
         ComponentHandle.OnPass();
@@ -253,10 +254,13 @@ public abstract class ComponentSolver : ICommandResponder
 
     public IEnumerator TurnBombOnSolve()
     {
-        if (!_turnQueued)
+        while(_turnQueued)
+            yield return new WaitForSeconds(0.1f);
+
+        if (!_readyToTurn)
             yield break;
 
-        while (!_readyToTurn || _processingTwitchCommand)
+        while (_processingTwitchCommand)
             yield return new WaitForSeconds(0.1f);
 
         _readyToTurn = false;
@@ -427,9 +431,12 @@ public abstract class ComponentSolver : ICommandResponder
     
     public string helpMessage = null;
     public string manualCode = null;
+    public bool delayInvokation = false;
+
     public bool _turnQueued = false;
     private bool _readyToTurn = false;
     private bool _processingTwitchCommand = false;
+   
 
     public TwitchComponentHandle ComponentHandle = null;
 }
