@@ -372,7 +372,7 @@ public class Leaderboard
             xml.Serialize(writer, _entryList);
 
             path = Path.Combine(Application.persistentDataPath, statsSavePath);
-            Debug.Log("Saving stats data to file: " + path);
+            Debug.Log("Leaderboard: Saving stats data to file: " + path);
             Dictionary<string, int> stats = new Dictionary<string, int>
             {
                 { "BombsAttempted", BombsAttempted },
