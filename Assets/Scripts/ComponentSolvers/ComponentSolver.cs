@@ -98,7 +98,6 @@ public abstract class ComponentSolver : ICommandResponder
         while (subcoroutine.MoveNext())
         {
             object currentValue = subcoroutine.Current;
-            int temp;
             if (currentValue is string)
             {
                 string currentString = (string)currentValue;
@@ -141,12 +140,15 @@ public abstract class ComponentSolver : ICommandResponder
                 {
                     DisableOnStrike = true;
                 }
-                else if (currentString.StartsWith("award strikes ", StringComparison.CurrentCultureIgnoreCase) &&
-                         int.TryParse(currentString.Substring(14), out temp))
+                else if (currentString.StartsWith("award strikes ", StringComparison.CurrentCultureIgnoreCase))
                 {
-                    _strikeCount += temp;
-                    AwardStrikes(_currentUserNickName, _currentResponseNotifier, temp);
-                    DisableOnStrike = false;
+                    int awardStrikeCount;
+                    if (int.TryParse(currentString.Substring(14), out awardStrikeCount))
+                    {
+                        _strikeCount += awardStrikeCount;
+                        AwardStrikes(_currentUserNickName, _currentResponseNotifier, awardStrikeCount);
+                        DisableOnStrike = false;
+                    }
                 }
             }
             else if (currentValue is Quaternion)
