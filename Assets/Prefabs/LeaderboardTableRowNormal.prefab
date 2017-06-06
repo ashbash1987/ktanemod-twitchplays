@@ -131,7 +131,6 @@ GameObject:
   - 114: {fileID: 114000012093488100}
   - 225: {fileID: 225000014085205624}
   - 95: {fileID: 95000014110450710}
-  - 122: {fileID: 122000010797921812}
   m_Layer: 0
   m_Name: LeaderboardTableRowNormal
   m_TagString: Untagged
@@ -494,17 +493,6 @@ MonoBehaviour:
   m_PreferredHeight: 40
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
---- !u!122 &122000010797921812
-Halo:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1000014091651764}
-  m_Enabled: 1
-  m_Color:
-    serializedVersion: 2
-    rgba: 4281254160
-  m_Size: 5
 --- !u!222 &222000010531263950
 CanvasRenderer:
   m_ObjectHideFlags: 1

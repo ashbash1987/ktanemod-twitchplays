@@ -196,7 +196,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f8d9f7a2fe2c64c8ad7ed8a62b33ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  specialRows: []
+  specialRows:
+  - {fileID: 114000011985468212, guid: da5298ce9c49c8244907c9d5a87abc48, type: 2}
+  - {fileID: 114000013388690480, guid: 6f0f6e64d24bd0d41b8b81d068f2d4ea, type: 2}
+  - {fileID: 114000010542720656, guid: 3ee569665aa70c24bbee82000fb4378c, type: 2}
   normalRow: {fileID: 114000012197924668, guid: b0383c1ce09cf5d4c8549b3fdfa72bea,
     type: 2}
   tableTransform: {fileID: 224379496515557104}

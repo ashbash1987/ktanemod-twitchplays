@@ -59,7 +59,6 @@ GameObject:
   m_Component:
   - 224: {fileID: 224000010375069096}
   - 114: {fileID: 114000013261203894}
-  - 222: {fileID: 222000013664221014}
   m_Layer: 0
   m_Name: Columns
   m_TagString: Untagged
@@ -530,12 +529,6 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000010279756600}
---- !u!222 &222000013664221014
-CanvasRenderer:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1000011239414916}
 --- !u!224 &224000010173103930
 RectTransform:
   m_ObjectHideFlags: 1
