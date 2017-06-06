@@ -37,24 +37,49 @@ public abstract class ComponentSolver : ICommandResponder
     #region Interface Implementation
     public IEnumerator RespondToCommand(string userNickName, string message, ICommandResponseNotifier responseNotifier)
     {
+        _processingTwitchCommand = true;
         if (Solved)
         {
             responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+            _processingTwitchCommand = false;
             yield break;
         }
 
         _currentResponseNotifier = responseNotifier;
         _currentUserNickName = userNickName;
 
+
+        int beforeStrikeCount = StrikeCount;
         IEnumerator subcoroutine = RespondToCommandCommon(message);
         if (subcoroutine == null || !subcoroutine.MoveNext())
         {
             subcoroutine = RespondToCommandInternal(message);
-            if (subcoroutine == null || !subcoroutine.MoveNext())
+            if (subcoroutine == null || !subcoroutine.MoveNext() || Solved || beforeStrikeCount != StrikeCount)
             {
-                responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+                if (Solved || beforeStrikeCount != StrikeCount)
+                {
+                    IEnumerator focusDefocus = BombCommander.Focus(Selectable, FocusDistance, FrontFace);
+                    while (focusDefocus.MoveNext())
+                    {
+                        yield return focusDefocus.Current;
+                    }
+                    yield return new WaitForSeconds(0.5f);
+
+                    responseNotifier.ProcessResponse(Solved ? CommandResponse.EndComplete : CommandResponse.EndError);
+
+                    focusDefocus = BombCommander.Defocus(FrontFace);
+                    while (focusDefocus.MoveNext())
+                    {
+                        yield return focusDefocus.Current;
+                    }
+                    yield return new WaitForSeconds(0.5f);
+                }
+                else
+                    responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+
                 _currentResponseNotifier = null;
                 _currentUserNickName = null;
+                _processingTwitchCommand = false;
                 yield break;
             }
         }
@@ -163,19 +188,9 @@ public abstract class ComponentSolver : ICommandResponder
 
         yield return new WaitForSeconds(0.5f);
 
-        if (_readyToTurn)
-        {
-            _readyToTurn = false;
-            IEnumerator turnCoroutine = BombCommander.TurnBomb();
-            while (turnCoroutine.MoveNext())
-            {
-                yield return turnCoroutine.Current;
-            }
-            yield return new WaitForSeconds(0.5f);
-        }
-
         _currentResponseNotifier = null;
         _currentUserNickName = null;
+        _processingTwitchCommand = false;
     }
     #endregion
 
@@ -229,11 +244,33 @@ public abstract class ComponentSolver : ICommandResponder
         {
             Debug.Log("[bmn] Activating queued turn for completed module.");
             _readyToTurn = true;
+            _turnQueued = false;
         }
 
         ComponentHandle.OnPass();
 
         return false;
+    }
+
+    public IEnumerator TurnBombOnSolve()
+    {
+        while(_turnQueued)
+            yield return new WaitForSeconds(0.1f);
+
+        if (!_readyToTurn)
+            yield break;
+
+        while (_processingTwitchCommand)
+            yield return new WaitForSeconds(0.1f);
+
+        _readyToTurn = false;
+        IEnumerator turnCoroutine = BombCommander.TurnBomb();
+        while (turnCoroutine.MoveNext())
+        {
+            yield return turnCoroutine.Current;
+        }
+
+        yield return new WaitForSeconds(0.5f);
     }
 
     private bool DisableOnStrike;
@@ -394,8 +431,12 @@ public abstract class ComponentSolver : ICommandResponder
     
     public string helpMessage = null;
     public string manualCode = null;
+    public bool delayInvokation = false;
+
     public bool _turnQueued = false;
     private bool _readyToTurn = false;
+    private bool _processingTwitchCommand = false;
+   
 
     public TwitchComponentHandle ComponentHandle = null;
 }

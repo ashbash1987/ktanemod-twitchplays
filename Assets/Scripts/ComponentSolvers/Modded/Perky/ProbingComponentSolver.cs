@@ -51,15 +51,10 @@ public class ProbingComponentSolver : ComponentSolver
         yield return "Probing Solve Attempt";
         yield return EnsureWiresConnected(red-1, blue-1);
 
-        for (var i = 0; i < 65; i++)
-        {
-            yield return new WaitForSeconds(0.1f);
-            if (beforeStrikes == StrikeCount) continue;
-
-            //A strike somewhere else on the bomb has the possibility to cause a strike here.
-            yield return EnsureWiresConnected(4, 4);
-            yield break;
-        }
+        //Because a strike elsewhere on the bomb may cause this module to strike,
+        //about 20% of the time.
+        yield return "solve";
+        yield return "strike";
     }
 
 
