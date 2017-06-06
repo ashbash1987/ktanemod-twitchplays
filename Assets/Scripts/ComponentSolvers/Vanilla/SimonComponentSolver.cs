@@ -27,11 +27,6 @@ public class SimonComponentSolver : ComponentSolver
 
         foreach (Match move in Regex.Matches(inputCommand, @"(\b(red|blue|green|yellow)\b|[rbgy])", RegexOptions.IgnoreCase))
         {
-            Dictionary<string, int> buttonIndex = new Dictionary<string, int>
-            {
-              {"r", 0}, {"b", 1}, {"g", 2}, {"y", 3}
-            };
-            
             MonoBehaviour button = (MonoBehaviour)_buttons.GetValue(  buttonIndex[ move.Value.Substring(0, 1).ToLowerInvariant() ]  );
         
             if (button != null)
@@ -65,6 +60,10 @@ public class SimonComponentSolver : ComponentSolver
 
     private static Type _simonComponentType = null;
     private static FieldInfo _buttonsField = null;
+    private static readonly Dictionary<string, int> buttonIndex = new Dictionary<string, int>
+    {
+        {"r", 0}, {"b", 1}, {"g", 2}, {"y", 3}
+    };
 
     private Array _buttons = null;
 }
