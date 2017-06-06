@@ -85,12 +85,12 @@ public static class ComponentSolverFactory
         ModComponentSolverHelpMessages["FriendshipModule"] = "Submit the desired friendship element with !{0} submit Fairness Conscientiousness Kindness Authenticity.";
         //ModComponentSolverHelpMessages["graphModule"] = "";
         ModComponentSolverHelpMessages["HexamazeModule"] = "Move towards the exit with !{0} move 12 10 6 6 6 2, or with !{0} move N NW S S S NE.  (clockface or cardinal)";
-        //ModComponentSolverHelpMessages["http"] = ""; // do
+        ModComponentSolverHelpMessages["http"] = "Submit the response with !{0} resp 123.";
         ModComponentSolverHelpMessages["Laundry"] = "Set all of the options with !{0} set all 30C,2 dot,110C,Wet Cleaning.  Set just washing with !{0} set wash 40C.  Submit with !{0} insert coin. Prey for that 4 in 2 + lit bob. Kappa";
         ModComponentSolverHelpMessages["LEDEnc"] = "Press the button with label B with !{0} press b.";
         //ModComponentSolverHelpMessages["LetterKeys"] = "";
         ModComponentSolverHelpMessages["LightCycleModule"] = "Submit your answer with !{0} B R W M G Y. (note, this module WILL try to input any answer you put into it. Don't do !{0} claim or !{0} mine here.)";
-        //ModComponentSolverHelpMessages["LightsOut"] = ""; // do
+        ModComponentSolverHelpMessages["LightsOut"] = "Press the buttons with !{0} press 1 2 3. Buttons ordered from top to bottom, then left to right.";
         ModComponentSolverHelpMessages["Logic"] = "Logic is answered with !{0} submit F T.";
         //ModComponentSolverHelpMessages["MazeV2"] = "";
         //ModComponentSolverHelpMessages["Microcontroller"] = "";
@@ -105,7 +105,7 @@ public static class ComponentSolverFactory
         //ModComponentSolverHelpMessages["Needy Math"] = "";
         ModComponentSolverHelpMessages["neutralization"] = "Turn the filter on/off with !{0} filter. Move to the next base with !{0} base next.  Move to previous base with !{0} base prev. Set drop count with !{0} conc set 48. Submit with !{0} titrate.";
         //ModComponentSolverHelpMessages["NumberPad"] = "";
-        //ModComponentSolverHelpMessages["OnlyConnectModule"] = "";
+        ModComponentSolverHelpMessages["OnlyConnectModule"] = "Press a button by position with !{0} press tm or !{0} press 2. Round 1 also accepts symbol names (e.g. reeds, eye, flax, lion, water, viper).";
         //ModComponentSolverHelpMessages["spwizPerspectivePegs"] = "";
         ModComponentSolverHelpMessages["PianoKeys"] = "Submit your answer with !{0} press Bb Bb Bb Bb Gb Ab Bb Ab Bb.";
         //ModComponentSolverHelpMessages["resistors"] = "";
@@ -117,14 +117,14 @@ public static class ComponentSolverFactory
         ModComponentSolverHelpMessages["SillySlots"] = "Keep the slots with !{0} keep.  Pull the slots with !{0} pull.";
         ModComponentSolverHelpMessages["SimonScreamsModule"] = "Press the correct colors for each round with !{0} press B O Y.";
         ModComponentSolverHelpMessages["SkewedSlotsModule"] = "Submit the correct response with !{0} submit 1 2 3.";
-        //ModComponentSolverHelpMessages["SouvenirModule"] = ""; // do
+        ModComponentSolverHelpMessages["SouvenirModule"] = "Submit the correct response with !{0} answer 3. Order is from top to bottom, then left to right.";
         //ModComponentSolverHelpMessages["switchModule"] = "";
-        //ModComponentSolverHelpMessages["symbolicPasswordModule"] = ""; // do
+        ModComponentSolverHelpMessages["symbolicPasswordModule"] = "Cycle a row with cycle t l. Cycle a column with cycle m. Submit with !{0} submit. Rows are TL/TR/BL/BR, columns are L/R/M. Spaces are important!";
         //ModComponentSolverHelpMessages["spwizTetris"] = "";
         ModComponentSolverHelpMessages["TextField"] = "Press the button in Row 2 column 3 and Row 3 Column 4 with !{0} press 3,2 4,3.";
         ModComponentSolverHelpMessages["TheBulbModule"] = "Press O with !{0} press O.  Press I with !{0} press I. Unscrew the bulb with !{0} unscrew.  Screw in the bulb with !{0} screw.";
-        //ModComponentSolverHelpMessages["TheClockModule"] = ""; // do
-        //ModComponentSolverHelpMessages["TheGamepadModule"] = ""; // do
+        ModComponentSolverHelpMessages["TheClockModule"] = "Submit a time with !{0} set 12:34 am. Command must include a 12-hour time followed by AM/PM.";
+        ModComponentSolverHelpMessages["TheGamepadModule"] = "Submit your answer with !{0} submit l r u d a b.";
         ModComponentSolverHelpMessages["ThirdBase"] = "Press a button with !{0} z0s8. Word must match the button as it would appear if the module was the right way up. Not case sensitive.";
         ModComponentSolverHelpMessages["TicTacToeModule"] = "Press a button with !{0} tl. Buttons are tl, tm, tr, ml, mm, mr, bl, bm, br.";
         ModComponentSolverHelpMessages["webDesign"] = "Accept the design with !{0} acc.  Consider the design with !{0} con.  Reject the design with !{0} reject.";
@@ -134,7 +134,6 @@ public static class ComponentSolverFactory
         
         //Manual Codes
         ModComponentSolverManualCodes["ColourFlash"] = "Color Flash";
-        ModComponentSolverManualCodes["monsplodeFight"] = "Monsplode, Fight%21";
 
         //Delay Invokation. (Modules start processing commands before the very first yield return, so need to be delayed.)
         //The standard is to return the KMSelectable[] array, or yield return something, before interaction with the module
