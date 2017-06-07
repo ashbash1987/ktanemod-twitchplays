@@ -149,6 +149,17 @@ public abstract class ComponentSolver : ICommandResponder
 
         yield return new WaitForSeconds(0.5f);
 
+        if (_readyToTurn)
+        {
+            _readyToTurn = false;
+            IEnumerator turnCoroutine = BombCommander.TurnBomb();
+            while (turnCoroutine.MoveNext())
+            {
+                yield return turnCoroutine.Current;
+            }
+            yield return new WaitForSeconds(0.5f);
+        }
+
         _currentResponseNotifier = null;
         _currentUserNickName = null;
     }
@@ -197,6 +208,16 @@ public abstract class ComponentSolver : ICommandResponder
         {
             AwardSolve(_currentUserNickName, _currentResponseNotifier);
         }
+
+        BombCommander._bombSolvedModules++;
+        
+        if (_turnQueued)
+        {
+            Debug.LogFormat("ComponentSolver: Activating queued turn for completed module {0}.", Code);
+            _readyToTurn = true;
+        }
+
+        ComponentHandle.OnPass();
 
         return false;
     }
@@ -348,4 +369,8 @@ public abstract class ComponentSolver : ICommandResponder
     
     public string helpMessage = null;
     public string manualCode = null;
+    public bool _turnQueued = false;
+    private bool _readyToTurn = false;
+
+    public TwitchComponentHandle ComponentHandle = null;
 }

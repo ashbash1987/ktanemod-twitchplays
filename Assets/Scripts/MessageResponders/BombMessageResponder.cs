@@ -19,24 +19,56 @@ public class BombMessageResponder : MessageResponder
     {
         InputInterceptor.DisableInput();
 
+        leaderboard.ClearSolo();
         StartCoroutine(CheckForBomb());
     }
 
     private void OnDisable()
     {
         StopAllCoroutines();
-
+        leaderboard.BombsAttempted++;
         string bombMessage = null;
         if ((bool)CommonReflectedTypeInfo.HasDetonatedProperty.GetValue(_bombCommander.Bomb, null))
         {
-            bombMessage = "KAPOW KAPOW The bomb has exploded! KAPOW KAPOW";
+            bombMessage = string.Format("KAPOW KAPOW The bomb has exploded, with {0} remaining! KAPOW KAPOW", _bombCommander.CurrentTimerFormatted);
+            leaderboard.BombsExploded++;
+            leaderboard.Success = false;
         }
         else
         {
-            bombMessage = "PraiseIt PraiseIt The bomb has been defused! PraiseIt PraiseIt";
+            bombMessage = string.Format("PraiseIt PraiseIt The bomb has been defused, with {0} remaining! PraiseIt PraiseIt", _bombCommander.CurrentTimerFormatted);
+            leaderboard.BombsCleared++;
+            leaderboard.Success = true;
+            if (leaderboard.CurrentSolvers.Count == 1)
+            {
+                float previousRecord = 0.0f;
+                float elapsedTime = _bombCommander._bombStartingTimer - _bombCommander.CurrentTimer;
+                string userName = "";
+                foreach (string uName in leaderboard.CurrentSolvers.Keys)
+                {
+                    userName = uName;
+                    break;
+                }
+                if (leaderboard.CurrentSolvers[userName] == Leaderboard.RequiredSoloSolves)
+                {
+                    leaderboard.AddSoloClear(userName, elapsedTime, out previousRecord);
+                    TimeSpan elapsedTimeSpan = TimeSpan.FromSeconds(elapsedTime);
+                    bombMessage = string.Format("PraiseIt PraiseIt {0} completed a solo defusal in {1}:{2:00}!", leaderboard.SoloSolver.UserName, (int)elapsedTimeSpan.TotalMinutes, elapsedTimeSpan.Seconds);
+                    if (elapsedTime < previousRecord)
+                    {
+                        TimeSpan previousTimeSpan = TimeSpan.FromSeconds(previousRecord);
+                        bombMessage += string.Format(" It's a new record! (Previous record: {0}:{1:00})", (int)previousTimeSpan.TotalMinutes, previousTimeSpan.Seconds);
+                    }
+                    bombMessage += " PraiseIt PraiseIt";
+                }
+                else
+                {
+                    leaderboard.ClearSolo();
+                }
+            }
         }
 
-        parentService.StartCoroutine(SendDelayedMessage(1.5f, bombMessage));
+        parentService.StartCoroutine(SendDelayedMessage(1.0f, bombMessage));
 
         if (_bombHandle != null)
         {
@@ -85,6 +117,8 @@ public class BombMessageResponder : MessageResponder
         CreateComponentHandlesForBomb(bomb);
 
         _ircConnection.SendMessage("The next bomb is now live! Start sending your commands! MrDestructoid");
+
+        _bombHandle.OnMessageReceived("The Bomb", "red", "!bomb hold");
     }
 
     protected override void OnMessageReceived(string userNickName, string userColorCode, string text)
@@ -114,6 +148,11 @@ public class BombMessageResponder : MessageResponder
         bool foundComponents = false;
 
         IList bombComponents = (IList)CommonReflectedTypeInfo.BombComponentsField.GetValue(bomb);
+
+        if (bombComponents.Count > 12)
+        {
+            _bombCommander._multiDecker = true;
+        }
 
         foreach (MonoBehaviour bombComponent in bombComponents)
         {

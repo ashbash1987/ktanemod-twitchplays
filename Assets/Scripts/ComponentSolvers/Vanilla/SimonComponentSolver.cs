@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class SimonComponentSolver : ComponentSolver
@@ -23,32 +25,13 @@ public class SimonComponentSolver : ComponentSolver
 
         int beforeButtonStrikeCount = StrikeCount;
 
-        string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (string buttonString in sequence)
+        foreach (Match move in Regex.Matches(inputCommand, @"(\b(red|blue|green|yellow)\b|[rbgy])", RegexOptions.IgnoreCase))
         {
-            MonoBehaviour button = null;
-
-            if (buttonString.Equals("r", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("red", StringComparison.InvariantCultureIgnoreCase))
-            {
-                button = (MonoBehaviour)_buttons.GetValue(0);
-            }
-            else if (buttonString.Equals("b", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("blue", StringComparison.InvariantCultureIgnoreCase))
-            {
-                button = (MonoBehaviour)_buttons.GetValue(1);
-            }
-            else if (buttonString.Equals("g", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("green", StringComparison.InvariantCultureIgnoreCase))
-            {
-                button = (MonoBehaviour)_buttons.GetValue(2);
-            }
-            else if (buttonString.Equals("y", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("yellow", StringComparison.InvariantCultureIgnoreCase))
-            {
-                button = (MonoBehaviour)_buttons.GetValue(3);
-            }
-
+            MonoBehaviour button = (MonoBehaviour)_buttons.GetValue(  buttonIndex[ move.Value.Substring(0, 1).ToLowerInvariant() ]  );
+        
             if (button != null)
             {
-                yield return buttonString;
+                yield return move;
 
                 if (Canceller.ShouldCancel)
                 {
@@ -77,6 +60,10 @@ public class SimonComponentSolver : ComponentSolver
 
     private static Type _simonComponentType = null;
     private static FieldInfo _buttonsField = null;
+    private static readonly Dictionary<string, int> buttonIndex = new Dictionary<string, int>
+    {
+        {"r", 0}, {"b", 1}, {"g", 2}, {"y", 3}
+    };
 
     private Array _buttons = null;
 }

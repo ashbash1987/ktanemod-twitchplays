@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections;
 using UnityEngine;
+using System.IO;
 
 public class TwitchPlaysService : MonoBehaviour
 {
@@ -50,6 +51,7 @@ public class TwitchPlaysService : MonoBehaviour
         _coroutineQueue.coroutineCanceller = _coroutineCanceller;
 
         _leaderboard = new Leaderboard();
+        _leaderboard.LoadDataFromFile();
 
         SetupResponder(bombMessageResponder);
         SetupResponder(postGameMessageResponder);

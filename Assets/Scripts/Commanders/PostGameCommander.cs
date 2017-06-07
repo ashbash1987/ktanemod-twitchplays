@@ -32,11 +32,11 @@ public class PostGameCommander : ICommandResponder
         if (message.Equals("!continue", StringComparison.InvariantCultureIgnoreCase) ||
             message.Equals("!back", StringComparison.InvariantCultureIgnoreCase))
         {
-            button = (MonoBehaviour)_continueButtonField.GetValue(ResultsPage);
+            button = ContinueButton;
         }
         else if (message.Equals("!retry", StringComparison.InvariantCultureIgnoreCase))
         {
-            button = (MonoBehaviour)_retryButtonField.GetValue(ResultsPage);
+            button = RetryButton;
         }
 
         if (button == null)
@@ -44,9 +44,31 @@ public class PostGameCommander : ICommandResponder
             yield break;
         }
 
-        DoInteractionStart(button);
-        yield return new WaitForSeconds(0.1f);
-        DoInteractionEnd(button);
+        // Press the button twice, in case the first is too early and skips the message instead
+        for (int i = 0; i < 2; i++)
+        {
+            DoInteractionStart(button);
+            yield return new WaitForSeconds(0.1f);
+            DoInteractionEnd(button);
+        }
+    }
+    #endregion
+
+    #region Public Fields
+    public MonoBehaviour ContinueButton
+    {
+        get
+        {
+            return (MonoBehaviour)_continueButtonField.GetValue(ResultsPage);
+        }
+    }
+
+    public MonoBehaviour RetryButton
+    {
+        get
+        {
+            return (MonoBehaviour)_retryButtonField.GetValue(ResultsPage);
+        }
     }
     #endregion
 

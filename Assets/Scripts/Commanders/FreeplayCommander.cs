@@ -75,10 +75,20 @@ public class FreeplayCommander : ICommandResponder
     #region Interface Implementation
     public IEnumerator RespondToCommand(string userNickName, string message, ICommandResponseNotifier responseNotifier)
     {
-        MonoBehaviour singlePressButton = null;
-
-        if (message.Equals("hold", StringComparison.InvariantCultureIgnoreCase) ||
-            message.Equals("pick up", StringComparison.InvariantCultureIgnoreCase))
+        message = message.ToLowerInvariant();
+        int holdState = (int)_holdStateProperty.GetValue(FloatingHoldable, null);
+        
+        if (holdState == 0)
+        {
+            if (message.Equals("drop", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("let go", StringComparison.InvariantCultureIgnoreCase) ||
+            message.Equals("put down", StringComparison.InvariantCultureIgnoreCase))
+            {
+                LetGoFreeplayDevice();
+                yield break;
+            }
+        }
+        else
         {
             IEnumerator holdCoroutine = HoldFreeplayDevice();
             while (holdCoroutine.MoveNext())
@@ -86,155 +96,197 @@ public class FreeplayCommander : ICommandResponder
                 yield return holdCoroutine.Current;
             }
         }
+        
+        if (message.Equals("needy on", StringComparison.InvariantCultureIgnoreCase))
+        {
+            SetNeedy();
+        }
+        else if (message.Equals("needy off", StringComparison.InvariantCultureIgnoreCase))
+        {
+            SetNeedy(false);
+        }
+        else if (message.Equals("hardcore on", StringComparison.InvariantCultureIgnoreCase))
+        {
+            SetHardcore();
+        }
+        else if (message.Equals("hardcore off", StringComparison.InvariantCultureIgnoreCase))
+        {
+            SetHardcore(false);
+        }
+        else if (message.Equals("mods only on", StringComparison.InvariantCultureIgnoreCase))
+        {
+            SetModsOnly();
+        }
+        else if (message.Equals("mods only off", StringComparison.InvariantCultureIgnoreCase))
+        {
+            SetModsOnly(false);
+        }
+        else if (message.Equals("start", StringComparison.InvariantCultureIgnoreCase))
+        {
+            StartBomb();
+        }
+        else if (message.StartsWith("start"))
+        {
+            Match timerMatch = Regex.Match(message, "([0-9][0-9]?):([0-9]{2})");
+            if (timerMatch.Success)
+            {
+                IEnumerator setTimerCoroutine = SetBombTimer(timerMatch.Groups[1].Value, timerMatch.Groups[2].Value);
+                while (setTimerCoroutine.MoveNext())
+                {
+                    yield return setTimerCoroutine.Current;
+                }
+            }
+            message = message.Remove(timerMatch.Index, timerMatch.Length);
+
+            Match modulesMatch = Regex.Match(message, "[0-9]+");
+            if (modulesMatch.Success)
+            {
+                Debug.Log(string.Format("Setting modules to {0}", modulesMatch.Value));
+                IEnumerator setModulesCoroutine = SetBombModules(modulesMatch.Value);
+                while (setModulesCoroutine.MoveNext())
+                {
+                    yield return setModulesCoroutine.Current;
+                }
+            }
+
+            string messageLower = message.ToLowerInvariant();
+
+            SetHardcore(messageLower.Contains("hardcore"));
+            SetNeedy(messageLower.Contains("needy"));
+
+            if (messageLower.Contains("vanilla"))
+            {
+                SetModsOnly(false);
+            }
+            else if (messageLower.Contains("mods"))
+            {
+                SetModsOnly();
+            }
+
+            StartBomb();
+        }
         else
         {
-            int holdState = (int)_holdStateProperty.GetValue(FloatingHoldable, null);
-            if (holdState != 0)
+            Match timerMatch = Regex.Match(message, "^timer? ([0-9][0-9]?)(?::([0-9]{2}))?$", RegexOptions.IgnoreCase);
+            if (timerMatch.Success)
             {
-                yield break;
-            }
-
-            if (message.Equals("drop", StringComparison.InvariantCultureIgnoreCase) ||
-                message.Equals("let go", StringComparison.InvariantCultureIgnoreCase) ||
-                message.Equals("put down", StringComparison.InvariantCultureIgnoreCase))
-            {
-                LetGoFreeplayDevice();
-            }
-            else if (message.Equals("needy on", StringComparison.InvariantCultureIgnoreCase))
-            {
-                object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
-                bool hasNeedy = (bool)_hasNeedyField.GetValue(currentSettings);
-                if (!hasNeedy)
+                IEnumerator setTimerCoroutine = SetBombTimer(timerMatch.Groups[1].Value, timerMatch.Groups[2].Value);
+                while (setTimerCoroutine.MoveNext())
                 {
-                    MonoBehaviour needyToggle = (MonoBehaviour)_needyToggleField.GetValue(FreeplayDevice);
-                    singlePressButton = (MonoBehaviour)needyToggle.GetComponent(_selectableType);
+                    yield return setTimerCoroutine.Current;
                 }
             }
-            else if (message.Equals("needy off", StringComparison.InvariantCultureIgnoreCase))
+            
+            Match modulesMatch = Regex.Match(message, "^modules ([0-9]+)$", RegexOptions.IgnoreCase);
+            if (modulesMatch.Success)
             {
-                object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
-                bool hasNeedy = (bool)_hasNeedyField.GetValue(currentSettings);
-                if (hasNeedy)
+                IEnumerator setModulesCoroutine = SetBombModules(modulesMatch.Groups[1].Value);
+                while (setModulesCoroutine.MoveNext())
                 {
-                    MonoBehaviour needyToggle = (MonoBehaviour)_needyToggleField.GetValue(FreeplayDevice);
-                    singlePressButton = (MonoBehaviour)needyToggle.GetComponent(_selectableType);
+                    yield return setModulesCoroutine.Current;
                 }
-            }
-            else if (message.Equals("hardcore on", StringComparison.InvariantCultureIgnoreCase))
-            {
-                object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
-                bool isHardcore = (bool)_isHardCoreField.GetValue(currentSettings);
-                if (!isHardcore)
-                {
-                    MonoBehaviour hardcoreToggle = (MonoBehaviour)_hardcoreToggleField.GetValue(FreeplayDevice);
-                    singlePressButton = (MonoBehaviour)hardcoreToggle.GetComponent(_selectableType);
-                }
-            }
-            else if (message.Equals("hardcore off", StringComparison.InvariantCultureIgnoreCase))
-            {
-                object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
-                bool isHardcore = (bool)_isHardCoreField.GetValue(currentSettings);
-                if (isHardcore)
-                {
-                    MonoBehaviour hardcoreToggle = (MonoBehaviour)_hardcoreToggleField.GetValue(FreeplayDevice);
-                    singlePressButton = (MonoBehaviour)hardcoreToggle.GetComponent(_selectableType);
-                }
-            }
-            else if (message.Equals("start", StringComparison.InvariantCultureIgnoreCase))
-            {
-                MonoBehaviour startButton = (MonoBehaviour)_startButtonField.GetValue(FreeplayDevice);
-                singlePressButton = (MonoBehaviour)startButton.GetComponent(_selectableType);
-            }
-            else if (message.Equals("mods only on", StringComparison.InvariantCultureIgnoreCase))
-            {
-                object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
-                bool onlyMods = (bool)_onlyModsField.GetValue(currentSettings);
-                if (!onlyMods)
-                {
-                    MonoBehaviour modsToggle = (MonoBehaviour)_modsOnlyToggleField.GetValue(FreeplayDevice);
-                    singlePressButton = (MonoBehaviour)modsToggle.GetComponent(_selectableType);
-                }
-            }
-            else if (message.Equals("mods only off", StringComparison.InvariantCultureIgnoreCase))
-            {
-                object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
-                bool onlyMods = (bool)_onlyModsField.GetValue(currentSettings);
-                if (onlyMods)
-                {
-                    MonoBehaviour modsToggle = (MonoBehaviour)_modsOnlyToggleField.GetValue(FreeplayDevice);
-                    singlePressButton = (MonoBehaviour)modsToggle.GetComponent(_selectableType);
-                }
-            }
-            else
-            {
-                Match timerMatch = Regex.Match(message, "^timer? ([0-9]+:)?([0-9][0-9])$", RegexOptions.IgnoreCase);
-                if (timerMatch.Success)
-                {
-                    int minutes = 0;
-                    if (!string.IsNullOrEmpty(timerMatch.Groups[1].Value) && !int.TryParse(timerMatch.Groups[1].Value.Substring(0, timerMatch.Groups[1].Value.Length - 1), out minutes))
-                    {
-                        yield break;
-                    }
-
-                    int seconds = 0;
-                    if (!int.TryParse(timerMatch.Groups[2].Value, out seconds) || seconds >= 60)
-                    {
-                        yield break;
-                    }
-
-
-                    int timeIndex = (minutes*2) + (seconds/30);
-
-                    object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
-                    float currentTime = (float)_timeField.GetValue(currentSettings);
-                    int currentTimeIndex = Mathf.FloorToInt(currentTime) / 30;
-                    MonoBehaviour button = timeIndex > currentTimeIndex ? (MonoBehaviour)_timeIncrementField.GetValue(FreeplayDevice) : (MonoBehaviour)_timeDecrementField.GetValue(FreeplayDevice);
-                    MonoBehaviour buttonSelectable = (MonoBehaviour)button.GetComponent(_selectableType);
-
-                    for (int hitCount = 0; hitCount < Mathf.Abs(timeIndex - currentTimeIndex); ++hitCount)
-                    {
-                        currentTime = (float) _timeField.GetValue(currentSettings);
-                        SelectObject(buttonSelectable);
-                        yield return new WaitForSeconds(0.1f);
-                        if (Mathf.FloorToInt(currentTime) == Mathf.FloorToInt((float) _timeField.GetValue(currentSettings)))
-                            yield break;
-                    }
-                }
-
-                Match modulesMatch = Regex.Match(message, "^modules ([0-9]+)$", RegexOptions.IgnoreCase);
-                if (modulesMatch.Success)
-                {
-                    int moduleCount = 0;
-                    if (!int.TryParse(modulesMatch.Groups[1].Value, out moduleCount))
-                    {
-                        yield break;
-                    }
-
-                    object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
-                    int currentModuleCount = (int)_moduleCountField.GetValue(currentSettings);
-                    MonoBehaviour button = moduleCount > currentModuleCount ? (MonoBehaviour)_moduleCountIncrementField.GetValue(FreeplayDevice) : (MonoBehaviour)_moduleCountDecrementField.GetValue(FreeplayDevice);
-                    MonoBehaviour buttonSelectable = (MonoBehaviour)button.GetComponent(_selectableType);
-
-                    for (int hitCount = 0; hitCount < Mathf.Abs(moduleCount - currentModuleCount); ++hitCount)
-                    {
-                        int lastModuleCount = (int)_moduleCountField.GetValue(currentSettings);
-                        SelectObject(buttonSelectable);
-                        yield return new WaitForSeconds(0.1f);
-                        if (lastModuleCount == (int) _moduleCountField.GetValue(currentSettings))
-                            yield break;
-                    }
-                }
-            }
-
-            if (singlePressButton != null)
-            {
-                SelectObject(singlePressButton);
             }
         }
     }
     #endregion
 
     #region Helper Methods
+    public IEnumerator SetBombTimer(string mins, string secs)
+    {
+        int minutes = 0;
+        if (!int.TryParse(mins, out minutes))
+        {
+            yield break;
+        }
+
+        int seconds = 0;
+        if (!string.IsNullOrEmpty(secs) && 
+            (!int.TryParse(secs, out seconds) || seconds >= 60) )
+        {
+            yield break;
+        }
+
+        int timeIndex = (minutes * 2) + (seconds / 30);
+
+        object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
+        float currentTime = (float)_timeField.GetValue(currentSettings);
+        int currentTimeIndex = Mathf.FloorToInt(currentTime) / 30;
+        MonoBehaviour button = timeIndex > currentTimeIndex ? (MonoBehaviour)_timeIncrementField.GetValue(FreeplayDevice) : (MonoBehaviour)_timeDecrementField.GetValue(FreeplayDevice);
+        MonoBehaviour buttonSelectable = (MonoBehaviour)button.GetComponent(_selectableType);
+
+        for (int hitCount = 0; hitCount < Mathf.Abs(timeIndex - currentTimeIndex); ++hitCount)
+        {
+            currentTime = (float)_timeField.GetValue(currentSettings);
+            SelectObject(buttonSelectable);
+            yield return new WaitForSeconds(0.1f);
+            if (Mathf.FloorToInt(currentTime) == Mathf.FloorToInt((float)_timeField.GetValue(currentSettings)))
+                yield break;
+        }
+    }
+
+    public IEnumerator SetBombModules(string mods)
+    {
+        int moduleCount = 0;
+        if (!int.TryParse(mods, out moduleCount))
+        {
+            yield break;
+        }
+
+        object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
+        int currentModuleCount = (int)_moduleCountField.GetValue(currentSettings);
+        MonoBehaviour button = moduleCount > currentModuleCount ? (MonoBehaviour)_moduleCountIncrementField.GetValue(FreeplayDevice) : (MonoBehaviour)_moduleCountDecrementField.GetValue(FreeplayDevice);
+        MonoBehaviour buttonSelectable = (MonoBehaviour)button.GetComponent(_selectableType);
+
+        for (int hitCount = 0; hitCount < Mathf.Abs(moduleCount - currentModuleCount); ++hitCount)
+        {
+            int lastModuleCount = (int)_moduleCountField.GetValue(currentSettings);
+            SelectObject(buttonSelectable);
+            yield return new WaitForSeconds(0.1f);
+            if (lastModuleCount == (int)_moduleCountField.GetValue(currentSettings))
+                yield break;
+        }
+    }
+
+    public void SetNeedy(bool on = true)
+    {
+        object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
+        bool hasNeedy = (bool)_hasNeedyField.GetValue(currentSettings);
+        if (hasNeedy != on)
+        {
+            MonoBehaviour needyToggle = (MonoBehaviour)_needyToggleField.GetValue(FreeplayDevice);
+            SelectObject( (MonoBehaviour)needyToggle.GetComponent(_selectableType) );
+            
+        }
+    }
+
+    public void SetHardcore(bool on = true)
+    {
+        object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
+        bool isHardcore = (bool)_isHardCoreField.GetValue(currentSettings);
+        if (isHardcore != on)
+        {
+            MonoBehaviour hardcoreToggle = (MonoBehaviour)_hardcoreToggleField.GetValue(FreeplayDevice);
+            SelectObject( (MonoBehaviour)hardcoreToggle.GetComponent(_selectableType) );
+        }
+    }
+
+    public void SetModsOnly(bool on = true)
+    {
+        object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
+        bool onlyMods = (bool)_onlyModsField.GetValue(currentSettings);
+        if (onlyMods != on)
+        {
+            MonoBehaviour modsToggle = (MonoBehaviour)_modsOnlyToggleField.GetValue(FreeplayDevice);
+            SelectObject( (MonoBehaviour)modsToggle.GetComponent(_selectableType) );
+        }
+    }
+
+    public void StartBomb()
+    {
+        MonoBehaviour startButton = (MonoBehaviour)_startButtonField.GetValue(FreeplayDevice);
+        SelectObject( (MonoBehaviour)startButton.GetComponent(_selectableType) );
+    }
+
     public IEnumerator HoldFreeplayDevice()
     {
         int holdState = (int)_holdStateProperty.GetValue(FloatingHoldable, null);

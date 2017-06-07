@@ -1,28 +1,26 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Reflection;
 
 public class TwitchLeaderboard : MonoBehaviour
 {
     [Header("Prefabs")]
-    public TwitchLeaderboardRow[] specialRows = null;
-    public TwitchLeaderboardRow normalRow = null;
-
-    [Header("Text Elements")]
-    public Text totalBombCountText = null;
-    public Text totalSolveCountText = null;
-    public Text totalStrikeCountText = null;
-    public Text totalRateText = null;
+    public TwitchLeaderboardTable twitchLeaderboardTablePrefab = null;
+    public TwitchLeaderboardTableSolo twitchLeaderboardTableSoloPrefab = null;
+    public TwitchLeaderboardStats twitchLeaderboardStatsPrefab = null;
 
     [Header("Hierachy Management")]
-    public RectTransform tableTransform = null;
+    public RectTransform mainTableTransform = null;
+    public RectTransform altTableTransform = null;
+    public RectTransform promptTransform = null;
+    public RectTransform retryTransform = null;
+    public RectTransform leftMaskTransform = null;
 
-    [Header("Values")]
     public Leaderboard leaderboard = null;
-    public int bombCount = 0;
-    public int maximumRowCount = 15;
-
-    private List<TwitchLeaderboardRow> _instancedRows = new List<TwitchLeaderboardRow>();
+    private TwitchLeaderboardTable mainTable = null;
+    private TwitchLeaderboardTableSolo soloTable = null;
+    private TwitchLeaderboardStats statsTable = null;
 
     private void Start()
     {
@@ -31,50 +29,74 @@ public class TwitchLeaderboard : MonoBehaviour
             return;
         }
 
-        float delay = 0.6f;
-        int index = 0;
-
-        foreach (Leaderboard.LeaderboardEntry entry in leaderboard.GetSortedEntries(maximumRowCount))
+        if (leaderboard.Success)
         {
-            TwitchLeaderboardRow row = Instantiate<TwitchLeaderboardRow>(index < specialRows.Length ? specialRows[index] : normalRow);
-            row.position = index + 1;
-            row.leaderboardEntry = entry;
-            row.delay = delay;
-            row.transform.SetParent(tableTransform, false);
-
-            _instancedRows.Add(row);
-
-            delay += 0.1f;
-            index++;
+            retryTransform.gameObject.SetActive(false);
         }
 
-        int solveCount = 0;
-        int strikeCount = 0;
-        float totalSolveRate = 0.0f;
-        leaderboard.GetTotalSolveStrikeCounts(out solveCount, out strikeCount);
-
-        if (strikeCount == 0)
+        statsTable = Instantiate<TwitchLeaderboardStats>(twitchLeaderboardStatsPrefab);
+        statsTable.leaderboard = leaderboard;
+        
+        if (leaderboard.Count > 0)
         {
-            totalSolveRate = strikeCount;
+            mainTable = Instantiate<TwitchLeaderboardTable>(twitchLeaderboardTablePrefab);
+            mainTable.leaderboard = leaderboard;
+        }
+
+        if (leaderboard.SoloCount > 0)
+        {
+            soloTable = Instantiate<TwitchLeaderboardTableSolo>(twitchLeaderboardTableSoloPrefab);
+            soloTable.leaderboard = leaderboard;
+            leftMaskTransform.gameObject.SetActive(true);
+
+            bool prioritiseSolo = (leaderboard.SoloSolver != null);
+            int countOnRight = prioritiseSolo ? leaderboard.SoloCount : leaderboard.Count;
+            int countOnLeft = prioritiseSolo ? leaderboard.Count : leaderboard.SoloCount;
+            int maxOnRight = prioritiseSolo ? soloTable.maximumRowCount : mainTable.maximumRowCount;
+            bool statsOnRight = (countOnRight <= maxOnRight) // Right (priority) wouldn't be made smaller than its total count by fitting the stats in
+                && (countOnRight < countOnLeft); // and right is smaller than left (only possible if solo is on right)
+
+            // Make the leaderboard that's sharing with the stats smaller
+            if (statsOnRight == prioritiseSolo)
+            {
+                soloTable.maximumRowCount -= statsTable.entriesLess;
+            }
+            else
+            {
+                mainTable.maximumRowCount -= statsTable.entriesLess;
+            }
+
+            statsTable.transform.SetParent(statsOnRight ? mainTableTransform : altTableTransform, false);
+            soloTable.transform.SetParent(prioritiseSolo ? mainTableTransform : altTableTransform, false);
+            mainTable.transform.SetParent(prioritiseSolo ? altTableTransform : mainTableTransform, false);
         }
         else
         {
-            totalSolveRate = ((float)solveCount) / strikeCount;
+            if ((leaderboard.Count - statsTable.entriesLess) > mainTable.maximumRowCount)
+            {
+                statsTable.transform.SetParent(altTableTransform, false);
+                leftMaskTransform.gameObject.SetActive(true);
+            }
+            else
+            {
+                statsTable.transform.SetParent(mainTableTransform, false);
+            }
+
+            mainTable.transform.SetParent(mainTableTransform, false);
         }
 
-        totalBombCountText.text = bombCount.ToString();
-        totalSolveCountText.text = solveCount.ToString();
-        totalStrikeCountText.text = strikeCount.ToString();
-        totalRateText.text = string.Format("{0:0.00}", totalSolveRate);
+
+        StartCoroutine(DelayPrompt(10.0f));
+    }
+
+    private IEnumerator<WaitForSeconds> DelayPrompt(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        promptTransform.gameObject.SetActive(true);
     }
 
     private void OnDisable()
     {
-        foreach(TwitchLeaderboardRow row in _instancedRows)
-        {
-            DestroyObject(row);
-        }
 
-        _instancedRows.Clear();
     }
 }

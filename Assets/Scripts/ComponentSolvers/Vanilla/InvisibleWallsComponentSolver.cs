@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class InvisibleWallsComponentSolver : ComponentSolver
@@ -9,7 +11,7 @@ public class InvisibleWallsComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (IList)_buttonsField.GetValue(bombComponent);
-        
+
         helpMessage = "Move with !{0} move u d l r.";
         manualCode = "Mazes";
     }
@@ -25,32 +27,13 @@ public class InvisibleWallsComponentSolver : ComponentSolver
 
         int beforeButtonStrikeCount = StrikeCount;
 
-        string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (string buttonString in sequence)
+        foreach (Match move in Regex.Matches(inputCommand, @"[udlr]", RegexOptions.IgnoreCase))
         {
-            MonoBehaviour button = null;
-
-            if (buttonString.Equals("u", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("up", StringComparison.InvariantCultureIgnoreCase))
-            {
-                button = (MonoBehaviour)_buttons[0];
-            }
-            else if (buttonString.Equals("l", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("left", StringComparison.InvariantCultureIgnoreCase))
-            {
-                button = (MonoBehaviour)_buttons[1];
-            }
-            else if (buttonString.Equals("r", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("right", StringComparison.InvariantCultureIgnoreCase))
-            {
-                button = (MonoBehaviour)_buttons[2];
-            }
-            else if (buttonString.Equals("d", StringComparison.InvariantCultureIgnoreCase) || buttonString.Equals("down", StringComparison.InvariantCultureIgnoreCase))
-            {
-                button = (MonoBehaviour)_buttons[3];
-            }
-
+            MonoBehaviour button = (MonoBehaviour)_buttons[  buttonIndex[ move.Value.ToLowerInvariant() ]  ];
+            
             if (button != null)
             {
-                yield return buttonString;
+                yield return move.Value;
 
                 if (Canceller.ShouldCancel)
                 {
@@ -79,6 +62,10 @@ public class InvisibleWallsComponentSolver : ComponentSolver
 
     private static Type _invisibleWallsComponentType = null;
     private static FieldInfo _buttonsField = null;
+    private static readonly Dictionary<string, int> buttonIndex = new Dictionary<string, int>
+    {
+        {"u", 0}, {"l", 1}, {"r", 2}, {"d", 3}
+    };
 
     private IList _buttons = null;
 }

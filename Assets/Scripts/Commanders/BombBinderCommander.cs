@@ -101,6 +101,21 @@ public class BombBinderCommander : ICommandResponder
                     yield return selectCoroutine.Current;
                 }
             }
+            else if (message.StartsWith("select", StringComparison.InvariantCultureIgnoreCase))
+            {
+                string[] commandParts = message.Split(' ');
+                int index = 0;
+                if ( (commandParts.Length != 2) ||
+                    (!int.TryParse(commandParts[1], out index)) )
+                {
+                    yield break;
+                }
+                IEnumerator selectCoroutine = SelectOnPage(index);
+                while (selectCoroutine.MoveNext())
+                {
+                    yield return selectCoroutine.Current;
+                }
+            }
             else
             {
                 string[] sequence = message.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -225,8 +240,39 @@ public class BombBinderCommander : ICommandResponder
         _currentSelectableIndex = oldSelectableIndex;
     }
 
-    private IEnumerator SelectOnPage()
+    private IEnumerator SelectOnPage(int index = 0)
     {
+        if (index > 0)
+        {
+            if ( (_currentSelectables == null) || (index > _currentSelectables.Length) )
+            {
+                yield break;
+            }
+
+            int i = 0;
+            MonoBehaviour newSelectable = null;
+            for (_currentSelectableIndex = 0; _currentSelectableIndex < _currentSelectables.Length; ++_currentSelectableIndex)
+            {
+                Debug.Log(string.Format("BombBinderCommander: Selecting item {0}", _currentSelectableIndex));
+                newSelectable = (MonoBehaviour)_currentSelectables.GetValue(_currentSelectableIndex);
+                if ( (newSelectable != null) && (++i == index) )
+                {
+                    break;
+                }
+            }
+
+            if (newSelectable != null)
+            {
+                _handleDeselectMethod.Invoke(_currentSelectable, new object[] { null });
+                _currentSelectable = newSelectable;
+                _handleSelectMethod.Invoke(_currentSelectable, new object[] { true });
+            }
+            else
+            {
+                yield break;
+            }
+        }
+
         if (_currentSelectable != null)
         {
             //Some protection to prevent going into a tutorial; don't have complete support for that!

@@ -18,7 +18,8 @@ public class WireSequenceComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
-        if (inputCommand.Equals("up", StringComparison.InvariantCultureIgnoreCase))
+        if (inputCommand.Equals("up", StringComparison.InvariantCultureIgnoreCase) ||
+            inputCommand.Equals("u", StringComparison.InvariantCultureIgnoreCase))
         {
             yield return "up";
 
@@ -26,7 +27,8 @@ public class WireSequenceComponentSolver : ComponentSolver
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(_upButton);
         }
-        else if (inputCommand.Equals("down", StringComparison.InvariantCultureIgnoreCase))
+        else if (inputCommand.Equals("down", StringComparison.InvariantCultureIgnoreCase) ||
+                inputCommand.Equals("d", StringComparison.InvariantCultureIgnoreCase))
         {
             yield return "down";
 
@@ -48,6 +50,25 @@ public class WireSequenceComponentSolver : ComponentSolver
 
             foreach (string wireIndexString in sequence)
             {
+                if (wireIndexString.Equals("up", StringComparison.InvariantCultureIgnoreCase) ||
+                    wireIndexString.Equals("u", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    yield return "up";
+                    DoInteractionStart(_upButton);
+                    yield return new WaitForSeconds(0.1f);
+                    DoInteractionEnd(_upButton);
+                    break;
+                }
+                else if (wireIndexString.Equals("down", StringComparison.InvariantCultureIgnoreCase) ||
+                        wireIndexString.Equals("d", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    yield return "down";
+                    DoInteractionStart(_downButton);
+                    yield return new WaitForSeconds(0.1f);
+                    DoInteractionEnd(_downButton);
+                    break;
+                }
+                
                 int wireIndex = 0;
                 if (!int.TryParse(wireIndexString, out wireIndex))
                 {
@@ -79,6 +100,7 @@ public class WireSequenceComponentSolver : ComponentSolver
                     //Escape the sequence if a part of the given sequence is wrong
                     if (StrikeCount != beforeButtonStrikeCount)
                     {
+                        yield return string.Format("sendtochat BibleThump Wire {0} caused a strike!", wireIndex + 1);
                         break;
                     }
                 }
