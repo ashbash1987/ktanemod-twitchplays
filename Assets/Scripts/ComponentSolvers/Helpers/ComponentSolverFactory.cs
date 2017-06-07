@@ -32,6 +32,7 @@ public static class ComponentSolverFactory
         ModComponentSolverCreators["ButtonV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new SquareButtonComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["SimonV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new SimonStatesComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["PasswordV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new SafetySafeComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+        ModComponentSolverCreators["MorseV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new MorsematicsComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
         ModComponentSolverCreators["NeedyVentV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new NeedyQuizComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 		ModComponentSolverCreators["NeedyKnobV2"] = (bombCommander, bombComponent, ircConnection, canceller) => new NeedyRotaryPhoneComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
