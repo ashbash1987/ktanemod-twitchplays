@@ -13,6 +13,7 @@ public class PasswordComponentSolver : ComponentSolver
         _submitButton = (MonoBehaviour)_submitButtonField.GetValue(bombComponent);
         
         helpMessage = "Cycle through the letters in the 3rd column with !{0} cycle 3. Try a word with !{0} word.";
+        manualCode = "Passwords";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

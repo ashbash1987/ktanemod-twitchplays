@@ -10,8 +10,8 @@ public class WhosOnFirstComponentSolver : ComponentSolver
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
         
-        helpMessage = "Press a button with !{0} phrase. Phrase must match exactly, not case sensitive.";
-        manualCode = "Who%E2%80%99s%20on%20First";
+        helpMessage = "Press a button with !{0} what?. Phrase must match exactly, not case sensitive.";
+        manualCode = "Who’s on First";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

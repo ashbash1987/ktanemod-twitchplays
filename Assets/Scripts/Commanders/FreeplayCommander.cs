@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -101,6 +101,12 @@ public class FreeplayCommander : ICommandResponder
                 yield return holdCoroutine.Current;
             }
         }
+
+        string changeMinutesTo = String.Empty;
+        string changeSecondsTo = String.Empty;
+        string changeBombsTo = String.Empty;
+        string changeModulesTo = String.Empty;
+        bool startBomb = false;
         
         if (message.Equals("needy on", StringComparison.InvariantCultureIgnoreCase))
         {
@@ -130,16 +136,47 @@ public class FreeplayCommander : ICommandResponder
         {
             StartBomb();
         }
+        else if (message.StartsWith("profile"))
+        {
+            string profile = message.Remove(0, 8).Trim();
+
+            switch (profile)
+            {
+                case "single":
+                case "solo":
+                    changeBombsTo = "1";
+                    changeMinutesTo = "20";
+                    changeModulesTo = "11";
+                    break;
+
+                case "quadruple":
+                case "quad":
+                    changeBombsTo = "1";
+                    changeMinutesTo = "80";
+                    changeModulesTo = "47";
+                    break;
+
+                case "dual single":
+                    changeBombsTo = "2";
+                    changeMinutesTo = "40";
+                    changeModulesTo = "11";
+                    break;
+
+                case "dual quadruple":
+                case "dual quad":
+                    changeBombsTo = "2";
+                    changeMinutesTo = "160";
+                    changeModulesTo = "47";
+                    break;
+            }
+        }
         else if (message.StartsWith("start"))
         {
             Match timerMatch = Regex.Match(message, "([0-9][0-9]?):([0-9]{2})");
             if (timerMatch.Success)
             {
-                IEnumerator setTimerCoroutine = SetBombTimer(timerMatch.Groups[1].Value, timerMatch.Groups[2].Value);
-                while (setTimerCoroutine.MoveNext())
-                {
-                    yield return setTimerCoroutine.Current;
-                }
+                changeMinutesTo = timerMatch.Groups[1].Value;
+                changeSecondsTo = timerMatch.Groups[2].Value;
             }
             message = message.Remove(timerMatch.Index, timerMatch.Length);
 
@@ -158,17 +195,17 @@ public class FreeplayCommander : ICommandResponder
                         setBombs |= count <= 2;
                         setModules |= count >= 3;
 
-                        IEnumerator setBombsModulesCoroutine;
-                        setBombsModulesCoroutine = count <= 2
-                            ? SetBombCount(modulesMatch.Value)
-                            : SetBombModules(modulesMatch.Value);
+                        if (count <= 2)
+                        {
+                            changeBombsTo = modulesMatch.Value;
+                        }
+                        else
+                        {
+                            changeModulesTo = modulesMatch.Value;
+                        }
 
                         Debug.Log(string.Format("Setting {1} to {0}", modulesMatch.Value,
                             count <= 2 ? "bombs" : "modules"));
-                        while (setBombsModulesCoroutine.MoveNext())
-                        {
-                            yield return setBombsModulesCoroutine.Current;
-                        }
                     }
                 }
                 message = message.Remove(modulesMatch.Index, modulesMatch.Length);
@@ -189,40 +226,59 @@ public class FreeplayCommander : ICommandResponder
                 SetModsOnly();
             }
 
-            StartBomb();
+            startBomb = true;
         }
         else
         {
             Match timerMatch = Regex.Match(message, "^timer? ([0-9][0-9]?)(?::([0-9]{2}))?$", RegexOptions.IgnoreCase);
             if (timerMatch.Success)
             {
-                IEnumerator setTimerCoroutine = SetBombTimer(timerMatch.Groups[1].Value, timerMatch.Groups[2].Value);
-                while (setTimerCoroutine.MoveNext())
-                {
-                    yield return setTimerCoroutine.Current;
-                }
+                changeMinutesTo = timerMatch.Groups[1].Value;
+                changeSecondsTo = timerMatch.Groups[2].Value;
             }
 
             Match bombsMatch = Regex.Match(message, "^bombs ([0-9]+)$", RegexOptions.IgnoreCase);
             if (bombsMatch.Success)
             {
-                IEnumerator setBombsCoroutine = SetBombCount(bombsMatch.Groups[1].Value);
-                while (setBombsCoroutine.MoveNext())
-                {
-                    yield return setBombsCoroutine.Current;
-                }
+                changeBombsTo = bombsMatch.Groups[1].Value;
             }
 
             Match modulesMatch = Regex.Match(message, "^modules ([0-9]+)$", RegexOptions.IgnoreCase);
             if (modulesMatch.Success)
             {
-                IEnumerator setModulesCoroutine = SetBombModules(modulesMatch.Groups[1].Value);
-                while (setModulesCoroutine.MoveNext())
-                {
-                    yield return setModulesCoroutine.Current;
-                }
+                changeModulesTo = modulesMatch.Groups[1].Value;
             }
         }
+
+        if (changeMinutesTo != String.Empty)
+        {
+            IEnumerator setTimerCoroutine = SetBombTimer(changeMinutesTo, changeSecondsTo);
+            while (setTimerCoroutine.MoveNext())
+            {
+                yield return setTimerCoroutine.Current;
+            }
+        }
+        if (changeBombsTo != String.Empty)
+        {
+            IEnumerator setBombsCoroutine = SetBombCount(changeBombsTo);
+            while (setBombsCoroutine.MoveNext())
+            {
+                yield return setBombsCoroutine.Current;
+            }
+        }
+        if (changeModulesTo != String.Empty)
+        {
+            IEnumerator setModulesCoroutine = SetBombModules(changeModulesTo);
+            while (setModulesCoroutine.MoveNext())
+            {
+                yield return setModulesCoroutine.Current;
+            }
+        }
+        if (startBomb)
+        {
+            StartBomb();
+        }
+
     }
     #endregion
 
