@@ -10,6 +10,7 @@ public static class ComponentSolverFactory
     private static readonly Dictionary<string, ModComponentSolverDelegate> ModComponentSolverCreators;
     private static readonly Dictionary<string, string> ModComponentSolverHelpMessages;
     private static readonly Dictionary<string, string> ModComponentSolverManualCodes;
+    private static readonly Dictionary<string, bool> ModComponentSolverDelayInvoke;
 
     private enum ModCommandType
     {
@@ -22,6 +23,7 @@ public static class ComponentSolverFactory
         ModComponentSolverCreators = new Dictionary<string, ModComponentSolverDelegate>();
         ModComponentSolverHelpMessages = new Dictionary<string, string>();
         ModComponentSolverManualCodes = new Dictionary<string, string>();
+        ModComponentSolverDelayInvoke = new Dictionary<string, bool>();
 
         //AT_Bash Modules
         ModComponentSolverCreators["MotionSense"] = (bombCommander, bombComponent, ircConnection, canceller) => new MotionSenseComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
@@ -99,6 +101,10 @@ public static class ComponentSolverFactory
         //Manual Codes
         ModComponentSolverManualCodes["ColourFlash"] = "Color Flash";
 
+        //Delay Invokation. (Modules start processing commands before the very first yield return, so need to be delayed.)
+        //The standard is to return the KMSelectable[] array, or yield return something, before interaction with the module
+        //actually starts. The following modules don't follow this standard, and therefore need to be forcefully delayed.
+        ModComponentSolverDelayInvoke["SimonScreamsModule"] = true;
     }
 
     public static ComponentSolver CreateSolver(BombCommander bombCommander, MonoBehaviour bombComponent, ComponentTypeEnum componentType, IRCConnection ircConnection, CoroutineCanceller canceller)
@@ -187,12 +193,16 @@ public static class ComponentSolverFactory
         MethodInfo method = FindProcessCommandMethod(bombComponent, out commandType, out commandComponentType);
         string help = FindHelpMessage(bombComponent);
         string manual = FindManualCode(bombComponent);
+        bool delayInvoke = false;
 
         if (help == null && ModComponentSolverHelpMessages.ContainsKey(moduleType))
             help = ModComponentSolverHelpMessages[moduleType];
 
         if (manual == null && ModComponentSolverManualCodes.ContainsKey(moduleType))
             manual = ModComponentSolverManualCodes[moduleType];
+
+        if (ModComponentSolverDelayInvoke.ContainsKey(moduleType))
+            delayInvoke = ModComponentSolverDelayInvoke[moduleType];
 
         if (method != null)
         {
@@ -202,7 +212,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help);
+                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke);
                     };
                 case ModCommandType.Coroutine:
                     FieldInfo cancelfield;
@@ -211,7 +221,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, cancelfield, canceltype);
+                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke, cancelfield, canceltype);
                     };
 
                 default:

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class CoroutineModComponentSolver : ComponentSolver
 {
-    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, FieldInfo cancelfield, Type canceltype) :
+    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool delayInvoke, FieldInfo cancelfield, Type canceltype) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
@@ -15,6 +15,7 @@ public class CoroutineModComponentSolver : ComponentSolver
         manualCode = manual;
         TryCancelField = cancelfield;
         TryCancelComponentSolverType = canceltype;
+        delayInvokation = delayInvoke;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -27,6 +28,9 @@ public class CoroutineModComponentSolver : ComponentSolver
 
         int beforeStrikeCount = StrikeCount;
         IEnumerator responseCoroutine = null;
+        if (delayInvokation)
+            yield return "CoroutineModComponentSolver";
+
         try
         {
             responseCoroutine = (IEnumerator)ProcessMethod.Invoke(CommandComponent, new object[] { inputCommand });

@@ -13,6 +13,8 @@ public class TwitchBombHandle : MonoBehaviour
     public Text idText = null;
     public ScrollRect messageScroll = null;
     public GameObject messageScrollContents = null;
+    public RectTransform mainWindowTransform = null;
+    public RectTransform highlightTransform = null;
 
     [HideInInspector]
     public IRCConnection ircConnection = null;
@@ -25,6 +27,9 @@ public class TwitchBombHandle : MonoBehaviour
 
     [HideInInspector]
     public CoroutineCanceller coroutineCanceller = null;
+
+    [HideInInspector]
+    public int bombID = -1;
     #endregion
 
     #region Private Fields
@@ -39,10 +44,23 @@ public class TwitchBombHandle : MonoBehaviour
 
     private void Start()
     {
+        if(bombID > -1)
+            _code = "bomb" + (bombID + 1);
+
         idText.text = string.Format("!{0}", _code);
 
         canvasGroup.alpha = 1.0f;
         highlightGroup.alpha = 0.0f;
+        if (bombID > -1)
+        {
+            mainWindowTransform.localPosition -= new Vector3(0, 160.0f * bombID, 0);
+            highlightTransform.localPosition -= new Vector3(0, 160.0f * bombID, 0);
+        }
+    }
+
+    private void LateUpdate()
+    {
+        messageScroll.verticalNormalizedPosition = 0.0f;
     }
     #endregion
 

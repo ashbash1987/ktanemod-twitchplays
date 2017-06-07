@@ -169,18 +169,32 @@ public class TwitchComponentHandle : MonoBehaviour
             else {
               manualText = _solver.manualCode;
             }
-            messageOut = string.Format("{0}: https://ktane.timwi.de/HTML/{1}.html", manualText, Uri.EscapeDataString(manualText));
+            if (manualText.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase) ||
+                manualText.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
+                messageOut = manualText;
+            else
+                messageOut = string.Format("{0}: https://ktane.timwi.de/HTML/{1}.html", manualText, Uri.EscapeDataString(manualText));
         }
         else if (Regex.IsMatch(internalCommand, "^(bomb|queue) (turn( a?round)?|flip|spin)$", RegexOptions.IgnoreCase))
         {
-            _solver._turnQueued = true;
+            if (!_solver._turnQueued)
+            {
+                _solver._turnQueued = true;
+                StartCoroutine(_solver.TurnBombOnSolve());
+            }
             messageOut = string.Format("Turning to the other side when Module {0} is solved", targetModule);
         }
-        if (messageOut != null) {
+        else if (Regex.IsMatch(internalCommand, "^cancel (bomb|queue) (turn( a?round)?|flip|spin)$", RegexOptions.IgnoreCase))
+        {
+            _solver._turnQueued = false;
+            messageOut = string.Format("Bomb turn on Module {0} solve cancelled", targetModule);
+        }
+        if (!string.IsNullOrEmpty(messageOut))
+        {
             ircConnection.SendMessage(string.Format(messageOut, _code, headerText.text));
             return;
         }
-        
+
         TwitchMessage message = (TwitchMessage)Instantiate(messagePrefab, messageScrollContents.transform, false);
         message.leaderboard = leaderboard;
         message.userName = userNickName;

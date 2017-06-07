@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -18,6 +19,10 @@ public class WireSequenceComponentSolver : ComponentSolver
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
     {
+        List<MonoBehaviour> buttons = new List<MonoBehaviour>();
+        List<string> strikemessages = new List<string>();
+
+        int beforeButtonStrikeCount = StrikeCount;
         if (inputCommand.Equals("up", StringComparison.InvariantCultureIgnoreCase) ||
             inputCommand.Equals("u", StringComparison.InvariantCultureIgnoreCase))
         {
@@ -35,76 +40,95 @@ public class WireSequenceComponentSolver : ComponentSolver
             DoInteractionStart(_downButton);
             yield return new WaitForSeconds(0.1f);
             DoInteractionEnd(_downButton);
+
+            if (StrikeCount != beforeButtonStrikeCount)
+            {
+                yield return "strikemessage attempting to move down.";
+            }
         }
         else
         {
-            if (!inputCommand.StartsWith("cut ", StringComparison.InvariantCultureIgnoreCase))
+            if (inputCommand.StartsWith("cut ", StringComparison.InvariantCultureIgnoreCase))
+            {
+                inputCommand = inputCommand.Substring(4);
+            }
+            else if (inputCommand.StartsWith("c ", StringComparison.InvariantCultureIgnoreCase))
+            {
+                inputCommand = inputCommand.Substring(2);
+            }
+            else
             {
                 yield break;
             }
-            inputCommand = inputCommand.Substring(4);
-
-            int beforeButtonStrikeCount = StrikeCount;
+            
 
             string[] sequence = inputCommand.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string wireIndexString in sequence)
             {
+                Debug.LogFormat("Wire Sequence Solver: '{0}'",wireIndexString);
                 if (wireIndexString.Equals("up", StringComparison.InvariantCultureIgnoreCase) ||
                     wireIndexString.Equals("u", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    yield return "up";
-                    DoInteractionStart(_upButton);
-                    yield return new WaitForSeconds(0.1f);
-                    DoInteractionEnd(_upButton);
+                    buttons.Add(_upButton);
+                    strikemessages.Add("strikemessage This will never cause a strike Kappa");
                     break;
                 }
-                else if (wireIndexString.Equals("down", StringComparison.InvariantCultureIgnoreCase) ||
-                        wireIndexString.Equals("d", StringComparison.InvariantCultureIgnoreCase))
+
+                if (wireIndexString.Equals("down", StringComparison.InvariantCultureIgnoreCase) ||
+                    wireIndexString.Equals("d", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    yield return "down";
-                    DoInteractionStart(_downButton);
-                    yield return new WaitForSeconds(0.1f);
-                    DoInteractionEnd(_downButton);
+                    buttons.Add(_downButton);
+                    strikemessages.Add("strikemessage attempting to move down.");
                     break;
                 }
-                
-                int wireIndex = 0;
+
+                int wireIndex;
                 if (!int.TryParse(wireIndexString, out wireIndex))
                 {
-                    continue;
+                    Debug.Log("Invalid Integer - Aborting");
+                    yield break;
+                }
+                wireIndex--;
+                if (!CanInteractWithWire(wireIndex))
+                {
+                    Debug.LogFormat("Cannot Interact with wire {0} as it doesn't exist on current page. Aborting.", wireIndex + 1);
+                    yield break;
                 }
 
-                wireIndex--;
-
-                if (CanInteractWithWire(wireIndex))
+                MonoBehaviour wire = GetWire(wireIndex);
+                if (wire == null)
                 {
-                    MonoBehaviour wire = GetWire(wireIndex);
-                    if (wire == null)
-                    {
-                        yield break;
-                    }
+                    Debug.LogFormat("Wire {0} doesn't exist. Aborting.", wireIndex + 1);
+                    yield break;
+                }
+                buttons.Add(wire);
+                strikemessages.Add(string.Format("strikemessage cutting Wire {0}.", wireIndex + 1));
+            }
 
-                    yield return wireIndexString;
+            yield return "wire sequence";
+            for (var i = 0; i < buttons.Count; i++)
+            {
+                Debug.LogFormat("Interaction {0}/{1} - Strike message: {2}", i + 1, buttons.Count, strikemessages[i]);
+                yield return strikemessages[i];
+                DoInteractionStart(buttons[i]);
+                yield return new WaitForSeconds(0.1f);
+                DoInteractionEnd(buttons[i]);
 
-                    if (Canceller.ShouldCancel)
-                    {
-                        Canceller.ResetCancel();
-                        yield break;
-                    }
-
-                    DoInteractionStart(wire);
-                    yield return new WaitForSeconds(0.1f);
-                    DoInteractionEnd(wire);
-
-                    //Escape the sequence if a part of the given sequence is wrong
-                    if (StrikeCount != beforeButtonStrikeCount)
-                    {
-                        yield return string.Format("sendtochat BibleThump Wire {0} caused a strike!", wireIndex + 1);
-                        break;
-                    }
+                if (StrikeCount != beforeButtonStrikeCount)
+                {
+                    Debug.Log("Strike!!! - Aborting");
+                    yield break;
+                }
+                if (Canceller.ShouldCancel)
+                {
+                    Canceller.ResetCancel();
+                    yield break;
                 }
             }
+
+            if (Canceller.ShouldCancel)
+                Canceller.ResetCancel();
         }
     }
 
