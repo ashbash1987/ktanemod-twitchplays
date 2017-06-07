@@ -34,13 +34,14 @@ public class NeedyQuizComponentSolver : ComponentSolver
                 Debug.Log("[Answering Questions #" + _thisLoggingID + "] Given answer: Y");
                 Debug.Log("[Answering Questions #" + _thisLoggingID + "] ABORT! ABORT!!! ABOOOOOOORT!!!!!");
                 yield return "sendtochat ABORT! ABORT!!! ABOOOOOOORT!!!!!";
-
+                int strikeCount = 0;
+                yield return "multiple strikes";
                 while (!Detonated)
                 {
-                    yield return "add strike";
+                    strikeCount++;
                     _service.CauseStrike("ABORT!");
                 }
-                yield return "award strikes";
+                yield return "award strikes " + strikeCount;
                 yield break;
             }
 

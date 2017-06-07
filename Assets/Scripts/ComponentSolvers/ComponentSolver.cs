@@ -37,24 +37,49 @@ public abstract class ComponentSolver : ICommandResponder
     #region Interface Implementation
     public IEnumerator RespondToCommand(string userNickName, string message, ICommandResponseNotifier responseNotifier)
     {
+        _processingTwitchCommand = true;
         if (Solved)
         {
             responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+            _processingTwitchCommand = false;
             yield break;
         }
 
         _currentResponseNotifier = responseNotifier;
         _currentUserNickName = userNickName;
 
+
+        int beforeStrikeCount = StrikeCount;
         IEnumerator subcoroutine = RespondToCommandCommon(message);
         if (subcoroutine == null || !subcoroutine.MoveNext())
         {
             subcoroutine = RespondToCommandInternal(message);
-            if (subcoroutine == null || !subcoroutine.MoveNext())
+            if (subcoroutine == null || !subcoroutine.MoveNext() || Solved || beforeStrikeCount != StrikeCount)
             {
-                responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+                if (Solved || beforeStrikeCount != StrikeCount)
+                {
+                    IEnumerator focusDefocus = BombCommander.Focus(Selectable, FocusDistance, FrontFace);
+                    while (focusDefocus.MoveNext())
+                    {
+                        yield return focusDefocus.Current;
+                    }
+                    yield return new WaitForSeconds(0.5f);
+
+                    responseNotifier.ProcessResponse(Solved ? CommandResponse.EndComplete : CommandResponse.EndError);
+
+                    focusDefocus = BombCommander.Defocus(FrontFace);
+                    while (focusDefocus.MoveNext())
+                    {
+                        yield return focusDefocus.Current;
+                    }
+                    yield return new WaitForSeconds(0.5f);
+                }
+                else
+                    responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+
                 _currentResponseNotifier = null;
                 _currentUserNickName = null;
+                _processingTwitchCommand = false;
                 yield break;
             }
         }
@@ -76,6 +101,7 @@ public abstract class ComponentSolver : ICommandResponder
         while (subcoroutine.MoveNext())
         {
             object currentValue = subcoroutine.Current;
+            int temp;
             if (currentValue is string)
             {
                 string currentString = (string)currentValue;
@@ -89,28 +115,41 @@ public abstract class ComponentSolver : ICommandResponder
                     _delegatedSolveUserNickName = userNickName;
                     _delegatedSolveResponseNotifier = responseNotifier;
                 }
+                else if (currentString.StartsWith("strikemessage ", StringComparison.InvariantCultureIgnoreCase) && 
+                    currentString.Substring(14).Trim() != string.Empty)
+                {
+                    StrikeMessage = currentString.Substring(14);
+                }
                 else if (currentString.Equals("parseerror", StringComparison.InvariantCultureIgnoreCase))
                 {
                     parseError = true;
                     break;
                 }
-                else if (currentString.Equals("trycancel", StringComparison.InvariantCultureIgnoreCase) && Canceller.ShouldCancel)
+                else if (currentString.Equals("trycancel", StringComparison.InvariantCultureIgnoreCase) && 
+                    Canceller.ShouldCancel)
                 {
                     Canceller.ResetCancel();
                     break;
                 }
-                else if (currentString.StartsWith("sendtochat ", StringComparison.InvariantCultureIgnoreCase) && currentString.Substring(11).Trim() != string.Empty)
+                else if (currentString.StartsWith("sendtochat ", StringComparison.InvariantCultureIgnoreCase) && 
+                    currentString.Substring(11).Trim() != string.Empty)
                 {
                     IRCConnection.SendMessage(currentString.Substring(11));
                 }
-                else if (currentString.Equals("add strike"))
+                else if (currentString.StartsWith("add strike", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    _strikeCount++;
+                    OnStrike(null);
                 }
-                else if (currentString.Equals("award strikes"))
+                else if (currentString.Equals("multiple strikes", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    AwardStrikes(_currentUserNickName, _currentResponseNotifier, StrikeCount - previousStrikeCount);
-                    previousStrikeCount = StrikeCount;
+                    DisableOnStrike = true;
+                }
+                else if (currentString.StartsWith("award strikes ", StringComparison.CurrentCultureIgnoreCase) &&
+                         int.TryParse(currentString.Substring(14), out temp))
+                {
+                    _strikeCount += temp;
+                    AwardStrikes(_currentUserNickName, _currentResponseNotifier, temp);
+                    DisableOnStrike = false;
                 }
             }
             else if (currentValue is Quaternion)
@@ -149,19 +188,9 @@ public abstract class ComponentSolver : ICommandResponder
 
         yield return new WaitForSeconds(0.5f);
 
-        if (_readyToTurn)
-        {
-            _readyToTurn = false;
-            IEnumerator turnCoroutine = BombCommander.TurnBomb();
-            while (turnCoroutine.MoveNext())
-            {
-                yield return turnCoroutine.Current;
-            }
-            yield return new WaitForSeconds(0.5f);
-        }
-
         _currentResponseNotifier = null;
         _currentUserNickName = null;
+        _processingTwitchCommand = false;
     }
     #endregion
 
@@ -215,6 +244,7 @@ public abstract class ComponentSolver : ICommandResponder
         {
             Debug.LogFormat("ComponentSolver: Activating queued turn for completed module {0}.", Code);
             _readyToTurn = true;
+            _turnQueued = false;
         }
 
         ComponentHandle.OnPass();
@@ -222,8 +252,32 @@ public abstract class ComponentSolver : ICommandResponder
         return false;
     }
 
+    public IEnumerator TurnBombOnSolve()
+    {
+        while(_turnQueued)
+            yield return new WaitForSeconds(0.1f);
+
+        if (!_readyToTurn)
+            yield break;
+
+        while (_processingTwitchCommand)
+            yield return new WaitForSeconds(0.1f);
+
+        _readyToTurn = false;
+        IEnumerator turnCoroutine = BombCommander.TurnBomb();
+        while (turnCoroutine.MoveNext())
+        {
+            yield return turnCoroutine.Current;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+    }
+
+    private bool DisableOnStrike;
     private bool OnStrike(object _ignore)
     {
+        if (DisableOnStrike) return false;
+
         _strikeCount++;
 
         if (_delegatedStrikeUserNickName != null && _delegatedStrikeResponseNotifier != null)
@@ -248,8 +302,9 @@ public abstract class ComponentSolver : ICommandResponder
 
     private void AwardStrikes(string userNickName, ICommandResponseNotifier responseNotifier, int strikeCount)
     {
-        IRCConnection.SendMessage(string.Format("VoteNay Module {0} got {1} strike{2}! +{3} strike{2} to {4}", Code, strikeCount == 1 ? "a" : strikeCount.ToString(), strikeCount == 1 ? "" : "s", strikeCount, userNickName));
+        IRCConnection.SendMessage(string.Format("VoteNay Module {0} got {1} strike{2}! +{3} strike{2} to {4}{5}", Code, strikeCount == 1 ? "a" : strikeCount.ToString(), strikeCount == 1 ? "" : "s", strikeCount, userNickName, string.IsNullOrEmpty(StrikeMessage) ? "" : " caused by " + StrikeMessage));
         responseNotifier.ProcessResponse(CommandResponse.EndError, strikeCount);
+        StrikeMessage = string.Empty;
     }
     #endregion
 
@@ -260,6 +315,13 @@ public abstract class ComponentSolver : ICommandResponder
     }
     
     #region Protected Properties
+
+    protected string StrikeMessage
+    {
+        get;
+        set;
+    }
+
     protected bool Solved
     {
         get
@@ -369,8 +431,12 @@ public abstract class ComponentSolver : ICommandResponder
     
     public string helpMessage = null;
     public string manualCode = null;
+    public bool delayInvokation = false;
+
     public bool _turnQueued = false;
     private bool _readyToTurn = false;
+    private bool _processingTwitchCommand = false;
+   
 
     public TwitchComponentHandle ComponentHandle = null;
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class CoroutineModComponentSolver : ComponentSolver
 {
-    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, FieldInfo cancelfield, Type canceltype) :
+    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool delayInvoke, FieldInfo cancelfield, Type canceltype) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
@@ -15,6 +15,7 @@ public class CoroutineModComponentSolver : ComponentSolver
         manualCode = manual;
         TryCancelField = cancelfield;
         TryCancelComponentSolverType = canceltype;
+        delayInvokation = delayInvoke;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -25,7 +26,11 @@ public class CoroutineModComponentSolver : ComponentSolver
             yield break;
         }
 
+        int beforeStrikeCount = StrikeCount;
         IEnumerator responseCoroutine = null;
+        if (delayInvokation)
+            yield return "CoroutineModComponentSolver";
+
         try
         {
             responseCoroutine = (IEnumerator)ProcessMethod.Invoke(CommandComponent, new object[] { inputCommand });
@@ -41,31 +46,32 @@ public class CoroutineModComponentSolver : ComponentSolver
             yield break;
         }
 
-        yield return "modcoroutine";
+        bool moveNext = false;
+        while (beforeStrikeCount == StrikeCount && !Solved)
+        {
+            try
+            {
+                if (!responseCoroutine.MoveNext())
+                    yield break;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogErrorFormat(
+                    "An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.",
+                    ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
+                Debug.LogException(ex);
+                yield break;
+            }
+            if (!moveNext)
+            {
+                moveNext = true;
+                yield return "CoroutineModComponentSolver";
+            }
 
-        bool internalParseError = false;
-        try
-        {
-            internalParseError = !responseCoroutine.MoveNext();
-        }
-        catch (Exception ex)
-        {
-            Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
-            Debug.LogException(ex);
-            internalParseError = true;
-        }
-        if (internalParseError)
-        {
-            yield return "parseerror";
-            yield break;
-        }
-
-        while (true)
-        {
             object currentObject = responseCoroutine.Current;
             if (currentObject is KMSelectable)
             {
-                KMSelectable selectable = (KMSelectable)currentObject;
+                KMSelectable selectable = (KMSelectable) currentObject;
                 if (HeldSelectables.Contains(selectable))
                 {
                     DoInteractionEnd(selectable);
@@ -79,14 +85,13 @@ public class CoroutineModComponentSolver : ComponentSolver
             }
             if (currentObject is KMSelectable[])
             {
-                int beforeStrikeCount = StrikeCount;
                 KMSelectable[] selectables = (KMSelectable[]) currentObject;
                 foreach (KMSelectable selectable in selectables)
                 {
                     DoInteractionStart(selectable);
                     yield return new WaitForSeconds(0.1f);
                     DoInteractionEnd(selectable);
-                    if (beforeStrikeCount != StrikeCount || Canceller.ShouldCancel)
+                    if (beforeStrikeCount != StrikeCount || Canceller.ShouldCancel || Solved)
                         break;
                 }
             }
@@ -101,23 +106,9 @@ public class CoroutineModComponentSolver : ComponentSolver
             }
             yield return currentObject;
 
-            try
-            {
-                if (!responseCoroutine.MoveNext())
-                {
-                    break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogErrorFormat("An exception occurred while trying to invoke {0}.{1}; the command invokation will not continue.", ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
-                Debug.LogException(ex);
-                break;
-            }
-
             if (Canceller.ShouldCancel)
                 TryCancel = true;
-        }        
+        } 
     }
 
     private readonly MethodInfo ProcessMethod = null;

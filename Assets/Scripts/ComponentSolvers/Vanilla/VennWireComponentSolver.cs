@@ -10,6 +10,7 @@ public class VennWireComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _wires = (Array)_activeWiresProperty.GetValue(bombComponent, null);
+        _cutWires = new bool[6];
         
         helpMessage = "Cut the third wire with !{0} cut 3. Cut multiple wires with !{0} cut 2 3 6. Wires ordered from left to right, empty spaces do not count.";
     }
@@ -36,6 +37,10 @@ public class VennWireComponentSolver : ComponentSolver
 
             if (wireIndex >= 0 && wireIndex < _wires.Length)
             {
+                if (_cutWires[wireIndex])
+                    continue;
+                _cutWires[wireIndex] = true;
+
                 yield return wireIndexString.Value;
 
                 if (Canceller.ShouldCancel)
@@ -51,7 +56,7 @@ public class VennWireComponentSolver : ComponentSolver
                 DoInteractionEnd(wire);
 
                 //Escape the sequence if a part of the given sequence is wrong
-                if (StrikeCount != beforeButtonStrikeCount)
+                if (StrikeCount != beforeButtonStrikeCount || Solved)
                 {
                     break;
                 }
@@ -69,4 +74,5 @@ public class VennWireComponentSolver : ComponentSolver
     private static PropertyInfo _activeWiresProperty = null;
 
     private Array _wires = null;
+    private bool[] _cutWires = null;
 }

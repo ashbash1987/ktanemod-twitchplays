@@ -38,7 +38,7 @@ public class CryptographyComponentSolver : ComponentSolver
                 DoInteractionStart(_buttons[keytext.IndexOf(y)]);
                 yield return new WaitForSeconds(0.1f);
                 DoInteractionEnd(_buttons[keytext.IndexOf(y)]);
-                if (StrikeCount != BeforeStrikes)
+                if (StrikeCount != BeforeStrikes || Solved)
                     yield break;
             }
         }
