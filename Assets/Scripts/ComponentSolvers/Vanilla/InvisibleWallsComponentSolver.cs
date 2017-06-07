@@ -11,7 +11,7 @@ public class InvisibleWallsComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (IList)_buttonsField.GetValue(bombComponent);
-        
+
         helpMessage = "Move with !{0} move u d l r.";
         manualCode = "Mazes";
     }
@@ -29,11 +29,6 @@ public class InvisibleWallsComponentSolver : ComponentSolver
 
         foreach (Match move in Regex.Matches(inputCommand, @"[udlr]", RegexOptions.IgnoreCase))
         {
-            Dictionary<string, int> buttonIndex = new Dictionary<string, int>
-            {
-              {"u", 0}, {"l", 1}, {"r", 2}, {"d", 3}
-            };
-            
             MonoBehaviour button = (MonoBehaviour)_buttons[  buttonIndex[ move.Value.ToLowerInvariant() ]  ];
             
             if (button != null)
@@ -67,6 +62,10 @@ public class InvisibleWallsComponentSolver : ComponentSolver
 
     private static Type _invisibleWallsComponentType = null;
     private static FieldInfo _buttonsField = null;
+    private static readonly Dictionary<string, int> buttonIndex = new Dictionary<string, int>
+    {
+        {"u", 0}, {"l", 1}, {"r", 2}, {"d", 3}
+    };
 
     private IList _buttons = null;
 }

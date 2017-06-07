@@ -325,7 +325,7 @@ public class Leaderboard
         string path = Path.Combine(Application.persistentDataPath, usersSavePath);
         try
         {
-            Debug.Log("Loading leaderboard data from file: " + path);
+            Debug.Log("Leaderboard: Loading leaderboard data from file: " + path);
             XmlSerializer xml = new XmlSerializer(_entryList.GetType());
             TextReader reader = new StreamReader(path);
             List<LeaderboardEntry> entries = (List<LeaderboardEntry>)xml.Deserialize(reader);
@@ -333,7 +333,7 @@ public class Leaderboard
             ResetSortFlag();
 
             path = Path.Combine(Application.persistentDataPath, statsSavePath);
-            Debug.Log("Loading stats data from file: " + path);
+            Debug.Log("Leaderboard: Loading stats data from file: " + path);
             string jsonInput = File.ReadAllText(path);
             Dictionary<string, int> stats = JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonInput);
 
@@ -348,7 +348,7 @@ public class Leaderboard
         }
         catch (FileNotFoundException)
         {
-            Debug.LogWarningFormat("File {0} was not found.", path);
+            Debug.LogWarningFormat("Leaderboard: File {0} was not found.", path);
         }
         catch (Exception ex)
         {
@@ -366,13 +366,13 @@ public class Leaderboard
                 CheckAndSort();
             }
 
-            Debug.Log("Saving leaderboard data to file: " + path);
+            Debug.Log("Leaderboard: Saving leaderboard data to file: " + path);
             XmlSerializer xml = new XmlSerializer(_entryList.GetType());
             TextWriter writer = new StreamWriter(path);
             xml.Serialize(writer, _entryList);
 
             path = Path.Combine(Application.persistentDataPath, statsSavePath);
-            Debug.Log("Saving stats data to file: " + path);
+            Debug.Log("Leaderboard: Saving stats data to file: " + path);
             Dictionary<string, int> stats = new Dictionary<string, int>
             {
                 { "BombsAttempted", BombsAttempted },
@@ -387,7 +387,7 @@ public class Leaderboard
         }
         catch (FileNotFoundException)
         {
-            Debug.LogWarningFormat("[bmn] File {0} was not found.", path);
+            Debug.LogWarningFormat("Leaderboard: File {0} was not found.", path);
         }
         catch (Exception ex)
         {

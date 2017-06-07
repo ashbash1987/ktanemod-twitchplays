@@ -253,7 +253,7 @@ public class BombBinderCommander : ICommandResponder
             MonoBehaviour newSelectable = null;
             for (_currentSelectableIndex = 0; _currentSelectableIndex < _currentSelectables.Length; ++_currentSelectableIndex)
             {
-                Debug.Log(string.Format("[bmn] Looking for index {0}", _currentSelectableIndex));
+                Debug.Log(string.Format("BombBinderCommander: Selecting item {0}", _currentSelectableIndex));
                 newSelectable = (MonoBehaviour)_currentSelectables.GetValue(_currentSelectableIndex);
                 if ( (newSelectable != null) && (++i == index) )
                 {

@@ -749,6 +749,8 @@ MonoBehaviour:
   mainTableTransform: {fileID: 224063704834406276}
   altTableTransform: {fileID: 224530108564050708}
   promptTransform: {fileID: 224000014090394746}
+  retryTransform: {fileID: 224000012267575730}
+  leftMaskTransform: {fileID: 224000011821189116}
 --- !u!114 &114965850862884284
 MonoBehaviour:
   m_ObjectHideFlags: 1

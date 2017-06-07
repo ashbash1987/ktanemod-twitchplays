@@ -14,6 +14,8 @@ public class TwitchLeaderboard : MonoBehaviour
     public RectTransform mainTableTransform = null;
     public RectTransform altTableTransform = null;
     public RectTransform promptTransform = null;
+    public RectTransform retryTransform = null;
+    public RectTransform leftMaskTransform = null;
 
     public Leaderboard leaderboard = null;
     private TwitchLeaderboardTable mainTable = null;
@@ -29,7 +31,7 @@ public class TwitchLeaderboard : MonoBehaviour
 
         if (leaderboard.Success)
         {
-            promptTransform.FindChild("Retry").gameObject.SetActive(false);
+            retryTransform.gameObject.SetActive(false);
         }
 
         statsTable = Instantiate<TwitchLeaderboardStats>(twitchLeaderboardStatsPrefab);
@@ -45,7 +47,7 @@ public class TwitchLeaderboard : MonoBehaviour
         {
             soloTable = Instantiate<TwitchLeaderboardTableSolo>(twitchLeaderboardTableSoloPrefab);
             soloTable.leaderboard = leaderboard;
-            transform.FindChild("UI").FindChild("Mask").gameObject.SetActive(true);
+            leftMaskTransform.gameObject.SetActive(true);
 
             bool prioritiseSolo = (leaderboard.SoloSolver != null);
             int countOnRight = prioritiseSolo ? leaderboard.SoloCount : leaderboard.Count;
@@ -73,7 +75,7 @@ public class TwitchLeaderboard : MonoBehaviour
             if ((leaderboard.Count - statsTable.entriesLess) > mainTable.maximumRowCount)
             {
                 statsTable.transform.SetParent(altTableTransform, false);
-                transform.FindChild("UI").FindChild("Mask").gameObject.SetActive(true);
+                leftMaskTransform.gameObject.SetActive(true);
             }
             else
             {

@@ -398,8 +398,8 @@ MonoBehaviour:
   totalClearsText: {fileID: 114000013789152206}
   recordTimeText: {fileID: 114000011156640196}
   avgSolveTimeText: {fileID: 114000011413011058}
-  position: 0
-  delay: 0
+  position: 4
+  delay: 1.3
 --- !u!114 &114000013222908912
 MonoBehaviour:
   m_ObjectHideFlags: 1
