@@ -51,7 +51,7 @@ public class VennWireComponentSolver : ComponentSolver
                 DoInteractionEnd(wire);
 
                 //Escape the sequence if a part of the given sequence is wrong
-                if (StrikeCount != beforeButtonStrikeCount)
+                if (StrikeCount != beforeButtonStrikeCount || Solved)
                 {
                     break;
                 }

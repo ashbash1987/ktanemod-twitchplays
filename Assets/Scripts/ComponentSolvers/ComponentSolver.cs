@@ -46,13 +46,35 @@ public abstract class ComponentSolver : ICommandResponder
         _currentResponseNotifier = responseNotifier;
         _currentUserNickName = userNickName;
 
+
+        int beforeStrikeCount = StrikeCount;
         IEnumerator subcoroutine = RespondToCommandCommon(message);
         if (subcoroutine == null || !subcoroutine.MoveNext())
         {
             subcoroutine = RespondToCommandInternal(message);
-            if (subcoroutine == null || !subcoroutine.MoveNext())
+            if (subcoroutine == null || !subcoroutine.MoveNext() || Solved || beforeStrikeCount != StrikeCount)
             {
-                responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+                if (Solved || beforeStrikeCount != StrikeCount)
+                {
+                    IEnumerator focusDefocus = BombCommander.Focus(Selectable, FocusDistance, FrontFace);
+                    while (focusDefocus.MoveNext())
+                    {
+                        yield return focusDefocus.Current;
+                    }
+                    yield return new WaitForSeconds(0.5f);
+
+                    responseNotifier.ProcessResponse(Solved ? CommandResponse.EndComplete : CommandResponse.EndError);
+
+                    focusDefocus = BombCommander.Defocus(FrontFace);
+                    while (focusDefocus.MoveNext())
+                    {
+                        yield return focusDefocus.Current;
+                    }
+                    yield return new WaitForSeconds(0.5f);
+                }
+                else
+                    responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+
                 _currentResponseNotifier = null;
                 _currentUserNickName = null;
                 yield break;
@@ -89,28 +111,44 @@ public abstract class ComponentSolver : ICommandResponder
                     _delegatedSolveUserNickName = userNickName;
                     _delegatedSolveResponseNotifier = responseNotifier;
                 }
+                else if (currentString.StartsWith("strikemessage ", StringComparison.InvariantCultureIgnoreCase) && 
+                    currentString.Substring(14).Trim() != string.Empty)
+                {
+                    StrikeMessage = currentString.Substring(14);
+                }
                 else if (currentString.Equals("parseerror", StringComparison.InvariantCultureIgnoreCase))
                 {
                     parseError = true;
                     break;
                 }
-                else if (currentString.Equals("trycancel", StringComparison.InvariantCultureIgnoreCase) && Canceller.ShouldCancel)
+                else if (currentString.Equals("trycancel", StringComparison.InvariantCultureIgnoreCase) && 
+                    Canceller.ShouldCancel)
                 {
                     Canceller.ResetCancel();
                     break;
                 }
-                else if (currentString.StartsWith("sendtochat ", StringComparison.InvariantCultureIgnoreCase) && currentString.Substring(11).Trim() != string.Empty)
+                else if (currentString.StartsWith("sendtochat ", StringComparison.InvariantCultureIgnoreCase) && 
+                    currentString.Substring(11).Trim() != string.Empty)
                 {
                     IRCConnection.SendMessage(currentString.Substring(11));
                 }
-                else if (currentString.Equals("add strike"))
+                else if (currentString.StartsWith("add strike", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    _strikeCount++;
+                    OnStrike(null);
                 }
-                else if (currentString.Equals("award strikes"))
+                else if (currentString.Equals("multiple strikes", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    AwardStrikes(_currentUserNickName, _currentResponseNotifier, StrikeCount - previousStrikeCount);
-                    previousStrikeCount = StrikeCount;
+                    DisableOnStrike = true;
+                }
+                else if (currentString.StartsWith("award strikes ", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    int awardStrikeCount;
+                    if (int.TryParse(currentString.Substring(14), out awardStrikeCount))
+                    {
+                        _strikeCount += awardStrikeCount;
+                        AwardStrikes(_currentUserNickName, _currentResponseNotifier, awardStrikeCount);
+                        DisableOnStrike = false;
+                    }
                 }
             }
             else if (currentValue is Quaternion)
@@ -222,8 +260,11 @@ public abstract class ComponentSolver : ICommandResponder
         return false;
     }
 
+    private bool DisableOnStrike;
     private bool OnStrike(object _ignore)
     {
+        if (DisableOnStrike) return false;
+
         _strikeCount++;
 
         if (_delegatedStrikeUserNickName != null && _delegatedStrikeResponseNotifier != null)
@@ -248,8 +289,9 @@ public abstract class ComponentSolver : ICommandResponder
 
     private void AwardStrikes(string userNickName, ICommandResponseNotifier responseNotifier, int strikeCount)
     {
-        IRCConnection.SendMessage(string.Format("VoteNay Module {0} got {1} strike{2}! +{3} strike{2} to {4}", Code, strikeCount == 1 ? "a" : strikeCount.ToString(), strikeCount == 1 ? "" : "s", strikeCount, userNickName));
+        IRCConnection.SendMessage(string.Format("VoteNay Module {0} got {1} strike{2}! +{3} strike{2} to {4}{5}", Code, strikeCount == 1 ? "a" : strikeCount.ToString(), strikeCount == 1 ? "" : "s", strikeCount, userNickName, string.IsNullOrEmpty(StrikeMessage) ? "" : " caused by " + StrikeMessage));
         responseNotifier.ProcessResponse(CommandResponse.EndError, strikeCount);
+        StrikeMessage = string.Empty;
     }
     #endregion
 
@@ -260,6 +302,13 @@ public abstract class ComponentSolver : ICommandResponder
     }
     
     #region Protected Properties
+
+    protected string StrikeMessage
+    {
+        get;
+        set;
+    }
+
     protected bool Solved
     {
         get
