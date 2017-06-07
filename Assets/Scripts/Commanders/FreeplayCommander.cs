@@ -143,7 +143,6 @@ public class FreeplayCommander : ICommandResponder
             switch (profile)
             {
                 case "single":
-                    goto case "solo";
                 case "solo":
                     changeBombsTo = "1";
                     changeMinutesTo = "20";
@@ -151,7 +150,6 @@ public class FreeplayCommander : ICommandResponder
                     break;
 
                 case "quadruple":
-                    goto case "quad";
                 case "quad":
                     changeBombsTo = "1";
                     changeMinutesTo = "80";
@@ -165,7 +163,6 @@ public class FreeplayCommander : ICommandResponder
                     break;
 
                 case "dual quadruple":
-                    goto case "dual quad";
                 case "dual quad":
                     changeBombsTo = "2";
                     changeMinutesTo = "160";
