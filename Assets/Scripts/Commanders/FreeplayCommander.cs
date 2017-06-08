@@ -20,6 +20,8 @@ public class FreeplayCommander : ICommandResponder
         _modsOnlyToggleField = _freeplayDeviceType.GetField("ModsOnly", BindingFlags.Public | BindingFlags.Instance);
         _startButtonField = _freeplayDeviceType.GetField("StartButton", BindingFlags.Public | BindingFlags.Instance);
         _currentSettingsField = _freeplayDeviceType.GetField("currentSettings", BindingFlags.NonPublic | BindingFlags.Instance);
+        _maxModuleField = _freeplayDeviceType.GetField("maxModules", BindingFlags.NonPublic | BindingFlags.Instance);
+        _MAXSECONDSFIELD = _freeplayDeviceType.GetField("MAX_SECONDS_TO_SOLVE", BindingFlags.Public | BindingFlags.Static);
 
         _freeplaySettingsType = ReflectionHelper.FindType("Assets.Scripts.Settings.FreeplaySettings");
         _moduleCountField = _freeplaySettingsType.GetField("ModuleCount", BindingFlags.Public | BindingFlags.Instance);
@@ -102,6 +104,7 @@ public class FreeplayCommander : ICommandResponder
             }
         }
 
+        string changeHoursTo = String.Empty;
         string changeMinutesTo = String.Empty;
         string changeSecondsTo = String.Empty;
         string changeBombsTo = String.Empty;
@@ -145,68 +148,91 @@ public class FreeplayCommander : ICommandResponder
                 case "single":
                 case "solo":
                     changeBombsTo = "1";
+                    changeHoursTo = "0";
                     changeMinutesTo = "20";
                     changeModulesTo = "11";
+                    break;
+
+                case "double":
+                    changeBombsTo = "1";
+                    changeHoursTo = "0";
+                    changeMinutesTo = "40";
+                    changeModulesTo = "23";
                     break;
 
                 case "quadruple":
                 case "quad":
                     changeBombsTo = "1";
-                    changeMinutesTo = "80";
+                    changeHoursTo = "1";
+                    changeMinutesTo = "20";
                     changeModulesTo = "47";
                     break;
 
                 case "dual single":
+                case "dual solo":
                     changeBombsTo = "2";
+                    changeHoursTo = "0";
                     changeMinutesTo = "40";
                     changeModulesTo = "11";
+                    break;
+
+                case "dual double":
+                    changeBombsTo = "2";
+                    changeHoursTo = "1";
+                    changeMinutesTo = "20";
+                    changeModulesTo = "23";
                     break;
 
                 case "dual quadruple":
                 case "dual quad":
                     changeBombsTo = "2";
-                    changeMinutesTo = "160";
+                    changeHoursTo = "2";
+                    changeMinutesTo = "40";
                     changeModulesTo = "47";
                     break;
             }
         }
         else if (message.StartsWith("start"))
         {
-            Match timerMatch = Regex.Match(message, "([0-9][0-9]?):([0-9]{2})");
+            Match timerMatch = Regex.Match(message, "([0-9]):([0-9]{2}):([0-9]{2})");
             if (timerMatch.Success)
             {
-                changeMinutesTo = timerMatch.Groups[1].Value;
-                changeSecondsTo = timerMatch.Groups[2].Value;
+                changeHoursTo = timerMatch.Groups[1].Value;
+                changeMinutesTo = timerMatch.Groups[2].Value;
+                changeSecondsTo = timerMatch.Groups[3].Value;
+                message = message.Remove(timerMatch.Index, timerMatch.Length);
             }
-            message = message.Remove(timerMatch.Index, timerMatch.Length);
+            else
+            {
+                timerMatch = Regex.Match(message, "([0-9]+):([0-9]{2})");
+                if (timerMatch.Success)
+                {
+                    changeMinutesTo = timerMatch.Groups[1].Value;
+                    changeSecondsTo = timerMatch.Groups[2].Value;
+                    message = message.Remove(timerMatch.Index, timerMatch.Length);
+                }
+            }
+
 
             Match modulesMatch = Regex.Match(message, "[0-9]+");
 
-            bool setBombs = false;
-            bool setModules = false;
             while (modulesMatch.Success)
             {
                 int count = 0;
-                
+
                 if (int.TryParse(modulesMatch.Value, out count))
                 {
-                    if ((count <= 2 && !setBombs) || (count >= 3 && !setModules))
+                    if (count <= 2)
                     {
-                        setBombs |= count <= 2;
-                        setModules |= count >= 3;
-
-                        if (count <= 2)
-                        {
-                            changeBombsTo = modulesMatch.Value;
-                        }
-                        else
-                        {
-                            changeModulesTo = modulesMatch.Value;
-                        }
-
-                        Debug.Log(string.Format("Setting {1} to {0}", modulesMatch.Value,
-                            count <= 2 ? "bombs" : "modules"));
+                        changeBombsTo = modulesMatch.Value;
                     }
+                    else
+                    {
+                        changeModulesTo = modulesMatch.Value;
+                    }
+
+                    Debug.Log(string.Format("Setting {1} to {0}", modulesMatch.Value,
+                        count <= 2 ? "bombs" : "modules"));
                 }
                 message = message.Remove(modulesMatch.Index, modulesMatch.Length);
                 modulesMatch = Regex.Match(message, "[0-9]+");
@@ -230,7 +256,15 @@ public class FreeplayCommander : ICommandResponder
         }
         else
         {
-            Match timerMatch = Regex.Match(message, "^timer? ([0-9][0-9]?)(?::([0-9]{2}))?$", RegexOptions.IgnoreCase);
+            Match timerMatch = Regex.Match(message, "^timer? ([0-9]+)(?::([0-9]{2}))(?::([0-9]{2}))$", RegexOptions.IgnoreCase);
+            if (timerMatch.Success)
+            {
+                changeHoursTo = timerMatch.Groups[1].Value;
+                changeMinutesTo = timerMatch.Groups[2].Value;
+                changeSecondsTo = timerMatch.Groups[3].Value;
+            }
+
+            timerMatch = Regex.Match(message, "^timer? ([0-9]+)(?::([0-9]{2}))?$", RegexOptions.IgnoreCase);
             if (timerMatch.Success)
             {
                 changeMinutesTo = timerMatch.Groups[1].Value;
@@ -252,7 +286,7 @@ public class FreeplayCommander : ICommandResponder
 
         if (changeMinutesTo != String.Empty)
         {
-            IEnumerator setTimerCoroutine = SetBombTimer(changeMinutesTo, changeSecondsTo);
+            IEnumerator setTimerCoroutine = SetBombTimer(changeHoursTo, changeMinutesTo, changeSecondsTo);
             while (setTimerCoroutine.MoveNext())
             {
                 yield return setTimerCoroutine.Current;
@@ -283,8 +317,20 @@ public class FreeplayCommander : ICommandResponder
     #endregion
 
     #region Helper Methods
-    public IEnumerator SetBombTimer(string mins, string secs)
+    public bool IsDualBombInstalled()
     {
+        float seconds_to_solve = (float)_MAXSECONDSFIELD.GetValue(null);
+        return seconds_to_solve > 600.0f;
+    }
+
+    public IEnumerator SetBombTimer(string hours, string mins, string secs)
+    {
+        int hoursInt = 0;
+        if (!string.IsNullOrEmpty(hours) && !int.TryParse(hours, out hoursInt))
+        {
+            yield break;
+        }
+
         int minutes = 0;
         if (!int.TryParse(mins, out minutes))
         {
@@ -298,7 +344,14 @@ public class FreeplayCommander : ICommandResponder
             yield break;
         }
 
-        int timeIndex = (minutes * 2) + (seconds / 30);
+        int timeIndex = (hoursInt * 120) + (minutes * 2) + (seconds / 30);
+
+        //Double the available free play time. (The doubling stacks with the Multiple bombs module installed)
+        float originalMaxTime = (float) _MAXSECONDSFIELD.GetValue(null);
+        int maxModules = (int)_maxModuleField.GetValue(FreeplayDevice);
+        int multiplier = IsDualBombInstalled() ? 3 : 1;
+        float newMaxTime = 600f + ((maxModules - 1) * multiplier * 60);
+        _MAXSECONDSFIELD.SetValue(null, newMaxTime);
 
         object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
         float currentTime = (float)_timeField.GetValue(currentSettings);
@@ -311,9 +364,12 @@ public class FreeplayCommander : ICommandResponder
             currentTime = (float)_timeField.GetValue(currentSettings);
             SelectObject(buttonSelectable);
             yield return new WaitForSeconds(0.1f);
-            if (Mathf.FloorToInt(currentTime) == Mathf.FloorToInt((float)_timeField.GetValue(currentSettings)))
-                yield break;
+            if (Mathf.FloorToInt(currentTime) == Mathf.FloorToInt((float) _timeField.GetValue(currentSettings)))
+                break;
         }
+
+        //Restore original max time, just in case Multiple bombs module was NOT installed, to avoid false detection.
+        _MAXSECONDSFIELD.SetValue(null, originalMaxTime);
     }
 
     public IEnumerator SetBombCount(string bombs)
@@ -324,18 +380,12 @@ public class FreeplayCommander : ICommandResponder
             yield break;
         }
 
-        object currentSettings = _currentSettingsField.GetValue(FreeplayDevice);
-        int currentModuleCount = (int)_moduleCountField.GetValue(currentSettings);
-
-        Debug.Log("Attempting to set the number of bombs");
-        SelectObject(bombCount <= 1 ? SelectableChildren[2] : SelectableChildren[3]);
-
-        if (currentModuleCount != (int) _moduleCountField.GetValue(currentSettings))
+        if (!IsDualBombInstalled())
         {
-            Debug.Log("Failed - Multiple bombs not loaded - Reverting the module count.");
-            yield return new WaitForSeconds(0.1f);
-            SelectObject(bombCount <= 1 ? SelectableChildren[3] : SelectableChildren[2]);
+            yield break;
         }
+
+        SelectObject(bombCount <= 1 ? SelectableChildren[2] : SelectableChildren[3]);
     }
 
     public IEnumerator SetBombModules(string mods)
@@ -480,6 +530,8 @@ public class FreeplayCommander : ICommandResponder
     private static FieldInfo _modsOnlyToggleField = null;
     private static FieldInfo _startButtonField = null;
     private static FieldInfo _currentSettingsField = null;
+    private static FieldInfo _maxModuleField = null;
+    private static FieldInfo _MAXSECONDSFIELD = null;
 
     private static Type _freeplaySettingsType = null;
     private static FieldInfo _moduleCountField = null;
