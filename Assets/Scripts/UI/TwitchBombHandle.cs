@@ -65,12 +65,12 @@ public class TwitchBombHandle : MonoBehaviour
     #endregion
 
     #region Message Interface    
-    public void OnMessageReceived(string userNickName, string userColor, string text)
+    public IEnumerator OnMessageReceived(string userNickName, string userColor, string text)
     {
         Match match = Regex.Match(text, string.Format("^!{0} (.+)", _code), RegexOptions.IgnoreCase);
         if (!match.Success)
         {
-            return;
+            return null;
         }
 
         string internalCommand = match.Groups[1].Value;
@@ -85,7 +85,7 @@ public class TwitchBombHandle : MonoBehaviour
             message.SetMessage(string.Format("<b><color={2}>{0}</color></b>: {1}", userNickName, internalCommand, userColor));
         }
 
-        coroutineQueue.AddToQueue(RespondToCommandCoroutine(userNickName, internalCommand, message));
+        return RespondToCommandCoroutine(userNickName, internalCommand, message);
     }
     #endregion
 

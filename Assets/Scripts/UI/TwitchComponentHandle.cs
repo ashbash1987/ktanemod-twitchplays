@@ -65,6 +65,9 @@ public class TwitchComponentHandle : MonoBehaviour
 
     [HideInInspector]
     public Leaderboard leaderboard = null;
+
+    [HideInInspector]
+    public int bombID;
     #endregion
 
     #region Private Fields
@@ -141,12 +144,12 @@ public class TwitchComponentHandle : MonoBehaviour
     #endregion
 
     #region Message Interface
-    public void OnMessageReceived(string userNickName, string userColor, string text)
+    public IEnumerator OnMessageReceived(string userNickName, string userColor, string text)
     {
         Match match = Regex.Match(text, string.Format("^!({0}) (.+)", _code), RegexOptions.IgnoreCase);
         if (!match.Success)
         {
-            return;
+            return null;
         }
 
         string targetModule = match.Groups[1].Value;
@@ -192,7 +195,7 @@ public class TwitchComponentHandle : MonoBehaviour
         if (!string.IsNullOrEmpty(messageOut))
         {
             ircConnection.SendMessage(string.Format(messageOut, _code, headerText.text));
-            return;
+            return null;
         }
 
         TwitchMessage message = (TwitchMessage)Instantiate(messagePrefab, messageScrollContents.transform, false);
@@ -212,10 +215,9 @@ public class TwitchComponentHandle : MonoBehaviour
             }
         }
 
-        if (_solver != null)
-        {
-            coroutineQueue.AddToQueue(RespondToCommandCoroutine(userNickName, internalCommand, message));
-        }
+        return _solver != null
+            ? RespondToCommandCoroutine(userNickName, internalCommand, message) 
+            : null;
     }
     #endregion
 

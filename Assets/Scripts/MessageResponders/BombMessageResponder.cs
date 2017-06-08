@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using ADBannerView = UnityEngine.iOS.ADBannerView;
@@ -15,6 +16,7 @@ public class BombMessageResponder : MessageResponder
     private List<BombCommander> _bombCommanders = new List<BombCommander>();
     private List<TwitchBombHandle> _bombHandles = new List<TwitchBombHandle>();
     private List<TwitchComponentHandle> _componentHandles = new List<TwitchComponentHandle>();
+    private int _currentBomb = -1;
 
     #region Unity Lifecycle
     private void OnEnable()
@@ -138,10 +140,12 @@ public class BombMessageResponder : MessageResponder
 
             if (bombs.Length == 1)
             {
+                _currentBomb = -1;
                 SetBomb((MonoBehaviour) bombs[0], -1);
             }
             else
             {
+                _currentBomb = 0;
                 int id = 0;
                 for (var i = bombs.Length - 1; i >= 0; i--)
                 {
@@ -161,29 +165,57 @@ public class BombMessageResponder : MessageResponder
         {
             _ircConnection.SendMessage("The next bomb is now live! Start sending your commands! MrDestructoid");
 
-            _bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold");
+            _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold"));
         }
         else if (id == 0)
         {
             _ircConnection.SendMessage("The next set of bombs are now live! Start sending your commands! MrDestructoid");
 
-            _bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold");
+            _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold"));
         }
     }
 
     protected override void OnMessageReceived(string userNickName, string userColorCode, string text)
     {
+        if (_currentBomb > -1)
+        {
+            //Check for !bomb messages, and pass them off to the currently held bomb.
+            Match match = Regex.Match(text, "^!bomb (.+)", RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                string internalCommand = match.Groups[1].Value;
+                text = string.Format("!bomb{0} {1}", _currentBomb + 1, internalCommand);
+            }
+        }
+
         foreach (var handle in _bombHandles)
         {
             if (handle != null)
             {
-                handle.OnMessageReceived(userNickName, userColorCode, text);
+                IEnumerator onMessageReceived = handle.OnMessageReceived(userNickName, userColorCode, text);
+                if (onMessageReceived == null) continue;
+
+                if (_currentBomb != handle.bombID)
+                {
+                    _coroutineQueue.AddToQueue(_bombCommanders[_currentBomb].LetGoBomb());
+                    _currentBomb = handle.bombID;
+                }
+                _coroutineQueue.AddToQueue(onMessageReceived);
             }
         }
 
         foreach (TwitchComponentHandle componentHandle in _componentHandles)
         {
-            componentHandle.OnMessageReceived(userNickName, userColorCode, text);
+            IEnumerator onMessageReceived = componentHandle.OnMessageReceived(userNickName, userColorCode, text);
+            if (onMessageReceived != null)
+            {
+                if (_currentBomb != componentHandle.bombID)
+                {
+                    _coroutineQueue.AddToQueue(_bombCommanders[_currentBomb].LetGoBomb());
+                    _currentBomb = componentHandle.bombID;
+                }
+                _coroutineQueue.AddToQueue(onMessageReceived);
+            }
         }
     }
 
@@ -234,6 +266,7 @@ public class BombMessageResponder : MessageResponder
             handle.coroutineQueue = _coroutineQueue;
             handle.coroutineCanceller = _coroutineCanceller;
             handle.leaderboard = leaderboard;
+            handle.bombID = _currentBomb == -1 ? -1 : _bombCommanders.Count - 1;
 
             Vector3 idealOffset = handle.transform.TransformDirection(GetIdealPositionForHandle(handle, bombComponents, out handle.direction));
             handle.transform.SetParent(bombComponent.transform.parent, true);
