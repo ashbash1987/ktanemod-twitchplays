@@ -165,18 +165,24 @@ public class BombMessageResponder : MessageResponder
         {
             _ircConnection.SendMessage("The next bomb is now live! Start sending your commands! MrDestructoid");
 
-            _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold"));
+            _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold"), -1);
         }
         else if (id == 0)
         {
             _ircConnection.SendMessage("The next set of bombs are now live! Start sending your commands! MrDestructoid");
 
-            _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold"));
+            _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold"), 0);
         }
     }
 
     protected override void OnMessageReceived(string userNickName, string userColorCode, string text)
     {
+        if (text.Equals("!stop", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _currentBomb = _coroutineQueue.CurrentBombID;
+            return;
+        }
+
         if (_currentBomb > -1)
         {
             //Check for !bomb messages, and pass them off to the currently held bomb.
@@ -197,10 +203,10 @@ public class BombMessageResponder : MessageResponder
 
                 if (_currentBomb != handle.bombID)
                 {
-                    _coroutineQueue.AddToQueue(_bombCommanders[_currentBomb].LetGoBomb());
+                    _coroutineQueue.AddToQueue(_bombCommanders[_currentBomb].LetGoBomb(), handle.bombID);
                     _currentBomb = handle.bombID;
                 }
-                _coroutineQueue.AddToQueue(onMessageReceived);
+                _coroutineQueue.AddToQueue(onMessageReceived, handle.bombID);
             }
         }
 
@@ -211,10 +217,10 @@ public class BombMessageResponder : MessageResponder
             {
                 if (_currentBomb != componentHandle.bombID)
                 {
-                    _coroutineQueue.AddToQueue(_bombCommanders[_currentBomb].LetGoBomb());
+                    _coroutineQueue.AddToQueue(_bombCommanders[_currentBomb].LetGoBomb(),componentHandle.bombID);
                     _currentBomb = componentHandle.bombID;
                 }
-                _coroutineQueue.AddToQueue(onMessageReceived);
+                _coroutineQueue.AddToQueue(onMessageReceived,componentHandle.bombID);
             }
         }
     }
