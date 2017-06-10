@@ -16,6 +16,8 @@ public class TwitchComponentHandle : MonoBehaviour
 
     #region Public Fields
     public TwitchMessage messagePrefab = null;
+    public Image unsupportedPrefab = null;
+    public Image idBannerPrefab = null;
 
     public CanvasGroup canvasGroup = null;
     public CanvasGroup highlightGroup = null;
@@ -113,11 +115,21 @@ public class TwitchComponentHandle : MonoBehaviour
         Arrow.gameObject.SetActive(true);
         HighlightArrow.gameObject.SetActive(true);
 
-        _solver = ComponentSolverFactory.CreateSolver(bombCommander, bombComponent, componentType, ircConnection, coroutineCanceller);
-        if (_solver != null)
+        try
         {
-            _solver.Code = _code;
-            _solver.ComponentHandle = this;
+            _solver = ComponentSolverFactory.CreateSolver(bombCommander, bombComponent, componentType, ircConnection, coroutineCanceller);
+            if (_solver != null)
+            {
+                _solver.Code = _code;
+                _solver.ComponentHandle = this;
+            }
+        }
+        catch (NotSupportedException e)
+        {
+            Debug.Log(e.Message);
+            unsupportedPrefab.gameObject.SetActive(true);
+            idBannerPrefab.gameObject.SetActive(false);
+            canvasGroupMultiDecker.alpha = 0.0f;
         }
     }
 
