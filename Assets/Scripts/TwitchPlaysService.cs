@@ -12,6 +12,7 @@ public class TwitchPlaysService : MonoBehaviour
         public string channelName;
         public string serverName;
         public int serverPort;
+        public bool debug = false;
     }
 
     public BombMessageResponder bombMessageResponder = null;
@@ -28,6 +29,8 @@ public class TwitchPlaysService : MonoBehaviour
     private MessageResponder _activeMessageResponder = null;
     private Leaderboard _leaderboard = null;
 
+    public static bool DebugMode = false;
+
     private void Start()
     {
         _gameInfo = GetComponent<KMGameInfo>();
@@ -41,6 +44,8 @@ public class TwitchPlaysService : MonoBehaviour
             Debug.LogError("[TwitchPlays] Failed to read connection settings from mod settings.");
             return;
         }
+
+        DebugMode = (settings.debug == true);
 
         _ircConnection = new IRCConnection(settings.authToken, settings.userName, settings.channelName, settings.serverName, settings.serverPort);
         _ircConnection.Connect();

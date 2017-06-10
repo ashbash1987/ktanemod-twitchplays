@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -21,7 +21,10 @@ public class BombMessageResponder : MessageResponder
     #region Unity Lifecycle
     private void OnEnable()
     {
-        InputInterceptor.DisableInput();
+        if (TwitchPlaysService.DebugMode != false)
+        {
+            InputInterceptor.DisableInput();
+        }
 
         leaderboard.ClearSolo();
         StartCoroutine(CheckForBomb());
