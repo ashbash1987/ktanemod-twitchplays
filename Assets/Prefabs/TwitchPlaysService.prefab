@@ -139,6 +139,7 @@ GameObject:
   - 114: {fileID: 114000010782666596}
   - 114: {fileID: 114000011240893280}
   - 114: {fileID: 114000013407019822}
+  - 114: {fileID: 114000013751686150}
   m_Layer: 0
   m_Name: TwitchPlaysService
   m_TagString: Untagged
@@ -1307,6 +1308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bce18af53e6a0614b92c62df9d657a56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CurrentBombID: -1
 --- !u!114 &114000013614066598
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1321,6 +1323,20 @@ MonoBehaviour:
   startInterruptSound: {fileID: 82000012117545474}
   musicLoopSound: {fileID: 82000011503487972}
   endInterruptSound: {fileID: 82000012117545474}
+--- !u!114 &114000013751686150
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000012806938254}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06e0889f6b8827449aef5d005f4599a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  analysisUrl: 
+  postOnComplete: 0
+  LOGPREFIX: 
 --- !u!114 &114000013858184068
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -27,6 +27,8 @@ public class BombMessageResponder : MessageResponder
         }
 
         leaderboard.ClearSolo();
+        TwitchPlaysService.logUploader.Clear();
+
         StartCoroutine(CheckForBomb());
     }
 
@@ -40,6 +42,9 @@ public class BombMessageResponder : MessageResponder
         var timeStarting = float.MaxValue;
         var timeRemaining = float.MaxValue;
         var timeRemainingFormatted = "";
+
+        TwitchPlaysService.logUploader.Post();
+
         foreach (var commander in _bombCommanders)
         {
             HasDetonated |= (bool) CommonReflectedTypeInfo.HasDetonatedProperty.GetValue(commander.Bomb, null);
@@ -99,7 +104,7 @@ public class BombMessageResponder : MessageResponder
             }
         }
 
-        parentService.StartCoroutine(SendDelayedMessage(1.0f, bombMessage));
+        parentService.StartCoroutine(SendDelayedMessage(1.0f, bombMessage, SendAnalysisLink));
 
         foreach (var handle in _bombHandles)
         {
@@ -365,10 +370,24 @@ public class BombMessageResponder : MessageResponder
         return false;
     }
 
-    private IEnumerator SendDelayedMessage(float delay, string message)
+    private IEnumerator SendDelayedMessage(float delay, string message, Action callback = null)
     {
         yield return new WaitForSeconds(delay);
         _ircConnection.SendMessage(message);
+
+        if (callback != null)
+        {
+            callback();
+        }
+    }
+
+    private void SendAnalysisLink()
+    {
+        if (!TwitchPlaysService.logUploader.PostToChat())
+        {
+            Debug.Log("[BombMessageResponder] Analysis URL not found, instructing LogUploader to post when it's ready");
+            TwitchPlaysService.logUploader.postOnComplete = true;
+        }
     }
     #endregion
 }

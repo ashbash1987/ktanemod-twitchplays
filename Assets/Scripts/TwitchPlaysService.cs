@@ -30,6 +30,7 @@ public class TwitchPlaysService : MonoBehaviour
     private Leaderboard _leaderboard = null;
 
     public static bool DebugMode = false;
+    public static LogUploader logUploader = null;
 
     private void Start()
     {
@@ -54,6 +55,9 @@ public class TwitchPlaysService : MonoBehaviour
 
         _coroutineQueue = GetComponent<CoroutineQueue>();
         _coroutineQueue.coroutineCanceller = _coroutineCanceller;
+
+        logUploader = GetComponent<LogUploader>();
+        logUploader.ircConnection = _ircConnection;
 
         _leaderboard = new Leaderboard();
         _leaderboard.LoadDataFromFile();

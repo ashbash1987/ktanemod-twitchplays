@@ -40,6 +40,12 @@ public class MiscellaneousMessageResponder : MessageResponder
             {
                 _ircConnection.SendMessage(string.Format("{0}, you don't have any solves or strikes yet!", userNickName));
             }
+        else if ( (text.Equals("!log", StringComparison.InvariantCultureIgnoreCase)) ||
+            (text.Equals("!analysis", StringComparison.InvariantCultureIgnoreCase)) )
+        {
+            TwitchPlaysService.logUploader.PostToChat("Analysis for the previous bomb: {0}");
+            return;
+        }
         }
         else if (text.Equals("!mouse", StringComparison.InvariantCultureIgnoreCase))
         {
