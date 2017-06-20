@@ -251,6 +251,8 @@ public abstract class ComponentSolver : ICommandResponder
 
         ComponentHandle.OnPass();
 
+        BombMessageResponder.moduleCameras.DetachFromModule(BombComponent, true);
+
         return false;
     }
 
@@ -393,6 +395,23 @@ public abstract class ComponentSolver : ICommandResponder
     #region Private Methods
     private IEnumerator RespondToCommandCommon(string inputCommand)
     {
+        if (inputCommand.Equals("unview", StringComparison.InvariantCultureIgnoreCase))
+        {
+            cameraPriority = false;
+            BombMessageResponder.moduleCameras.DetachFromModule(BombComponent);
+        }
+        else
+        {
+            if (inputCommand.Equals("view", StringComparison.InvariantCultureIgnoreCase))
+            {
+                cameraPriority = true;
+            }
+            if ( (BombCommander._multiDecker) || (cameraPriority) )
+            {
+                BombMessageResponder.moduleCameras.AttachToModule(BombComponent, cameraPriority);
+            }
+        }
+
         if (inputCommand.Equals("show", StringComparison.InvariantCultureIgnoreCase))
         {
             yield return "show";
@@ -434,6 +453,7 @@ public abstract class ComponentSolver : ICommandResponder
     public string helpMessage = null;
     public string manualCode = null;
     public bool delayInvokation = false;
+    public bool cameraPriority = false;
 
     public bool _turnQueued = false;
     private bool _readyToTurn = false;

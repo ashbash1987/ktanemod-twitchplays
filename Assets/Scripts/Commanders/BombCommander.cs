@@ -158,6 +158,14 @@ public class BombCommander : ICommandResponder
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
+        else if (message.Equals("unview", StringComparison.InvariantCultureIgnoreCase))
+        {
+            BombMessageResponder.moduleCameras.DetachFromModule(_timerComponent);
+        }
+        else if (message.Equals("view", StringComparison.InvariantCultureIgnoreCase))
+        {
+            BombMessageResponder.moduleCameras.AttachToModule(_timerComponent, true);
+        }
         else
         {
             responseNotifier.ProcessResponse(CommandResponse.NoResponse);
@@ -218,6 +226,8 @@ public class BombCommander : ICommandResponder
 
     public IEnumerator ShowEdgework(string edge)
     {
+        BombMessageResponder.moduleCameras.Hide();
+
         IEnumerator holdCoroutine = HoldBomb(_heldFrontFace);
         while (holdCoroutine.MoveNext())
         {
@@ -294,6 +304,8 @@ public class BombCommander : ICommandResponder
         {
             yield return returnToFace.Current;
         }
+
+        BombMessageResponder.moduleCameras.Show();
     }
 
     public IEnumerator Focus(MonoBehaviour selectable, float focusDistance, bool frontFace)
@@ -487,5 +499,6 @@ public class BombCommander : ICommandResponder
     public int _bombSolvedModules;
     public float _bombStartingTimer;
     public bool _multiDecker = false;
+    public MonoBehaviour _timerComponent = null;
 }
 

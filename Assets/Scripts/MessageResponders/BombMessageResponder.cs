@@ -10,6 +10,7 @@ public class BombMessageResponder : MessageResponder
 {
     public TwitchBombHandle twitchBombHandlePrefab = null;
     public TwitchComponentHandle twitchComponentHandlePrefab = null;
+    public ModuleCameras moduleCamerasPrefab = null;
     public Leaderboard leaderboard = null;
     public TwitchPlaysService parentService = null;
 
@@ -17,6 +18,8 @@ public class BombMessageResponder : MessageResponder
     private List<TwitchBombHandle> _bombHandles = new List<TwitchBombHandle>();
     private List<TwitchComponentHandle> _componentHandles = new List<TwitchComponentHandle>();
     private int _currentBomb = -1;
+
+    public static ModuleCameras moduleCameras = null;
 
     #region Unity Lifecycle
     private void OnEnable()
@@ -30,6 +33,8 @@ public class BombMessageResponder : MessageResponder
         TwitchPlaysService.logUploader.Clear();
 
         StartCoroutine(CheckForBomb());
+
+        moduleCameras = Instantiate<ModuleCameras>(moduleCamerasPrefab);
     }
 
     private void OnDisable()
@@ -265,7 +270,10 @@ public class BombMessageResponder : MessageResponder
             switch (componentTypeEnum)
             {
                 case ComponentTypeEnum.Empty:
+                    continue;
+
                 case ComponentTypeEnum.Timer:
+                    _bombCommanders[_bombCommanders.Count - 1]._timerComponent = bombComponent;
                     continue;
 
                 default:

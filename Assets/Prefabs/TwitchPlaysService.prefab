@@ -1268,6 +1268,8 @@ MonoBehaviour:
     type: 2}
   twitchComponentHandlePrefab: {fileID: 114000012400141880, guid: 0f644f742882dc444876f1811f05a6bb,
     type: 2}
+  moduleCamerasPrefab: {fileID: 114000010240856800, guid: c6c98293524bb1b41bad44e41d9d7eaa,
+    type: 2}
   parentService: {fileID: 0}
 --- !u!114 &114000012720405196
 MonoBehaviour:
