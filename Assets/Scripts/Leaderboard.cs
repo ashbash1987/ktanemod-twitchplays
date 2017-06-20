@@ -206,7 +206,7 @@ public class Leaderboard
         LeaderboardEntry entry = _entryDictionary[userName.ToLowerInvariant()];
         if (entry.SoloRank > count)
         {
-            ranking.RemoveAt(-1);
+            ranking.RemoveAt(ranking.Count - 1);
             ranking.Add(entry);
         }
 
