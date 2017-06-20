@@ -73,6 +73,7 @@ public static class ComponentSolverFactory
         ModComponentSolverHelpMessages["ColourFlash"] = "Submit the correct response with !{0} press yes 3, or !{0} press no 5.";
         //ModComponentSolverHelpMessages["combinationLock"] = "";
         ModComponentSolverHelpMessages["complicatedButtonsModule"] = "Press the top button with !{0} press top (also t, 1, etc.).";
+        ModComponentSolverHelpMessages["graphModule"] = "Submit an answer with !{0} submit green red true false. Order is TL, TR, BL, BR."; // Connection Check
         ModComponentSolverHelpMessages["CoordinatesModule"] = "Cycle the options with !{0} cycle.  Submit your answer with !{0} submit <3,2>.  Partial answers are acceptable. To do chinese numbers, its !{0} submit chinese 12.";
         ModComponentSolverHelpMessages["CreationModule"] = "Combine two elements with !{0} combine water fire.";
         ModComponentSolverHelpMessages["DoubleOhModule"] = "Cycle the buttons with !{0} cycle. (Cycle presses each button 3 times, in the order of vert1, horiz1, horiz2, vert2, submit.)  Submit your answer with !{0} press vert1 horiz1 horiz2 vert2 submit.";
@@ -84,7 +85,6 @@ public static class ComponentSolverFactory
         ModComponentSolverHelpMessages["fizzBuzzModule"] = "Press the top button with !{0} press top (also t, 1, etc.). Submit with !{0} press submit.";
         ModComponentSolverHelpMessages["FollowTheLeaderModule"] = "Cut the wires in the order specified with !{0} cut 12 10 8 7 6 5 3 1. (note that order was the Lit CLR rule.)";
         ModComponentSolverHelpMessages["FriendshipModule"] = "Submit the desired friendship element with !{0} submit Fairness Conscientiousness Kindness Authenticity.";
-        //ModComponentSolverHelpMessages["graphModule"] = "";
         ModComponentSolverHelpMessages["HexamazeModule"] = "Move towards the exit with !{0} move 12 10 6 6 6 2, or with !{0} move N NW S S S NE.  (clockface or cardinal)";
         ModComponentSolverHelpMessages["http"] = "Submit the response with !{0} resp 123.";
         ModComponentSolverHelpMessages["Laundry"] = "Set all of the options with !{0} set all 30C,2 dot,110C,Wet Cleaning.  Set just washing with !{0} set wash 40C.  Submit with !{0} insert coin. Prey for that 4 in 2 + lit bob. Kappa";
@@ -131,10 +131,14 @@ public static class ComponentSolverFactory
         ModComponentSolverHelpMessages["webDesign"] = "Accept the design with !{0} acc.  Consider the design with !{0} con.  Reject the design with !{0} reject.";
         ModComponentSolverHelpMessages["WirePlacementModule"] = "Cut the correct wires with !{0} cut A2 B4 D3.";
         //ModComponentSolverHelpMessages["WordScrambleModule"] = "";
-        ModComponentSolverHelpMessages["WordSearchModule"] = "Select the word starting at row B column 3, and ending at row C column 4, with !{0} select B3 C4.";
+        ModComponentSolverHelpMessages["WordSearchModule"] = "Select the word starting at column B row 3, and ending at column C row 4, with !{0} select B3 C4.";
         
         //Manual Codes
         ModComponentSolverManualCodes["ColourFlash"] = "Color Flash";
+        ModComponentSolverManualCodes["RockPaperScissorsLizardSpockModule"] = "Rock-Paper-Scissors-Lizard-Spock";
+        ModComponentSolverManualCodes["TicTacToeModule"] = "Tic-Tac-Toe";
+        ModComponentSolverManualCodes["BitOps"] = "Bitwise Operators";
+        ModComponentSolverManualCodes["RubiksCubeModule"] = "Rubik’s Cube";
 
         //Delay Invokation. (Modules start processing commands before the very first yield return, so need to be delayed.)
         //The standard is to return the KMSelectable[] array, or yield return something, before interaction with the module

@@ -11,7 +11,7 @@ public class SquareButtonComponentSolver : ComponentSolver
     {
         _button = (MonoBehaviour)_buttonField.GetValue(bombComponent.GetComponent(_componentType));
 
-        helpMessage = "Click the button with !{0} tap. Click the button at time with !{0} tap 8:55 8:44 8:33. Hold the button with !{0} hold. Release the button with !{0} 9:58 9:49 9:30.";
+        helpMessage = "Click the button with !{0} tap. Click the button at time with !{0} tap 8:55 8:44 8:33. Hold the button with !{0} hold. Release the button with !{0} release 9:58 9:49 9:30.";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
