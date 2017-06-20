@@ -21,7 +21,7 @@ public class BombMessageResponder : MessageResponder
     #region Unity Lifecycle
     private void OnEnable()
     {
-        if (TwitchPlaysService.DebugMode != false)
+        if (!TwitchPlaysService.DebugMode)
         {
             InputInterceptor.DisableInput();
         }
