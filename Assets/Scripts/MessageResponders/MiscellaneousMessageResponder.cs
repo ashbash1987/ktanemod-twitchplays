@@ -34,12 +34,22 @@ public class MiscellaneousMessageResponder : MessageResponder
             int rank = leaderboard.GetRank(userNickName, out entry);
             if (entry != null)
             {
-                _ircConnection.SendMessage(string.Format("{0} is #{1} with {2} solves and {3} strikes (success rate of {4:0.00})", userNickName, rank, entry.SolveCount, entry.StrikeCount, entry.SolveRate));
+                string txtSolver = "";
+                string txtSolo = ".";
+                if (entry.TotalSoloClears > 0)
+                {
+                    TimeSpan recordTimeSpan = TimeSpan.FromSeconds(entry.RecordSoloTime);
+                    txtSolver = "solver ";
+                    txtSolo = string.Format(", and #{0} solo with a best time of {1}:{2:00.0}", entry.SoloRank, (int)recordTimeSpan.TotalMinutes, recordTimeSpan.Seconds);
+                }
+                _ircConnection.SendMessage(string.Format("SeemsGood {0} is #{1} {4}with {2} solves and {3} strikes{5}", userNickName, rank, entry.SolveCount, entry.StrikeCount, txtSolver, txtSolo));
             }
             else
             {
-                _ircConnection.SendMessage(string.Format("{0}, you don't have any solves or strikes yet!", userNickName));
+                _ircConnection.SendMessage(string.Format("FailFish {0}, do you even play this game?", userNickName));
             }
+            return;
+        }
         else if ( (text.Equals("!log", StringComparison.InvariantCultureIgnoreCase)) ||
             (text.Equals("!analysis", StringComparison.InvariantCultureIgnoreCase)) )
         {
