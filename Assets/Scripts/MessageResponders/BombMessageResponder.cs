@@ -129,7 +129,8 @@ public class BombMessageResponder : MessageResponder
     #region Protected/Private Methods
     private IEnumerator CheckForBomb()
     {
-        
+        TwitchComponentHandle.ResetId();
+
         UnityEngine.Object[] bombs;
         do
         {

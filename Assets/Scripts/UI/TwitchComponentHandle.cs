@@ -81,13 +81,7 @@ public class TwitchComponentHandle : MonoBehaviour
     private static int _nextID = 0;
     private static int GetNewID()
     {
-        _nextID++;
-        if (_nextID >= 100)
-        {
-            _nextID = 1;
-        }
-
-        return _nextID;
+        return ++_nextID;
     }
     #endregion
 
@@ -152,6 +146,11 @@ public class TwitchComponentHandle : MonoBehaviour
     public void OnPass()
     {
         canvasGroupMultiDecker.alpha = 0.0f;
+    }
+
+    public static void ResetId()
+    {
+        _nextID = 0;
     }
     #endregion
 
