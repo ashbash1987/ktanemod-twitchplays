@@ -56,6 +56,20 @@ public class MiscellaneousMessageResponder : MessageResponder
             TwitchPlaysService.logUploader.PostToChat("Analysis for the previous bomb: {0}");
             return;
         }
+        else if (text.Equals("!about", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _ircConnection.SendMessage("Twitch Plays: KTaNE is an alternative way of playing !ktane. Unlike the original game, you play as both defuser and expert, and defuse the bomb by sending special commands to the chat room. Try !help for more information!");
+            return;
+        }
+        else if (text.Equals("!credits", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _ircConnection.SendMessage("Twitch Plays: KTaNE was developed by Ash the Bash (twitch.tv/at_bash). The project is currently maintained by Ash, bmn (twitch.tv/gogobmn) and CaitSith2 (twitch.tv/caitsith2), with the support of many mod developers. The manual repository and logfile analyser are managed by Timwi (twitch.tv/timwiterby). Keep Talking and Nobody Explodes is by Steel Crate Games.");
+            return;
+        }
+        else if (text.Equals("!ktane", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _ircConnection.SendMessage("Keep Talking and Nobody Explodes is developed by Steel Crate Games. It's available for Windows PC, Mac OS X, PlayStation VR, Samsung Gear VR and Google Daydream. See http://www.keeptalkinggame.com/ for more information!");
+            return;
         }
         else if (text.Equals("!mouse", StringComparison.InvariantCultureIgnoreCase))
         {
