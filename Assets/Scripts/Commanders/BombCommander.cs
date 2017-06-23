@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class BombCommander : ICommandResponder
@@ -106,14 +107,9 @@ public class BombCommander : ICommandResponder
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
         else if (message.Equals("edgework", StringComparison.InvariantCultureIgnoreCase) ||
-            message.Equals("edgework right", StringComparison.InvariantCultureIgnoreCase) ||
-            message.Equals("edgework bottom", StringComparison.InvariantCultureIgnoreCase) ||
-            message.Equals("edgework left", StringComparison.InvariantCultureIgnoreCase) ||
-            message.Equals("edgework top", StringComparison.InvariantCultureIgnoreCase) ||
-            message.Equals("right", StringComparison.InvariantCultureIgnoreCase) ||
-            message.Equals("bottom", StringComparison.InvariantCultureIgnoreCase) ||
-            message.Equals("left", StringComparison.InvariantCultureIgnoreCase) ||
-            message.Equals("top", StringComparison.InvariantCultureIgnoreCase))
+            Regex.IsMatch(message, 
+            "^(edgework )?(top|top right|right top|right|right bottom|bottom right|bottom|bottom left|left bottom|left|left top|top left|)$",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             responseNotifier.ProcessResponse(CommandResponse.Start);
 
@@ -235,11 +231,23 @@ public class BombCommander : ICommandResponder
             yield return new WaitForSeconds(2.0f);
         }
 
+        if (edge == "" || edge == "bottom right" || edge == "right bottom")
+        {
+            IEnumerator firstSecondEdge = edge == ""
+                ? DoFreeYRotate(90.0f, 90.0f, 45.0f, 90.0f, 0.3f)
+                : DoFreeYRotate(0.0f, 0.0f, 45.0f, 90.0f, 0.3f);
+            while (firstSecondEdge.MoveNext())
+            {
+                yield return firstSecondEdge.Current;
+            }
+            yield return new WaitForSeconds(2.0f);
+        }
+
         if (edge == "" || edge == "bottom")
         {
 
             IEnumerator secondEdge = edge == ""
-                ? DoFreeYRotate(90.0f, 90.0f, 0.0f, 90.0f, 0.3f)
+                ? DoFreeYRotate(45.0f, 90.0f, 0.0f, 90.0f, 0.3f)
                 : DoFreeYRotate(0.0f, 0.0f, 0.0f, 90.0f, 0.3f);
             while (secondEdge.MoveNext())
             {
@@ -248,11 +256,22 @@ public class BombCommander : ICommandResponder
             yield return new WaitForSeconds(2.0f);
         }
 
+        if (edge == "" || edge == "bottom left" || edge == "left bottom")
+        {
+            IEnumerator secondThirdEdge = edge == ""
+                ? DoFreeYRotate(0.0f, 90.0f, -45.0f, 90.0f, 0.3f)
+                : DoFreeYRotate(0.0f, 0.0f, -45.0f, 90.0f, 0.3f);
+            while (secondThirdEdge.MoveNext())
+            {
+                yield return secondThirdEdge.Current;
+            }
+            yield return new WaitForSeconds(2.0f);
+        }
 
         if (edge == "" || edge == "left")
         {
             IEnumerator thirdEdge = edge == ""
-                ? DoFreeYRotate(0.0f, 90.0f, -90.0f, 90.0f, 0.3f)
+                ? DoFreeYRotate(-45.0f, 90.0f, -90.0f, 90.0f, 0.3f)
                 : DoFreeYRotate(0.0f, 0.0f, -90.0f, 90.0f, 0.3f);
             while (thirdEdge.MoveNext())
             {
@@ -261,14 +280,38 @@ public class BombCommander : ICommandResponder
             yield return new WaitForSeconds(2.0f);
         }
 
+        if (edge == "" || edge == "top left" || edge == "left top")
+        {
+            IEnumerator thirdFourthEdge = edge == ""
+                ? DoFreeYRotate(-90.0f, 90.0f, -135.0f, 90.0f, 0.3f)
+                : DoFreeYRotate(0.0f, 0.0f, -135.0f, 90.0f, 0.3f);
+            while (thirdFourthEdge.MoveNext())
+            {
+                yield return thirdFourthEdge.Current;
+            }
+            yield return new WaitForSeconds(2.0f);
+        }
+
         if (edge == "" || edge == "top")
         {
             IEnumerator fourthEdge = edge == ""
-                ? DoFreeYRotate(-90.0f, 90.0f, -180.0f, 90.0f, 0.3f)
+                ? DoFreeYRotate(-135.0f, 90.0f, -180.0f, 90.0f, 0.3f)
                 : DoFreeYRotate(0.0f, 0.0f, -180.0f, 90.0f, 0.3f);
             while (fourthEdge.MoveNext())
             {
                 yield return fourthEdge.Current;
+            }
+            yield return new WaitForSeconds(2.0f);
+        }
+
+        if (edge == "" || edge == "top right" || edge == "right top")
+        {
+            IEnumerator fourthFirstEdge = edge == ""
+                ? DoFreeYRotate(-180.0f, 90.0f, -225.0f, 90.0f, 0.3f)
+                : DoFreeYRotate(0.0f, 0.0f, -225.0f, 90.0f, 0.3f);
+            while (fourthFirstEdge.MoveNext())
+            {
+                yield return fourthFirstEdge.Current;
             }
             yield return new WaitForSeconds(2.0f);
         }
@@ -278,15 +321,31 @@ public class BombCommander : ICommandResponder
             case "right":
                 returnToFace = DoFreeYRotate(90.0f, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
+            case "right bottom":
+            case "bottom right":
+                returnToFace = DoFreeYRotate(45.0f, 90.0f, 0.0f, 0.0f, 0.3f);
+                break;
             case "bottom":
                 returnToFace = DoFreeYRotate(0.0f, 90.0f, 0.0f, 0.0f, 0.3f);
+                break;
+            case "left bottom":
+            case "bottom left":
+                returnToFace = DoFreeYRotate(-45.0f, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
             case "left":
                 returnToFace = DoFreeYRotate(-90.0f, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
+            case "left top":
+            case "top left":
+                returnToFace = DoFreeYRotate(-135.0f, 90.0f, 0.0f, 0.0f, 0.3f);
+                break;
             case "top":
             default:
                 returnToFace = DoFreeYRotate(-180.0f, 90.0f, 0.0f, 0.0f, 0.3f);
+                break;
+            case "top right":
+            case "right top":
+                returnToFace = DoFreeYRotate(-225.0f, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
         }
         
@@ -388,30 +447,6 @@ public class BombCommander : ICommandResponder
         }
         Quaternion target = Quaternion.Euler(targetPitch, 0, 0) * Quaternion.Euler(0, targetYSpin, 0);
         RotateByLocalQuaternion(target);
-    }
-
-    private IEnumerator DoFreeRotate(float initialZSpin, float initialPitch, float targetZSpin, float targetPitch, float duration)
-    {
-        Transform baseTransform = (Transform)_getBaseHeldObjectTransformMethod.Invoke(SelectableManager, null);
-
-        float initialTime = Time.time;
-        while (Time.time - initialTime < duration)
-        {
-            float lerp = (Time.time - initialTime) / duration;
-            float currentZSpin = Mathf.SmoothStep(initialZSpin, targetZSpin, lerp);
-            float currentPitch = Mathf.SmoothStep(initialPitch, targetPitch, lerp);
-
-            Quaternion currentRotation = Quaternion.Euler(currentPitch, 0.0f, currentZSpin);
-
-            _setZSpinMethod.Invoke(SelectableManager, new object[] { currentZSpin });
-            _setControlsRotationMethod.Invoke(SelectableManager, new object[] { baseTransform.rotation * currentRotation });
-            _handleFaceSelectionMethod.Invoke(SelectableManager, null);
-            yield return null;
-        }
-
-        _setZSpinMethod.Invoke(SelectableManager, new object[] { targetZSpin });
-        _setControlsRotationMethod.Invoke(SelectableManager, new object[] { baseTransform.rotation * Quaternion.Euler(targetPitch, 0.0f, targetZSpin) });
-        _handleFaceSelectionMethod.Invoke(SelectableManager, null);
     }
 
     public float CurrentTimer
