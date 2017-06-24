@@ -118,7 +118,7 @@ public class TwitchBombHandle : MonoBehaviour
         {
             icrn.ProcessResponse(CommandResponse.Start);
 
-            ircConnection.SendMessage(string.Format("sendtochat panicBasket [{0}]",
+            ircConnection.SendMessage(string.Format("panicBasket [{0}]",
                 bombCommander.GetFullFormattedTime));
 
             icrn.ProcessResponse(CommandResponse.EndNotComplete);
