@@ -106,14 +106,12 @@ public class BombCommander : ICommandResponder
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
-        else if (message.Equals("edgework", StringComparison.InvariantCultureIgnoreCase) ||
-            Regex.IsMatch(message, 
-            "^(edgework )?(top|top right|right top|right|right bottom|bottom right|bottom|bottom left|left bottom|left|left top|top left|)$",
-            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        else if (Regex.IsMatch(message, "^(edgework( 45|-45)?)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || 
+                 Regex.IsMatch(message, "^(edgework( 45|-45)? )?(top|top right|right top|right|right bottom|bottom right|bottom|bottom left|left bottom|left|left top|top left|)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             responseNotifier.ProcessResponse(CommandResponse.Start);
-
-            IEnumerator edgeworkCoroutine = ShowEdgework(message.Replace("edgework","").Trim().ToLowerInvariant());
+            bool _45Degrees = Regex.IsMatch(message, "^(edgework(-45| 45)).*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            IEnumerator edgeworkCoroutine = ShowEdgework(message.Replace("edgework", "").Replace(" 45", "").Replace("-45","").Trim().ToLowerInvariant(), _45Degrees);
             while (edgeworkCoroutine.MoveNext())
             {
                 yield return edgeworkCoroutine.Current;
@@ -212,7 +210,7 @@ public class BombCommander : ICommandResponder
         }
     }
 
-    public IEnumerator ShowEdgework(string edge)
+    public IEnumerator ShowEdgework(string edge, bool _45Degrees)
     {
         IEnumerator holdCoroutine = HoldBomb(_heldFrontFace);
         while (holdCoroutine.MoveNext())
@@ -220,6 +218,7 @@ public class BombCommander : ICommandResponder
             yield return holdCoroutine.Current;
         }
         IEnumerator returnToFace;
+        float offset = _45Degrees ? 0.0f : 45.0f;
 
         if (edge == "" || edge == "right")
         {
@@ -231,7 +230,7 @@ public class BombCommander : ICommandResponder
             yield return new WaitForSeconds(2.0f);
         }
 
-        if (edge == "" || edge == "bottom right" || edge == "right bottom")
+        if ((edge == "" && _45Degrees) || edge == "bottom right" || edge == "right bottom")
         {
             IEnumerator firstSecondEdge = edge == ""
                 ? DoFreeYRotate(90.0f, 90.0f, 45.0f, 90.0f, 0.3f)
@@ -247,7 +246,7 @@ public class BombCommander : ICommandResponder
         {
 
             IEnumerator secondEdge = edge == ""
-                ? DoFreeYRotate(45.0f, 90.0f, 0.0f, 90.0f, 0.3f)
+                ? DoFreeYRotate(45.0f + offset, 90.0f, 0.0f, 90.0f, 0.3f)
                 : DoFreeYRotate(0.0f, 0.0f, 0.0f, 90.0f, 0.3f);
             while (secondEdge.MoveNext())
             {
@@ -256,7 +255,7 @@ public class BombCommander : ICommandResponder
             yield return new WaitForSeconds(2.0f);
         }
 
-        if (edge == "" || edge == "bottom left" || edge == "left bottom")
+        if ((edge == "" && _45Degrees) || edge == "bottom left" || edge == "left bottom")
         {
             IEnumerator secondThirdEdge = edge == ""
                 ? DoFreeYRotate(0.0f, 90.0f, -45.0f, 90.0f, 0.3f)
@@ -271,7 +270,7 @@ public class BombCommander : ICommandResponder
         if (edge == "" || edge == "left")
         {
             IEnumerator thirdEdge = edge == ""
-                ? DoFreeYRotate(-45.0f, 90.0f, -90.0f, 90.0f, 0.3f)
+                ? DoFreeYRotate(-45.0f + offset, 90.0f, -90.0f, 90.0f, 0.3f)
                 : DoFreeYRotate(0.0f, 0.0f, -90.0f, 90.0f, 0.3f);
             while (thirdEdge.MoveNext())
             {
@@ -280,7 +279,7 @@ public class BombCommander : ICommandResponder
             yield return new WaitForSeconds(2.0f);
         }
 
-        if (edge == "" || edge == "top left" || edge == "left top")
+        if ((edge == "" && _45Degrees) || edge == "top left" || edge == "left top")
         {
             IEnumerator thirdFourthEdge = edge == ""
                 ? DoFreeYRotate(-90.0f, 90.0f, -135.0f, 90.0f, 0.3f)
@@ -295,7 +294,7 @@ public class BombCommander : ICommandResponder
         if (edge == "" || edge == "top")
         {
             IEnumerator fourthEdge = edge == ""
-                ? DoFreeYRotate(-135.0f, 90.0f, -180.0f, 90.0f, 0.3f)
+                ? DoFreeYRotate(-135.0f + offset, 90.0f, -180.0f, 90.0f, 0.3f)
                 : DoFreeYRotate(0.0f, 0.0f, -180.0f, 90.0f, 0.3f);
             while (fourthEdge.MoveNext())
             {
@@ -304,7 +303,7 @@ public class BombCommander : ICommandResponder
             yield return new WaitForSeconds(2.0f);
         }
 
-        if (edge == "" || edge == "top right" || edge == "right top")
+        if ((edge == "" && _45Degrees) || edge == "top right" || edge == "right top")
         {
             IEnumerator fourthFirstEdge = edge == ""
                 ? DoFreeYRotate(-180.0f, 90.0f, -225.0f, 90.0f, 0.3f)
@@ -340,12 +339,12 @@ public class BombCommander : ICommandResponder
                 returnToFace = DoFreeYRotate(-135.0f, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
             case "top":
-            default:
                 returnToFace = DoFreeYRotate(-180.0f, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
+            default:
             case "top right":
             case "right top":
-                returnToFace = DoFreeYRotate(-225.0f, 90.0f, 0.0f, 0.0f, 0.3f);
+                returnToFace = DoFreeYRotate(-225.0f + offset, 90.0f, 0.0f, 0.0f, 0.3f);
                 break;
         }
         
