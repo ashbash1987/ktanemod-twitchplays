@@ -56,6 +56,7 @@ public class PostGameMessageResponder : MessageResponder
 
             yield return null;
         }
+        InputInterceptor.EnableInput();
     }
     #endregion
 }

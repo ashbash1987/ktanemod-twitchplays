@@ -71,9 +71,5 @@ public class MiscellaneousMessageResponder : MessageResponder
             _ircConnection.SendMessage("Keep Talking and Nobody Explodes is developed by Steel Crate Games. It's available for Windows PC, Mac OS X, PlayStation VR, Samsung Gear VR and Google Daydream. See http://www.keeptalkinggame.com/ for more information!");
             return;
         }
-        else if (text.Equals("!mouse", StringComparison.InvariantCultureIgnoreCase))
-        {
-            InputInterceptor.EnableInput();
-        }
     }
 }

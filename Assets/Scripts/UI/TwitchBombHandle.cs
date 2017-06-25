@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -85,7 +87,48 @@ public class TwitchBombHandle : MonoBehaviour
             message.SetMessage(string.Format("<b><color={2}>{0}</color></b>: {1}", userNickName, internalCommand, userColor));
         }
 
-        return RespondToCommandCoroutine(userNickName, internalCommand, message);
+        //Respond instantly to these commands without dropping "The Bomb", should the command be for "The Other Bomb" and vice versa.
+        ICommandResponseNotifier icrn = message;
+        if (internalCommand.Equals("timestamp", StringComparison.InvariantCultureIgnoreCase) ||
+            internalCommand.Equals("date", StringComparison.InvariantCultureIgnoreCase))
+        {
+            //Some modules depend on the date/time the bomb, and therefore that Module instance has spawned, in the bomb defusers timezone.
+
+            icrn.ProcessResponse(CommandResponse.Start);
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("The Date/Time this bomb started is ");
+            sb.Append(string.Format("{0:F}", bombCommander.BombTimeStamp));
+            ircConnection.SendMessage(sb.ToString());
+
+            icrn.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+        else if (internalCommand.Equals("help", StringComparison.InvariantCultureIgnoreCase))
+        {
+            icrn.ProcessResponse(CommandResponse.Start);
+
+            ircConnection.SendMessage("The Bomb: Pick up with !bomb hold. Turn with !bomb turn. Show the edges with !bomb edgework. Show a specific edge with !bomb top. Display the bomb start time with !bomb time. Edges are top, bottom, left and right.");
+
+            icrn.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+
+        else if (internalCommand.Equals("time", StringComparison.InvariantCultureIgnoreCase) ||
+                 internalCommand.Equals("timer", StringComparison.InvariantCultureIgnoreCase) ||
+                 internalCommand.Equals("clock", StringComparison.InvariantCultureIgnoreCase))
+        {
+            icrn.ProcessResponse(CommandResponse.Start);
+
+            ircConnection.SendMessage(string.Format("panicBasket [{0}]",
+                bombCommander.GetFullFormattedTime));
+
+            icrn.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+        else
+        {
+            return RespondToCommandCoroutine(userNickName, internalCommand, message);
+        }
+
+        return null;
     }
     #endregion
 
