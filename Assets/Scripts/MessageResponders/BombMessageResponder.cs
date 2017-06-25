@@ -117,8 +117,6 @@ public class BombMessageResponder : MessageResponder
         }
         _componentHandles.Clear();
 
-        InputInterceptor.EnableInput();
-
         MusicPlayer.StopAllMusic();
     }
     #endregion
