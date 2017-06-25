@@ -71,6 +71,11 @@ public class TwitchPlaysService : MonoBehaviour
         {
             _ircConnection.Update();
         }
+
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            InputInterceptor.EnableInput();
+        }
     }
 
     private void OnDestroy()
