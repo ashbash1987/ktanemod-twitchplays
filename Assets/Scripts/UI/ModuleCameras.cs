@@ -1,20 +1,34 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ModuleCameras : MonoBehaviour
 {
+    public class ModuleItem
+    {
+        public MonoBehaviour component = null;
+        public MonoBehaviour handle = null;
+
+        public ModuleItem(MonoBehaviour c, MonoBehaviour h)
+        {
+            component = c;
+            handle = h;
+        }
+    }
+
     public class ModuleCamera : MonoBehaviour
     {
         public Camera cameraInstance = null;
         public int priority = CameraNotInUse;
         public int index = 0;
-        public MonoBehaviour component = null;
+        public ModuleItem module = null;
 
         private ModuleCameras parent = null;
+        private int originalLayer = 0;
 
         public ModuleCamera(Camera instantiatedCamera, ModuleCameras parentInstance)
         {
@@ -24,57 +38,76 @@ public class ModuleCameras : MonoBehaviour
 
         public void Refresh()
         {
-            component = null;
-            while ( (parent.priorityModuleStack.Count > 0) && (component == null) )
+            Deactivate();
+            while ( (parent.priorityModuleStack.Count > 0) && (module == null) )
             {
-                component = parent.priorityModuleStack.Pop();
+                module = parent.priorityModuleStack.Pop();
                 if (ModuleIsSolved)
                 {
-                    component = null;
+                    module = null;
                 }
                 else
                 {
                     priority = CameraPrioritised;
                 }
             }
-
-            while ( (parent.moduleStack.Count > 0) && (component == null) )
+            while ( (parent.moduleStack.Count > 0) && (module == null) )
             {
-                component = parent.moduleStack.Pop();
+                module = parent.moduleStack.Pop();
                 if (ModuleIsSolved)
                 {
-                    component = null;
+                    module = null;
                 }
                 else
                 {
                     priority = CameraInUse;
                 }
             }
-
-            if (component == null)
+            if (module != null)
             {
-                priority = CameraNotInUse;
-                cameraInstance.gameObject.SetActive(false);
-                return;
+                index = ++ModuleCameras.index;
+                // We know the camera's culling mask is pointing at a single layer, so let's find out what that layer is
+                int newLayer = (int)Math.Log(cameraInstance.cullingMask, 2);
+                originalLayer = module.component.gameObject.layer;
+                Debug.LogFormat("[ModuleCameras] Switching component's layer from {0} to {1}", originalLayer, newLayer);
+                SetRenderLayer(newLayer);
+                cameraInstance.transform.SetParent(module.component.transform, false);
+                cameraInstance.gameObject.SetActive(true);
+                Debug.LogFormat("[ModuleCameras] Component's layer is {0}. Camera's bitmask is {1}", module.component.gameObject.layer, cameraInstance.cullingMask);
             }
-
-            index = ++ModuleCameras.index;
-            cameraInstance.transform.SetParent(component.transform, false);
-            cameraInstance.gameObject.SetActive(true);
         }
 
         public void Deactivate()
         {
-            component = null;
-            priority = CameraNotInUse;
+            if (module != null)
+            {
+                SetRenderLayer(originalLayer);
+            }
             cameraInstance.gameObject.SetActive(false);
+            module = null;
+            priority = CameraNotInUse;
         }
 
         private bool ModuleIsSolved
         {
             get
             {
-                return (bool)CommonReflectedTypeInfo.IsSolvedField.GetValue(component);
+                return (bool)CommonReflectedTypeInfo.IsSolvedField.GetValue(module.component);
+            }
+        }
+
+        private void SetRenderLayer(int layer)
+        {
+            foreach (Transform trans in module.component.gameObject.GetComponentsInChildren<Transform>(true))
+            {
+                trans.gameObject.layer = layer;
+            }
+            if (module.handle != null)
+            {
+                foreach (Transform trans in module.handle.gameObject.GetComponentsInChildren<Transform>(true))
+                {
+                    trans.gameObject.layer = layer;
+                }
             }
         }
 
@@ -86,8 +119,8 @@ public class ModuleCameras : MonoBehaviour
     #endregion
 
     #region Private Fields
-    private Stack<MonoBehaviour> moduleStack = new Stack<MonoBehaviour>();
-    private Stack<MonoBehaviour> priorityModuleStack = new Stack<MonoBehaviour>();
+    private Stack<ModuleItem> moduleStack = new Stack<ModuleItem>();
+    private Stack<ModuleItem> priorityModuleStack = new Stack<ModuleItem>();
     private List<ModuleCamera> cameras = new List<ModuleCamera>();
     #endregion
 
@@ -124,29 +157,27 @@ public class ModuleCameras : MonoBehaviour
     #endregion
 
     #region Public Methods
-    public void AttachToModule(MonoBehaviour module, bool priority = false)
+    public void AttachToModule(MonoBehaviour component, MonoBehaviour handle, bool priority = false)
     {
-        int existingCamera = CurrentModulesContains(module);
+        int existingCamera = CurrentModulesContains(component);
         if (existingCamera > -1)
         {
             cameras[existingCamera].index = ++index;
             return;
         }
-
         ModuleCamera camera = AvailableCamera(priority);
-
         try
         {
             // If the camera is in use, return its module to the appropriate stack
-            if ((camera.priority > CameraNotInUse) && (camera.component != null))
+            if ((camera.priority > CameraNotInUse) && (camera.module.component != null))
             {
                 bool oldPriority = (camera.priority == CameraPrioritised);
-                AddModuleToStack(camera.component, oldPriority);
+                AddModuleToStack(camera.module.component, camera.module.handle, oldPriority);
                 camera.priority = CameraNotInUse;
             }
 
             // Add the new module to the stack
-            AddModuleToStack(module, priority);
+            AddModuleToStack(component, handle, priority);
 
             // Refresh the camera
             camera.Refresh();
@@ -157,9 +188,9 @@ public class ModuleCameras : MonoBehaviour
         }
     }
 
-    public void DetachFromModule(MonoBehaviour module, bool delay = false)
+    public void DetachFromModule(MonoBehaviour component, bool delay = false)
     {
-        StartCoroutine(DetachFromModuleCoroutine(module, delay));
+        StartCoroutine(DetachFromModuleCoroutine(component, delay));
     }
 
     public void Hide()
@@ -174,23 +205,25 @@ public class ModuleCameras : MonoBehaviour
     #endregion
 
     #region Private Methods
-    private void AddModuleToStack(MonoBehaviour module, bool priority)
+    private void AddModuleToStack(MonoBehaviour component, MonoBehaviour handle, bool priority)
     {
+        ModuleItem item = new ModuleItem(component, handle);
         if (priority)
         {
-            priorityModuleStack.Push(module);
+            priorityModuleStack.Push(item);
         }
-        else if (!moduleStack.Contains(module))
+        else if (!moduleStack.Any(m => object.ReferenceEquals(component, m.component)))
         {
-            moduleStack.Push(module);
+            moduleStack.Push(item);
         }
     }
 
-    private IEnumerator DetachFromModuleCoroutine(MonoBehaviour module, bool delay)
+    private IEnumerator DetachFromModuleCoroutine(MonoBehaviour component, bool delay)
     {
         foreach (ModuleCamera camera in cameras)
         {
-            if (object.ReferenceEquals(camera.component, module))
+            if ( (camera.module != null) && 
+                (object.ReferenceEquals(camera.module.component, component)) )
             {
                 if (delay)
                 {
@@ -199,7 +232,6 @@ public class ModuleCameras : MonoBehaviour
                 camera.Refresh();
             }
         }
-
         yield break;
     }
 
@@ -232,12 +264,13 @@ public class ModuleCameras : MonoBehaviour
         return ((minPriority < CameraPrioritised) || (priority)) ? bestCamera : null;
     }
 
-    private int CurrentModulesContains(MonoBehaviour module)
+    private int CurrentModulesContains(MonoBehaviour component)
     {
         int i = 0;
-        foreach (ModuleCamera cam in cameras)
+        foreach (ModuleCamera camera in cameras)
         {
-            if (object.ReferenceEquals(module, cam.component))
+            if ( (camera.module != null) &&
+                (object.ReferenceEquals(camera.module.component, component)) )
             {
                 return i;
             }
@@ -248,11 +281,11 @@ public class ModuleCameras : MonoBehaviour
 
     private void SetCameraVisibility(bool visible)
     {
-        foreach (ModuleCamera cam in cameras)
+        foreach (ModuleCamera camera in cameras)
         {
-            if (cam.priority > CameraNotInUse)
+            if (camera.priority > CameraNotInUse)
             {
-                cam.cameraInstance.gameObject.SetActive(visible);
+                camera.cameraInstance.gameObject.SetActive(visible);
             }
         }
     }

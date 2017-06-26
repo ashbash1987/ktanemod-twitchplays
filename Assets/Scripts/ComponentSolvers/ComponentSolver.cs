@@ -408,7 +408,7 @@ public abstract class ComponentSolver : ICommandResponder
             }
             if ( (BombCommander._multiDecker) || (cameraPriority) )
             {
-                BombMessageResponder.moduleCameras.AttachToModule(BombComponent, cameraPriority);
+                BombMessageResponder.moduleCameras.AttachToModule(BombComponent, ComponentHandle, cameraPriority);
             }
         }
 
