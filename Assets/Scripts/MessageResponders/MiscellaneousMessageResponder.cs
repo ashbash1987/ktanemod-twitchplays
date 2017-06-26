@@ -20,12 +20,12 @@ public class MiscellaneousMessageResponder : MessageResponder
         }
         else if (text.Equals("!manual", StringComparison.InvariantCultureIgnoreCase))
         {
-            _ircConnection.SendMessage("Go to http://www.bombmanual.com to get the vanilla manual for KTaNE. A full set of manuals is at https://ktane.timwi.de/");
+            _ircConnection.SendMessage("Go to http://www.bombmanual.com to get the vanilla manual for KTaNE. Type !69 manual for a link to a particular module's manual.");
             return;
         }
         else if (text.Equals("!help", StringComparison.InvariantCultureIgnoreCase))
         {
-            _ircConnection.SendMessage("Go to http://bombch.us/CeEz to get the command reference for TP:KTaNE.");
+            _ircConnection.SendMessage("Go to http://bombch.us/CeEz to get the command reference for TP:KTaNE. Type !69 help to see the commands for a particular module.");
             return;
         }
         else if (text.Equals("!rank", StringComparison.InvariantCultureIgnoreCase))
