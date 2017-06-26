@@ -363,7 +363,7 @@ public class FreeplayCommander : ICommandResponder
         {
             currentTime = (float)_timeField.GetValue(currentSettings);
             SelectObject(buttonSelectable);
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.01f);
             if (Mathf.FloorToInt(currentTime) == Mathf.FloorToInt((float) _timeField.GetValue(currentSettings)))
                 break;
         }
@@ -405,7 +405,7 @@ public class FreeplayCommander : ICommandResponder
         {
             int lastModuleCount = (int)_moduleCountField.GetValue(currentSettings);
             SelectObject(buttonSelectable);
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.01f);
             if (lastModuleCount == (int)_moduleCountField.GetValue(currentSettings))
                 yield break;
         }
