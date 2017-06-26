@@ -190,6 +190,7 @@ public class BombMessageResponder : MessageResponder
                 {
                     _bombHandles[0].nameText.text = singleNames[rand.Next(0, singleNames.Length - 1)];
                 }
+                _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived(_bombHandles[0].nameText.text, "red", "!bomb hold"), -1);
             }
             else
             {
@@ -217,6 +218,7 @@ public class BombMessageResponder : MessageResponder
                 {
                     _bombHandles[1].nameText.text = "The Other Bomb";
                 }
+                _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived(_bombHandles[0].nameText.text, "red", "!bomb hold"), 0);
             }
         } while (bombs == null || bombs.Length == 0);
     }
@@ -230,14 +232,10 @@ public class BombMessageResponder : MessageResponder
         if (id == -1)
         {
             _ircConnection.SendMessage("The next bomb is now live! Start sending your commands! MrDestructoid");
-
-            _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold"), -1);
         }
         else if (id == 0)
         {
             _ircConnection.SendMessage("The next set of bombs are now live! Start sending your commands! MrDestructoid");
-
-            _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived("The Bomb", "red", "!bomb hold"), 0);
         }
     }
 
