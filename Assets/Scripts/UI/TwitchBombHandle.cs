@@ -13,6 +13,7 @@ public class TwitchBombHandle : MonoBehaviour
     public CanvasGroup canvasGroup = null;
     public CanvasGroup highlightGroup = null;
     public Text idText = null;
+    public Text nameText = null;
     public ScrollRect messageScroll = null;
     public GameObject messageScrollContents = null;
     public RectTransform mainWindowTransform = null;

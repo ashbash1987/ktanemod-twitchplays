@@ -283,6 +283,7 @@ MonoBehaviour:
   canvasGroup: {fileID: 225000011905846548}
   highlightGroup: {fileID: 225000011631707134}
   idText: {fileID: 114000012369822544}
+  nameText: {fileID: 114000013673847644}
   messageScroll: {fileID: 114000011137338326}
   messageScrollContents: {fileID: 1000014178540424}
   mainWindowTransform: {fileID: 224000010537442592}

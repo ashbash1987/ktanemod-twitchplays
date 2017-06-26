@@ -21,6 +21,35 @@ public class BombMessageResponder : MessageResponder
 
     public static ModuleCameras moduleCameras = null;
 
+    private float specialNameProbability = 0.25f;
+    private string[] singleNames = new string[]
+    {
+        "Bomblebee",
+        "Big Bomb",
+        "Big Bomb Man",
+        "Explodicus",
+        "Little Boy",
+        "Fat Man",
+        "Bombadillo",
+        "Bomba Din",
+        "The Dud",
+        "Molotov",
+        "Sergeant Cluster",
+        "La Bomba",
+        "Bombchu",
+        "Bomboleo"
+    };
+    private string[,] doubleNames = new string[,]
+    {
+        { null, "The Bomb 2: Bomb Harder" },
+        { null, "The Bomb 2: The Second Bombing" },
+        { "Bomb", "Bomber" },
+        { null, "The Bomb Reloaded" },
+        { "Bombic", "& Knuckles" },
+        { null, "The River Kwai" },
+        { "Bomboleo", "Bombolea" }
+    };
+
     #region Unity Lifecycle
     private void OnEnable()
     {
@@ -68,7 +97,7 @@ public class BombMessageResponder : MessageResponder
                 timeRemainingFormatted = commander.GetFullFormattedTime;
             }
         }
-        
+
         if (HasDetonated)
         {
             bombMessage = string.Format("KAPOW KAPOW The bomb has exploded, with {0} remaining! KAPOW KAPOW", timeRemainingFormatted);
@@ -150,10 +179,17 @@ public class BombMessageResponder : MessageResponder
                 bombs = FindObjectsOfType(CommonReflectedTypeInfo.BombType);
             }
 
+            System.Random rand = new System.Random();
+
             if (bombs.Length == 1)
             {
                 _currentBomb = -1;
                 SetBomb((MonoBehaviour) bombs[0], -1);
+
+                if (rand.NextDouble() < specialNameProbability)
+                {
+                    _bombHandles[0].nameText.text = singleNames[rand.Next(0, singleNames.Length - 1)];
+                }
             }
             else
             {
@@ -162,6 +198,24 @@ public class BombMessageResponder : MessageResponder
                 for (var i = bombs.Length - 1; i >= 0; i--)
                 {
                     SetBomb((MonoBehaviour) bombs[i], id++);
+                }
+
+                if (rand.NextDouble() < specialNameProbability)
+                {
+                    int nameIndex = rand.Next(0, doubleNames.Length - 1);
+                    string nameText = null;
+                    for (int i = 0; i < 2; i++)
+                    {
+                        nameText = doubleNames[nameIndex, i];
+                        if (nameText != null)
+                        {
+                            _bombHandles[i].nameText.text = nameText;
+                        }
+                    }
+                }
+                else
+                {
+                    _bombHandles[1].nameText.text = "The Other Bomb";
                 }
             }
         } while (bombs == null || bombs.Length == 0);
