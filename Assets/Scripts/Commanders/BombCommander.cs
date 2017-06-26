@@ -119,6 +119,14 @@ public class BombCommander : ICommandResponder
 
             responseNotifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
+        else if (message.Equals("unview", StringComparison.InvariantCultureIgnoreCase))
+        {
+            BombMessageResponder.moduleCameras.DetachFromModule(_timerComponent);
+        }
+        else if (message.Equals("view", StringComparison.InvariantCultureIgnoreCase))
+        {
+            BombMessageResponder.moduleCameras.AttachToModule(_timerComponent, null, true);
+        }
         else
         {
             responseNotifier.ProcessResponse(CommandResponse.NoResponse);
