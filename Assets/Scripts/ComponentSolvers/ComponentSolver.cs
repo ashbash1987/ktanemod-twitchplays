@@ -50,7 +50,17 @@ public abstract class ComponentSolver : ICommandResponder
 
 
         int beforeStrikeCount = StrikeCount;
-        IEnumerator subcoroutine = RespondToCommandCommon(message);
+
+        IEnumerator subcoroutine = null;
+        if (message.StartsWith("send to module ", StringComparison.InvariantCultureIgnoreCase))
+        {
+            message = message.Substring(15);
+        }
+        else
+        {
+            subcoroutine = RespondToCommandCommon(message);
+        }
+
         if (subcoroutine == null || !subcoroutine.MoveNext())
         {
             subcoroutine = RespondToCommandInternal(message);
