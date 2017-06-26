@@ -139,7 +139,7 @@ public static class ComponentSolverFactory
         ModComponentSolverManualCodes["RockPaperScissorsLizardSpockModule"] = "Rock-Paper-Scissors-Lizard-Spock";
         ModComponentSolverManualCodes["TicTacToeModule"] = "Tic-Tac-Toe";
         ModComponentSolverManualCodes["BitOps"] = "Bitwise Operators";
-        ModComponentSolverManualCodes["RubiksCubeModule"] = "Rubik’s Cube";
+        ModComponentSolverManualCodes["RubiksCubeModule"] = "Rubik%E2%80%99s Cube";
 
         //Delay Invokation. (Modules start processing commands before the very first yield return, so need to be delayed.)
         //The standard is to return the KMSelectable[] array, or yield return something, before interaction with the module

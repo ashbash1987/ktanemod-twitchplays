@@ -313,7 +313,7 @@ public class TwitchComponentHandle : MonoBehaviour
         {
             string manualText = (_solver.manualCode == null) ? manualText = headerText.text : _solver.manualCode;
 
-            return Regex.Replace(manualText, @"[^\w]", m => "%" + ((int)m.Value[0]).ToString("X2"));
+            return Regex.Replace(manualText, @"[^\w%]", m => "%" + ((int)m.Value[0]).ToString("X2"));
         }
     }
     #endregion
