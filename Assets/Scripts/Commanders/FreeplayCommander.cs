@@ -319,8 +319,7 @@ public class FreeplayCommander : ICommandResponder
     #region Helper Methods
     public bool IsDualBombInstalled()
     {
-        float seconds_to_solve = (float)_MAXSECONDSFIELD.GetValue(null);
-        return seconds_to_solve > 600.0f;
+        return SelectableChildren.Length == 11;
     }
 
     public IEnumerator SetBombTimer(string hours, string mins, string secs)
