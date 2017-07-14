@@ -23,6 +23,8 @@ public class BombCommander : ICommandResponder
 
         _selectableType = ReflectionHelper.FindType("Selectable");
         _handleSelectMethod = _selectableType.GetMethod("HandleSelect", BindingFlags.Public | BindingFlags.Instance);
+        _handleSelectableInteractMethod = _selectableType.GetMethod("HandleInteract", BindingFlags.Public | BindingFlags.Instance);
+        _handleSelectableCancelMethod = _selectableType.GetMethod("HandleCancel", BindingFlags.Public | BindingFlags.Instance);
         _onInteractEndedMethod = _selectableType.GetMethod("OnInteractEnded", BindingFlags.Public | BindingFlags.Instance);
 
         _selectableManagerType = ReflectionHelper.FindType("SelectableManager");
@@ -343,13 +345,13 @@ public class BombCommander : ICommandResponder
 
         float focusTime = (float)_focusTimeField.GetValue(FloatingHoldable);
         _focusMethod.Invoke(FloatingHoldable, new object[] { selectable.transform, focusDistance, false, false, focusTime });
-        _handleSelectMethod.Invoke(selectable, new object[] { false });
+        _handleSelectableInteractMethod.Invoke(selectable, null);
     }
 
     public IEnumerator Defocus(MonoBehaviour selectable, bool frontFace)
     {
         _defocusMethod.Invoke(FloatingHoldable, new object[] { false, false });
-        _handleCancelMethod.Invoke(selectable, null);
+        _handleSelectableCancelMethod.Invoke(selectable, null);
         yield break;
     }
 
@@ -478,6 +480,8 @@ public class BombCommander : ICommandResponder
 
     private static Type _selectableType = null;
     private static MethodInfo _handleSelectMethod = null;
+    private static MethodInfo _handleSelectableInteractMethod = null;
+    private static MethodInfo _handleSelectableCancelMethod = null;
     private static MethodInfo _onInteractEndedMethod = null;
 
     private static Type _selectableManagerType = null;
