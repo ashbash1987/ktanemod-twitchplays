@@ -65,7 +65,7 @@ public abstract class ComponentSolver : ICommandResponder
 
                     responseNotifier.ProcessResponse(Solved ? CommandResponse.EndComplete : CommandResponse.EndError);
 
-                    focusDefocus = BombCommander.Defocus(FrontFace);
+                    focusDefocus = BombCommander.Defocus(Selectable, FrontFace);
                     while (focusDefocus.MoveNext())
                     {
                         yield return focusDefocus.Current;
@@ -179,7 +179,7 @@ public abstract class ComponentSolver : ICommandResponder
             yield return new WaitForSeconds(0.5f);
         }
 
-        IEnumerator defocusCoroutine = BombCommander.Defocus(FrontFace);
+        IEnumerator defocusCoroutine = BombCommander.Defocus(Selectable, FrontFace);
         while (defocusCoroutine.MoveNext())
         {
             yield return defocusCoroutine.Current;

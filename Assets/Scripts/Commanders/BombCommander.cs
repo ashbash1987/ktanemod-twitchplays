@@ -306,11 +306,13 @@ public class BombCommander : ICommandResponder
 
         float focusTime = (float)_focusTimeField.GetValue(FloatingHoldable);
         _focusMethod.Invoke(FloatingHoldable, new object[] { selectable.transform, focusDistance, false, false, focusTime });
+        _handleSelectMethod.Invoke(selectable, new object[] { false });
     }
 
-    public IEnumerator Defocus(bool frontFace)
+    public IEnumerator Defocus(MonoBehaviour selectable, bool frontFace)
     {
         _defocusMethod.Invoke(FloatingHoldable, new object[] { false, false });
+        _handleCancelMethod.Invoke(selectable, null);
         yield break;
     }
 
