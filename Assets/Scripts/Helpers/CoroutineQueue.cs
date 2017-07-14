@@ -9,6 +9,7 @@ public class CoroutineQueue : MonoBehaviour
     private void Awake()
     {
         _coroutineQueue = new Queue<IEnumerator>();
+        _bombIDProcessed = new Queue<int>();
     }  
 
     private void Update()
@@ -25,9 +26,16 @@ public class CoroutineQueue : MonoBehaviour
         _coroutineQueue.Enqueue(subcoroutine);
     }
 
+    public void AddToQueue(IEnumerator subcoroutine, int bombID)
+    {
+        _coroutineQueue.Enqueue(subcoroutine);
+        _bombIDProcessed.Enqueue(bombID);
+    }
+
     public void CancelFutureSubcoroutines()
     {
         _coroutineQueue.Clear();
+        _bombIDProcessed.Clear();
     }
 
     public void StopQueue()
@@ -50,6 +58,8 @@ public class CoroutineQueue : MonoBehaviour
         while (_coroutineQueue.Count > 0)
         {
             IEnumerator coroutine = _coroutineQueue.Dequeue();
+            if (_bombIDProcessed.Count > 0)
+                CurrentBombID = _bombIDProcessed.Dequeue();
             while (coroutine.MoveNext())
             {
                 yield return coroutine.Current;
@@ -65,4 +75,7 @@ public class CoroutineQueue : MonoBehaviour
     private Queue<IEnumerator> _coroutineQueue = null;
     private bool _processing = false;
     private Coroutine _activeCoroutine = null;
+
+    public int CurrentBombID = -1;
+    private Queue<int> _bombIDProcessed = null;
 }

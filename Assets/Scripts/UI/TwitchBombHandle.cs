@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,8 +13,11 @@ public class TwitchBombHandle : MonoBehaviour
     public CanvasGroup canvasGroup = null;
     public CanvasGroup highlightGroup = null;
     public Text idText = null;
+    public Text nameText = null;
     public ScrollRect messageScroll = null;
     public GameObject messageScrollContents = null;
+    public RectTransform mainWindowTransform = null;
+    public RectTransform highlightTransform = null;
 
     [HideInInspector]
     public IRCConnection ircConnection = null;
@@ -25,6 +30,9 @@ public class TwitchBombHandle : MonoBehaviour
 
     [HideInInspector]
     public CoroutineCanceller coroutineCanceller = null;
+
+    [HideInInspector]
+    public int bombID = -1;
     #endregion
 
     #region Private Fields
@@ -39,20 +47,33 @@ public class TwitchBombHandle : MonoBehaviour
 
     private void Start()
     {
+        if(bombID > -1)
+            _code = "bomb" + (bombID + 1);
+
         idText.text = string.Format("!{0}", _code);
 
         canvasGroup.alpha = 1.0f;
         highlightGroup.alpha = 0.0f;
+        if (bombID > -1)
+        {
+            mainWindowTransform.localPosition -= new Vector3(0, 160.0f * bombID, 0);
+            highlightTransform.localPosition -= new Vector3(0, 160.0f * bombID, 0);
+        }
+    }
+
+    private void LateUpdate()
+    {
+        messageScroll.verticalNormalizedPosition = 0.0f;
     }
     #endregion
 
     #region Message Interface    
-    public void OnMessageReceived(string userNickName, string userColor, string text)
+    public IEnumerator OnMessageReceived(string userNickName, string userColor, string text)
     {
         Match match = Regex.Match(text, string.Format("^!{0} (.+)", _code), RegexOptions.IgnoreCase);
         if (!match.Success)
         {
-            return;
+            return null;
         }
 
         string internalCommand = match.Groups[1].Value;
@@ -67,7 +88,48 @@ public class TwitchBombHandle : MonoBehaviour
             message.SetMessage(string.Format("<b><color={2}>{0}</color></b>: {1}", userNickName, internalCommand, userColor));
         }
 
-        coroutineQueue.AddToQueue(RespondToCommandCoroutine(userNickName, internalCommand, message));
+        //Respond instantly to these commands without dropping "The Bomb", should the command be for "The Other Bomb" and vice versa.
+        ICommandResponseNotifier icrn = message;
+        if (internalCommand.Equals("timestamp", StringComparison.InvariantCultureIgnoreCase) ||
+            internalCommand.Equals("date", StringComparison.InvariantCultureIgnoreCase))
+        {
+            //Some modules depend on the date/time the bomb, and therefore that Module instance has spawned, in the bomb defusers timezone.
+
+            icrn.ProcessResponse(CommandResponse.Start);
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("The Date/Time this bomb started is ");
+            sb.Append(string.Format("{0:F}", bombCommander.BombTimeStamp));
+            ircConnection.SendMessage(sb.ToString());
+
+            icrn.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+        else if (internalCommand.Equals("help", StringComparison.InvariantCultureIgnoreCase))
+        {
+            icrn.ProcessResponse(CommandResponse.Start);
+
+            ircConnection.SendMessage("The Bomb: Pick up with !bomb hold. Turn with !bomb turn. Show the edges with !bomb edgework. Show a specific edge with !bomb top. Display the bomb start time with !bomb time. Edges are top, bottom, left and right.");
+
+            icrn.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+
+        else if (internalCommand.Equals("time", StringComparison.InvariantCultureIgnoreCase) ||
+                 internalCommand.Equals("timer", StringComparison.InvariantCultureIgnoreCase) ||
+                 internalCommand.Equals("clock", StringComparison.InvariantCultureIgnoreCase))
+        {
+            icrn.ProcessResponse(CommandResponse.Start);
+
+            ircConnection.SendMessage(string.Format("panicBasket [{0}]",
+                bombCommander.GetFullFormattedTime));
+
+            icrn.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+        else
+        {
+            return RespondToCommandCoroutine(userNickName, internalCommand, message);
+        }
+
+        return null;
     }
     #endregion
 

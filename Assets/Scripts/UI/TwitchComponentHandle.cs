@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -16,6 +16,8 @@ public class TwitchComponentHandle : MonoBehaviour
 
     #region Public Fields
     public TwitchMessage messagePrefab = null;
+    public Image unsupportedPrefab = null;
+    public Image idBannerPrefab = null;
 
     public CanvasGroup canvasGroup = null;
     public CanvasGroup highlightGroup = null;
@@ -65,6 +67,9 @@ public class TwitchComponentHandle : MonoBehaviour
 
     [HideInInspector]
     public Leaderboard leaderboard = null;
+
+    [HideInInspector]
+    public int bombID;
     #endregion
 
     #region Private Fields
@@ -76,13 +81,7 @@ public class TwitchComponentHandle : MonoBehaviour
     private static int _nextID = 0;
     private static int GetNewID()
     {
-        _nextID++;
-        if (_nextID >= 100)
-        {
-            _nextID = 1;
-        }
-
-        return _nextID;
+        return ++_nextID;
     }
     #endregion
 
@@ -110,11 +109,21 @@ public class TwitchComponentHandle : MonoBehaviour
         Arrow.gameObject.SetActive(true);
         HighlightArrow.gameObject.SetActive(true);
 
-        _solver = ComponentSolverFactory.CreateSolver(bombCommander, bombComponent, componentType, ircConnection, coroutineCanceller);
-        if (_solver != null)
+        try
         {
-            _solver.Code = _code;
-            _solver.ComponentHandle = this;
+            _solver = ComponentSolverFactory.CreateSolver(bombCommander, bombComponent, componentType, ircConnection, coroutineCanceller);
+            if (_solver != null)
+            {
+                _solver.Code = _code;
+                _solver.ComponentHandle = this;
+            }
+        }
+        catch (NotSupportedException e)
+        {
+            Debug.Log(e.Message);
+            unsupportedPrefab.gameObject.SetActive(true);
+            idBannerPrefab.gameObject.SetActive(false);
+            canvasGroupMultiDecker.alpha = 0.0f;
         }
     }
 
@@ -138,15 +147,20 @@ public class TwitchComponentHandle : MonoBehaviour
     {
         canvasGroupMultiDecker.alpha = 0.0f;
     }
+
+    public static void ResetId()
+    {
+        _nextID = 0;
+    }
     #endregion
 
     #region Message Interface
-    public void OnMessageReceived(string userNickName, string userColor, string text)
+    public IEnumerator OnMessageReceived(string userNickName, string userColor, string text)
     {
         Match match = Regex.Match(text, string.Format("^!({0}) (.+)", _code), RegexOptions.IgnoreCase);
         if (!match.Success)
         {
-            return;
+            return null;
         }
 
         string targetModule = match.Groups[1].Value;
@@ -155,7 +169,7 @@ public class TwitchComponentHandle : MonoBehaviour
         string messageOut = null;
         if (internalCommand.Equals("help", StringComparison.InvariantCultureIgnoreCase)) {
             if (_solver.helpMessage == null) {
-                messageOut = "No help message for {1}!";
+                messageOut = "No help message for {1}! Try here: http://bombch.us/CdqJ";
             }
             else {
                 messageOut = string.Format("{0}: {1}", headerText.text, _solver.helpMessage);
@@ -169,18 +183,32 @@ public class TwitchComponentHandle : MonoBehaviour
             else {
               manualText = _solver.manualCode;
             }
-            messageOut = string.Format("{0}: https://ktane.timwi.de/HTML/{1}.html", manualText, Uri.EscapeDataString(manualText));
+            if (manualText.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase) ||
+                manualText.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
+                messageOut = manualText;
+            else
+                messageOut = string.Format("{0}: https://ktane.timwi.de/HTML/{1}.html", headerText.text, SafeManualCode);
         }
         else if (Regex.IsMatch(internalCommand, "^(bomb|queue) (turn( a?round)?|flip|spin)$", RegexOptions.IgnoreCase))
         {
-            _solver._turnQueued = true;
+            if (!_solver._turnQueued)
+            {
+                _solver._turnQueued = true;
+                StartCoroutine(_solver.TurnBombOnSolve());
+            }
             messageOut = string.Format("Turning to the other side when Module {0} is solved", targetModule);
         }
-        if (messageOut != null) {
-            ircConnection.SendMessage(string.Format(messageOut, _code, headerText.text));
-            return;
+        else if (Regex.IsMatch(internalCommand, "^cancel (bomb|queue) (turn( a?round)?|flip|spin)$", RegexOptions.IgnoreCase))
+        {
+            _solver._turnQueued = false;
+            messageOut = string.Format("Bomb turn on Module {0} solve cancelled", targetModule);
         }
-        
+        if (!string.IsNullOrEmpty(messageOut))
+        {
+            ircConnection.SendMessage(string.Format(messageOut, _code, headerText.text));
+            return null;
+        }
+
         TwitchMessage message = (TwitchMessage)Instantiate(messagePrefab, messageScrollContents.transform, false);
         message.leaderboard = leaderboard;
         message.userName = userNickName;
@@ -198,10 +226,9 @@ public class TwitchComponentHandle : MonoBehaviour
             }
         }
 
-        if (_solver != null)
-        {
-            coroutineQueue.AddToQueue(RespondToCommandCoroutine(userNickName, internalCommand, message));
-        }
+        return _solver != null
+            ? RespondToCommandCoroutine(userNickName, internalCommand, message) 
+            : null;
     }
     #endregion
 
@@ -277,6 +304,16 @@ public class TwitchComponentHandle : MonoBehaviour
                 default:
                     return null;
             }
+        }
+    }
+
+    private string SafeManualCode
+    {
+        get
+        {
+            string manualText = (_solver.manualCode == null) ? manualText = headerText.text : _solver.manualCode;
+
+            return Regex.Replace(manualText, @"[^\w%]", m => "%" + ((int)m.Value[0]).ToString("X2"));
         }
     }
     #endregion

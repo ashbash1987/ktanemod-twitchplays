@@ -1,26 +1,69 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using UnityEditor;
 using UnityEngine;
+using ADBannerView = UnityEngine.iOS.ADBannerView;
 
 public class BombMessageResponder : MessageResponder
 {
     public TwitchBombHandle twitchBombHandlePrefab = null;
     public TwitchComponentHandle twitchComponentHandlePrefab = null;
+    public ModuleCameras moduleCamerasPrefab = null;
     public Leaderboard leaderboard = null;
     public TwitchPlaysService parentService = null;
 
-    private BombCommander _bombCommander = null;
-    private TwitchBombHandle _bombHandle = null;
+    private List<BombCommander> _bombCommanders = new List<BombCommander>();
+    private List<TwitchBombHandle> _bombHandles = new List<TwitchBombHandle>();
     private List<TwitchComponentHandle> _componentHandles = new List<TwitchComponentHandle>();
+    private int _currentBomb = -1;
+
+    public static ModuleCameras moduleCameras = null;
+
+    private float specialNameProbability = 0.25f;
+    private string[] singleNames = new string[]
+    {
+        "Bomblebee",
+        "Big Bomb",
+        "Big Bomb Man",
+        "Explodicus",
+        "Little Boy",
+        "Fat Man",
+        "Bombadillo",
+        "Bomba Din",
+        "The Dud",
+        "Molotov",
+        "Sergeant Cluster",
+        "La Bomba",
+        "Bombchu",
+        "Bomboleo"
+    };
+    private string[,] doubleNames = new string[,]
+    {
+        { null, "The Bomb 2: Bomb Harder" },
+        { null, "The Bomb 2: The Second Bombing" },
+        { "Bomb", "Bomber" },
+        { null, "The Bomb Reloaded" },
+        { "Bombic", "& Knuckles" },
+        { null, "The River Kwai" },
+        { "Bomboleo", "Bombolea" }
+    };
 
     #region Unity Lifecycle
     private void OnEnable()
     {
-        InputInterceptor.DisableInput();
+        if (!TwitchPlaysService.DebugMode)
+        {
+            InputInterceptor.DisableInput();
+        }
 
         leaderboard.ClearSolo();
+        TwitchPlaysService.logUploader.Clear();
+
         StartCoroutine(CheckForBomb());
+
+        moduleCameras = Instantiate<ModuleCameras>(moduleCamerasPrefab);
     }
 
     private void OnDisable()
@@ -28,28 +71,55 @@ public class BombMessageResponder : MessageResponder
         StopAllCoroutines();
         leaderboard.BombsAttempted++;
         string bombMessage = null;
-        if ((bool)CommonReflectedTypeInfo.HasDetonatedProperty.GetValue(_bombCommander.Bomb, null))
+
+        bool HasDetonated = false;
+        var timeStarting = float.MaxValue;
+        var timeRemaining = float.MaxValue;
+        var timeRemainingFormatted = "";
+
+        TwitchPlaysService.logUploader.Post();
+
+        foreach (var commander in _bombCommanders)
         {
-            bombMessage = string.Format("KAPOW KAPOW The bomb has exploded, with {0} remaining! KAPOW KAPOW", _bombCommander.CurrentTimerFormatted);
-            leaderboard.BombsExploded++;
+            HasDetonated |= (bool) CommonReflectedTypeInfo.HasDetonatedProperty.GetValue(commander.Bomb, null);
+            if (timeRemaining > commander.CurrentTimer)
+            {
+                timeStarting = commander._bombStartingTimer;
+                timeRemaining = commander.CurrentTimer;
+            }
+
+            if (!string.IsNullOrEmpty(timeRemainingFormatted))
+            {
+                timeRemainingFormatted += ", " + commander.GetFullFormattedTime;
+            }
+            else
+            {
+                timeRemainingFormatted = commander.GetFullFormattedTime;
+            }
+        }
+
+        if (HasDetonated)
+        {
+            bombMessage = string.Format("KAPOW KAPOW The bomb has exploded, with {0} remaining! KAPOW KAPOW", timeRemainingFormatted);
+            leaderboard.BombsExploded+=_bombCommanders.Count;
             leaderboard.Success = false;
         }
         else
         {
-            bombMessage = string.Format("PraiseIt PraiseIt The bomb has been defused, with {0} remaining! PraiseIt PraiseIt", _bombCommander.CurrentTimerFormatted);
-            leaderboard.BombsCleared++;
+            bombMessage = string.Format("PraiseIt PraiseIt The bomb has been defused, with {0} remaining! PraiseIt PraiseIt", timeRemainingFormatted);
+            leaderboard.BombsCleared+=_bombCommanders.Count;
             leaderboard.Success = true;
             if (leaderboard.CurrentSolvers.Count == 1)
             {
                 float previousRecord = 0.0f;
-                float elapsedTime = _bombCommander._bombStartingTimer - _bombCommander.CurrentTimer;
+                float elapsedTime = timeStarting - timeRemaining;
                 string userName = "";
                 foreach (string uName in leaderboard.CurrentSolvers.Keys)
                 {
                     userName = uName;
                     break;
                 }
-                if (leaderboard.CurrentSolvers[userName] == Leaderboard.RequiredSoloSolves)
+                if (leaderboard.CurrentSolvers[userName] == (Leaderboard.RequiredSoloSolves * _bombCommanders.Count))
                 {
                     leaderboard.AddSoloClear(userName, elapsedTime, out previousRecord);
                     TimeSpan elapsedTimeSpan = TimeSpan.FromSeconds(elapsedTime);
@@ -68,14 +138,17 @@ public class BombMessageResponder : MessageResponder
             }
         }
 
-        parentService.StartCoroutine(SendDelayedMessage(1.0f, bombMessage));
+        parentService.StartCoroutine(SendDelayedMessage(1.0f, bombMessage, SendAnalysisLink));
 
-        if (_bombHandle != null)
+        foreach (var handle in _bombHandles)
         {
-            Destroy(_bombHandle.gameObject, 2.0f);
+            if (handle != null)
+            {
+                Destroy(handle.gameObject, 2.0f);
+            }
         }
-        _bombHandle = null;
-        _bombCommander = null;
+        _bombHandles.Clear();
+        _bombCommanders.Clear();
 
         if (_componentHandles != null)
         {
@@ -86,8 +159,6 @@ public class BombMessageResponder : MessageResponder
         }
         _componentHandles.Clear();
 
-        InputInterceptor.EnableInput();
-
         MusicPlayer.StopAllMusic();
     }
     #endregion
@@ -95,52 +166,138 @@ public class BombMessageResponder : MessageResponder
     #region Protected/Private Methods
     private IEnumerator CheckForBomb()
     {
-        yield return null;
+        TwitchComponentHandle.ResetId();
 
-        while (true)
+        UnityEngine.Object[] bombs;
+        do
         {
-            UnityEngine.Object[] bombs = FindObjectsOfType(CommonReflectedTypeInfo.BombType);
-            if (bombs != null && bombs.Length > 0)
+            yield return null;
+            bombs = FindObjectsOfType(CommonReflectedTypeInfo.BombType);
+            if (bombs.Length > 0)
             {
-                SetBomb((MonoBehaviour)bombs[0]);
-                break;
+                yield return new WaitForSeconds(0.1f);
+                bombs = FindObjectsOfType(CommonReflectedTypeInfo.BombType);
             }
 
-            yield return null;
-        }
+            System.Random rand = new System.Random();
+
+            if (bombs.Length == 1)
+            {
+                _currentBomb = -1;
+                SetBomb((MonoBehaviour) bombs[0], -1);
+
+                if (rand.NextDouble() < specialNameProbability)
+                {
+                    _bombHandles[0].nameText.text = singleNames[rand.Next(0, singleNames.Length - 1)];
+                }
+                _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived(_bombHandles[0].nameText.text, "red", "!bomb hold"), -1);
+            }
+            else
+            {
+                _currentBomb = 0;
+                int id = 0;
+                for (var i = bombs.Length - 1; i >= 0; i--)
+                {
+                    SetBomb((MonoBehaviour) bombs[i], id++);
+                }
+
+                if (rand.NextDouble() < specialNameProbability)
+                {
+                    int nameIndex = rand.Next(0, doubleNames.Length - 1);
+                    string nameText = null;
+                    for (int i = 0; i < 2; i++)
+                    {
+                        nameText = doubleNames[nameIndex, i];
+                        if (nameText != null)
+                        {
+                            _bombHandles[i].nameText.text = nameText;
+                        }
+                    }
+                }
+                else
+                {
+                    _bombHandles[1].nameText.text = "The Other Bomb";
+                }
+                _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived(_bombHandles[0].nameText.text, "red", "!bomb hold"), 0);
+            }
+        } while (bombs == null || bombs.Length == 0);
     }
 
-    private void SetBomb(MonoBehaviour bomb)
+    private void SetBomb(MonoBehaviour bomb, int id)
     {
-        _bombCommander = new BombCommander(bomb);
-        CreateBombHandleForBomb(bomb);
+        _bombCommanders.Add(new BombCommander(bomb));
+        CreateBombHandleForBomb(bomb, id);
         CreateComponentHandlesForBomb(bomb);
 
-        _ircConnection.SendMessage("The next bomb is now live! Start sending your commands! MrDestructoid");
-
-        _bombHandle.OnMessageReceived("The Bomb", "red", "!bomb hold");
+        if (id == -1)
+        {
+            _ircConnection.SendMessage("The next bomb is now live! Start sending your commands! MrDestructoid");
+        }
+        else if (id == 0)
+        {
+            _ircConnection.SendMessage("The next set of bombs are now live! Start sending your commands! MrDestructoid");
+        }
     }
 
     protected override void OnMessageReceived(string userNickName, string userColorCode, string text)
     {
-        if (_bombHandle != null)
+        if (text.Equals("!stop", StringComparison.InvariantCultureIgnoreCase))
         {
-            _bombHandle.OnMessageReceived(userNickName, userColorCode, text);
+            _currentBomb = _coroutineQueue.CurrentBombID;
+            return;
+        }
+
+        if (_currentBomb > -1)
+        {
+            //Check for !bomb messages, and pass them off to the currently held bomb.
+            Match match = Regex.Match(text, "^!bomb (.+)", RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                string internalCommand = match.Groups[1].Value;
+                text = string.Format("!bomb{0} {1}", _currentBomb + 1, internalCommand);
+            }
+        }
+
+        foreach (var handle in _bombHandles)
+        {
+            if (handle != null)
+            {
+                IEnumerator onMessageReceived = handle.OnMessageReceived(userNickName, userColorCode, text);
+                if (onMessageReceived == null) continue;
+
+                if (_currentBomb != handle.bombID)
+                {
+                    _coroutineQueue.AddToQueue(_bombCommanders[_currentBomb].LetGoBomb(), handle.bombID);
+                    _currentBomb = handle.bombID;
+                }
+                _coroutineQueue.AddToQueue(onMessageReceived, handle.bombID);
+            }
         }
 
         foreach (TwitchComponentHandle componentHandle in _componentHandles)
         {
-            componentHandle.OnMessageReceived(userNickName, userColorCode, text);
+            IEnumerator onMessageReceived = componentHandle.OnMessageReceived(userNickName, userColorCode, text);
+            if (onMessageReceived != null)
+            {
+                if (_currentBomb != componentHandle.bombID)
+                {
+                    _coroutineQueue.AddToQueue(_bombCommanders[_currentBomb].LetGoBomb(),componentHandle.bombID);
+                    _currentBomb = componentHandle.bombID;
+                }
+                _coroutineQueue.AddToQueue(onMessageReceived,componentHandle.bombID);
+            }
         }
     }
 
-    private void CreateBombHandleForBomb(MonoBehaviour bomb)
+    private void CreateBombHandleForBomb(MonoBehaviour bomb, int id)
     {
-        _bombHandle = Instantiate<TwitchBombHandle>(twitchBombHandlePrefab);
+        TwitchBombHandle _bombHandle = Instantiate<TwitchBombHandle>(twitchBombHandlePrefab);
+        _bombHandle.bombID = id;
         _bombHandle.ircConnection = _ircConnection;
-        _bombHandle.bombCommander = _bombCommander;
+        _bombHandle.bombCommander = _bombCommanders[_bombCommanders.Count-1];
         _bombHandle.coroutineQueue = _coroutineQueue;
         _bombHandle.coroutineCanceller = _coroutineCanceller;
+        _bombHandles.Add(_bombHandle);
     }
 
     private bool CreateComponentHandlesForBomb(MonoBehaviour bomb)
@@ -151,7 +308,7 @@ public class BombMessageResponder : MessageResponder
 
         if (bombComponents.Count > 12)
         {
-            _bombCommander._multiDecker = true;
+            _bombCommanders[_bombCommanders.Count - 1]._multiDecker = true;
         }
 
         foreach (MonoBehaviour bombComponent in bombComponents)
@@ -163,7 +320,10 @@ public class BombMessageResponder : MessageResponder
             switch (componentTypeEnum)
             {
                 case ComponentTypeEnum.Empty:
+                    continue;
+
                 case ComponentTypeEnum.Timer:
+                    _bombCommanders[_bombCommanders.Count - 1]._timerComponent = bombComponent;
                     continue;
 
                 default:
@@ -173,12 +333,13 @@ public class BombMessageResponder : MessageResponder
 
             TwitchComponentHandle handle = (TwitchComponentHandle)Instantiate(twitchComponentHandlePrefab, bombComponent.transform, false);
             handle.ircConnection = _ircConnection;
-            handle.bombCommander = _bombCommander;
+            handle.bombCommander = _bombCommanders[_bombCommanders.Count - 1];
             handle.bombComponent = bombComponent;
             handle.componentType = componentTypeEnum;
             handle.coroutineQueue = _coroutineQueue;
             handle.coroutineCanceller = _coroutineCanceller;
             handle.leaderboard = leaderboard;
+            handle.bombID = _currentBomb == -1 ? -1 : _bombCommanders.Count - 1;
 
             Vector3 idealOffset = handle.transform.TransformDirection(GetIdealPositionForHandle(handle, bombComponents, out handle.direction));
             handle.transform.SetParent(bombComponent.transform.parent, true);
@@ -267,10 +428,24 @@ public class BombMessageResponder : MessageResponder
         return false;
     }
 
-    private IEnumerator SendDelayedMessage(float delay, string message)
+    private IEnumerator SendDelayedMessage(float delay, string message, Action callback = null)
     {
         yield return new WaitForSeconds(delay);
         _ircConnection.SendMessage(message);
+
+        if (callback != null)
+        {
+            callback();
+        }
+    }
+
+    private void SendAnalysisLink()
+    {
+        if (!TwitchPlaysService.logUploader.PostToChat())
+        {
+            Debug.Log("[BombMessageResponder] Analysis URL not found, instructing LogUploader to post when it's ready");
+            TwitchPlaysService.logUploader.postOnComplete = true;
+        }
     }
     #endregion
 }

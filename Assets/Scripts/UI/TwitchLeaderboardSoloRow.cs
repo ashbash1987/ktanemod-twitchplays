@@ -35,15 +35,13 @@ public class TwitchLeaderboardSoloRow : MonoBehaviour
         if (leaderboardEntry != null)
         {
             TimeSpan recordTimeSpan = TimeSpan.FromSeconds(leaderboardEntry.RecordSoloTime);
-
-            int avgSolveMinutes = (int)Math.Floor(leaderboardEntry.TimePerSoloSolve / 60);
-            float avgSolveSeconds = leaderboardEntry.TimePerSoloSolve % 60;
-
+            TimeSpan averageTimeSpan = TimeSpan.FromSeconds(leaderboardEntry.TimePerSoloSolve);
+            
             userNameText.text = leaderboardEntry.UserName;
             userNameText.color = leaderboardEntry.UserColor;
             totalClearsText.text = leaderboardEntry.TotalSoloClears.ToString();
             recordTimeText.text = string.Format("{0}:{1:00}", (int)recordTimeSpan.TotalMinutes, recordTimeSpan.Seconds);
-            avgSolveTimeText.text = string.Format("{0}:{1:00.0}", avgSolveMinutes, avgSolveSeconds);
+            avgSolveTimeText.text = string.Format("{0}:{1:00.0}", (int)averageTimeSpan.TotalMinutes, averageTimeSpan.Seconds);
         }
 
         yield return new WaitForSeconds(delay);

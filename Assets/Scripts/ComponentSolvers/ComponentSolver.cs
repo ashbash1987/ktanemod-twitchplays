@@ -37,9 +37,11 @@ public abstract class ComponentSolver : ICommandResponder
     #region Interface Implementation
     public IEnumerator RespondToCommand(string userNickName, string message, ICommandResponseNotifier responseNotifier)
     {
+        _processingTwitchCommand = true;
         if (Solved)
         {
             responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+            _processingTwitchCommand = false;
             yield break;
         }
 
@@ -48,7 +50,17 @@ public abstract class ComponentSolver : ICommandResponder
 
 
         int beforeStrikeCount = StrikeCount;
-        IEnumerator subcoroutine = RespondToCommandCommon(message);
+
+        IEnumerator subcoroutine = null;
+        if (message.StartsWith("send to module ", StringComparison.InvariantCultureIgnoreCase))
+        {
+            message = message.Substring(15);
+        }
+        else
+        {
+            subcoroutine = RespondToCommandCommon(message);
+        }
+
         if (subcoroutine == null || !subcoroutine.MoveNext())
         {
             subcoroutine = RespondToCommandInternal(message);
@@ -77,6 +89,7 @@ public abstract class ComponentSolver : ICommandResponder
 
                 _currentResponseNotifier = null;
                 _currentUserNickName = null;
+                _processingTwitchCommand = false;
                 yield break;
             }
         }
@@ -187,19 +200,9 @@ public abstract class ComponentSolver : ICommandResponder
 
         yield return new WaitForSeconds(0.5f);
 
-        if (_readyToTurn)
-        {
-            _readyToTurn = false;
-            IEnumerator turnCoroutine = BombCommander.TurnBomb();
-            while (turnCoroutine.MoveNext())
-            {
-                yield return turnCoroutine.Current;
-            }
-            yield return new WaitForSeconds(0.5f);
-        }
-
         _currentResponseNotifier = null;
         _currentUserNickName = null;
+        _processingTwitchCommand = false;
     }
     #endregion
 
@@ -253,11 +256,35 @@ public abstract class ComponentSolver : ICommandResponder
         {
             Debug.LogFormat("ComponentSolver: Activating queued turn for completed module {0}.", Code);
             _readyToTurn = true;
+            _turnQueued = false;
         }
 
         ComponentHandle.OnPass();
 
+        BombMessageResponder.moduleCameras.DetachFromModule(BombComponent, true);
+
         return false;
+    }
+
+    public IEnumerator TurnBombOnSolve()
+    {
+        while(_turnQueued)
+            yield return new WaitForSeconds(0.1f);
+
+        if (!_readyToTurn)
+            yield break;
+
+        while (_processingTwitchCommand)
+            yield return new WaitForSeconds(0.1f);
+
+        _readyToTurn = false;
+        IEnumerator turnCoroutine = BombCommander.TurnBomb();
+        while (turnCoroutine.MoveNext())
+        {
+            yield return turnCoroutine.Current;
+        }
+
+        yield return new WaitForSeconds(0.5f);
     }
 
     private bool DisableOnStrike;
@@ -378,6 +405,23 @@ public abstract class ComponentSolver : ICommandResponder
     #region Private Methods
     private IEnumerator RespondToCommandCommon(string inputCommand)
     {
+        if (inputCommand.Equals("unview", StringComparison.InvariantCultureIgnoreCase))
+        {
+            cameraPriority = false;
+            BombMessageResponder.moduleCameras.DetachFromModule(BombComponent);
+        }
+        else
+        {
+            if (inputCommand.Equals("view", StringComparison.InvariantCultureIgnoreCase))
+            {
+                cameraPriority = true;
+            }
+            if ( (BombCommander._multiDecker) || (cameraPriority) )
+            {
+                BombMessageResponder.moduleCameras.AttachToModule(BombComponent, ComponentHandle, cameraPriority);
+            }
+        }
+
         if (inputCommand.Equals("show", StringComparison.InvariantCultureIgnoreCase))
         {
             yield return "show";
@@ -418,8 +462,13 @@ public abstract class ComponentSolver : ICommandResponder
     
     public string helpMessage = null;
     public string manualCode = null;
+    public bool delayInvokation = false;
+    public bool cameraPriority = false;
+
     public bool _turnQueued = false;
     private bool _readyToTurn = false;
+    private bool _processingTwitchCommand = false;
+   
 
     public TwitchComponentHandle ComponentHandle = null;
 }

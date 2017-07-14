@@ -5,13 +5,14 @@ using UnityEngine;
 
 public class SimpleModComponentSolver : ComponentSolver
 {
-    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual = null, string help = null) :
+    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool delayinvoke) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
         CommandComponent = commandComponent;
         helpMessage = help;
         manualCode = manual;
+        delayInvokation = delayinvoke;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -23,6 +24,9 @@ public class SimpleModComponentSolver : ComponentSolver
         }
 
         KMSelectable[] selectableSequence = null;
+        if(delayInvokation)
+            yield return "modsequence";
+
         try
         {
             selectableSequence = (KMSelectable[])ProcessMethod.Invoke(CommandComponent, new object[] { inputCommand });

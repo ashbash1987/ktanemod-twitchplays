@@ -12,6 +12,7 @@ public class TwitchPlaysService : MonoBehaviour
         public string channelName;
         public string serverName;
         public int serverPort;
+        public bool debug = false;
     }
 
     public BombMessageResponder bombMessageResponder = null;
@@ -28,6 +29,9 @@ public class TwitchPlaysService : MonoBehaviour
     private MessageResponder _activeMessageResponder = null;
     private Leaderboard _leaderboard = null;
 
+    public static bool DebugMode = false;
+    public static LogUploader logUploader = null;
+
     private void Start()
     {
         _gameInfo = GetComponent<KMGameInfo>();
@@ -42,6 +46,8 @@ public class TwitchPlaysService : MonoBehaviour
             return;
         }
 
+        DebugMode = (settings.debug == true);
+
         _ircConnection = new IRCConnection(settings.authToken, settings.userName, settings.channelName, settings.serverName, settings.serverPort);
         _ircConnection.Connect();
 
@@ -49,6 +55,9 @@ public class TwitchPlaysService : MonoBehaviour
 
         _coroutineQueue = GetComponent<CoroutineQueue>();
         _coroutineQueue.coroutineCanceller = _coroutineCanceller;
+
+        logUploader = GetComponent<LogUploader>();
+        logUploader.ircConnection = _ircConnection;
 
         _leaderboard = new Leaderboard();
         _leaderboard.LoadDataFromFile();
@@ -70,6 +79,11 @@ public class TwitchPlaysService : MonoBehaviour
         if (_ircConnection != null)
         {
             _ircConnection.Update();
+        }
+
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            InputInterceptor.EnableInput();
         }
     }
 
