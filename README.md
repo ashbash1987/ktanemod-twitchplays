@@ -23,7 +23,7 @@ These are features that are absolutely required in order to allow Twitch Plays t
 - [x] Add leaderboard/blame UI to post-game screen to add further interaction with Twitch Chat.
 ### Phase 2
 These are the next 'nice-to-have' features, once all of the phase 1 tasks are completed and tested to function well.
-- [ ] Add robust support for mod bomb casings and multiple bombs.
-- [ ] Control mod modules directly.
+- [x] Add robust support for mod bomb casings and multiple bombs.
+- [x] Control mod modules directly.
 - [ ] *'Democracy / Anarchy' and or other moderation control?*
 - [ ] *Command limiting? (depending on popularity of streams)*
