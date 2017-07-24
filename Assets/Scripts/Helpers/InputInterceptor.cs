@@ -16,6 +16,7 @@ public static class InputInterceptor
             try
             {
                 ((MonoBehaviour)inputSystem).gameObject.SetActive(true);
+                Cursor.visible = true;
             }
             catch (Exception ex)
             {
