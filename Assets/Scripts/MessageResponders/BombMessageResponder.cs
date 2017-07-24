@@ -31,7 +31,6 @@ public class BombMessageResponder : MessageResponder
         "Little Boy",
         "Fat Man",
         "Bombadillo",
-        "Bomba Din",
         "The Dud",
         "Molotov",
         "Sergeant Cluster",
