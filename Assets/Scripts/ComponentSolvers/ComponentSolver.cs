@@ -239,6 +239,12 @@ public abstract class ComponentSolver : ICommandResponder
 
     private bool OnPass(object _ignore)
     {
+        string componentType = ComponentHandle.componentType.ToString();
+        if ( (componentType.Length > 4) && (componentType.Substring(0, 5).Equals("Needy")) )
+        {
+            return false;
+        }
+
         if (_delegatedSolveUserNickName != null && _delegatedSolveResponseNotifier != null)
         {
             AwardSolve(_delegatedSolveUserNickName, _delegatedSolveResponseNotifier);
