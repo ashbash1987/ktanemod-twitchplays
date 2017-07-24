@@ -28,10 +28,36 @@ public class MiscellaneousMessageResponder : MessageResponder
             _ircConnection.SendMessage("Go to http://bombch.us/CeEz to get the command reference for TP:KTaNE. Type !69 help to see the commands for a particular module.");
             return;
         }
-        else if (text.Equals("!rank", StringComparison.InvariantCultureIgnoreCase))
+        else if (text.StartsWith("!rank", StringComparison.InvariantCultureIgnoreCase))
         {
             Leaderboard.LeaderboardEntry entry = null;
-            int rank = leaderboard.GetRank(userNickName, out entry);
+            int rank = 0;
+            if (text.Length > 6)
+            {
+                string[] parts = text.Split(' ');
+                int desiredRank;
+                if ( parts[1].Equals("solo", StringComparison.InvariantCultureIgnoreCase) && int.TryParse(parts[2], out desiredRank) )
+                {
+                    rank = leaderboard.GetSoloRank(desiredRank, out entry);
+                }
+                else if (int.TryParse(parts[1], out desiredRank))
+                {
+                    rank = leaderboard.GetRank(desiredRank, out entry);
+                }
+                else
+                {
+                    return;
+                }
+                if (entry == null)
+                {
+                    _ircConnection.SendMessage("Nobody here with that rank!");
+                    return;
+                }
+            }
+            if (entry == null)
+            {
+                rank = leaderboard.GetRank(userNickName, out entry);
+            }
             if (entry != null)
             {
                 string txtSolver = "";
@@ -42,7 +68,7 @@ public class MiscellaneousMessageResponder : MessageResponder
                     txtSolver = "solver ";
                     txtSolo = string.Format(", and #{0} solo with a best time of {1}:{2:00.0}", entry.SoloRank, (int)recordTimeSpan.TotalMinutes, recordTimeSpan.Seconds);
                 }
-                _ircConnection.SendMessage(string.Format("SeemsGood {0} is #{1} {4}with {2} solves and {3} strikes{5}", userNickName, rank, entry.SolveCount, entry.StrikeCount, txtSolver, txtSolo));
+                _ircConnection.SendMessage(string.Format("SeemsGood {0} is #{1} {4}with {2} solves and {3} strikes{5}", entry.UserName, entry.Rank, entry.SolveCount, entry.StrikeCount, txtSolver, txtSolo));
             }
             else
             {
