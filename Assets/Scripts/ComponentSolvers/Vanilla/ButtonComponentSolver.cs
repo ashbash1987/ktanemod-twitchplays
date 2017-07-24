@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
@@ -9,8 +9,8 @@ public class ButtonComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _button = (MonoBehaviour)_buttonField.GetValue(bombComponent);
-        
-        helpMessage = "Press and release with !{0} tap. Hold with !{0} hold. Release on digit 7 with !{0} release 7.";
+
+        helpMessage = "!{0} tap [tap the button] | !{0} hold [hold the button] | !{0} release 7 [release when the digit shows 7]";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

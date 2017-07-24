@@ -12,7 +12,7 @@ public class InvisibleWallsComponentSolver : ComponentSolver
     {
         _buttons = (IList)_buttonsField.GetValue(bombComponent);
 
-        helpMessage = "Move with !{0} move u d l r.";
+        helpMessage = "!{0} move up down left right, !{0} move udlr [make a series of white icon moves]";
         manualCode = "Mazes";
     }
 

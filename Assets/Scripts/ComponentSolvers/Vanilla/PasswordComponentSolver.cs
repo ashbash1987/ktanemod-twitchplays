@@ -12,7 +12,7 @@ public class PasswordComponentSolver : ComponentSolver
         _spinners = (IList)_spinnersField.GetValue(bombComponent);
         _submitButton = (MonoBehaviour)_submitButtonField.GetValue(bombComponent);
         
-        helpMessage = "Cycle through the letters in the 3rd column with !{0} cycle 3. Try a word with !{0} word.";
+        helpMessage = "!{0} cycle 3 [cycle through the letters in column 3] | !{0} world [try to submit a word]";
         manualCode = "Passwords";
     }
 

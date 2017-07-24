@@ -108,7 +108,7 @@ public class TwitchBombHandle : MonoBehaviour
         {
             icrn.ProcessResponse(CommandResponse.Start);
 
-            ircConnection.SendMessage("The Bomb: Pick up with !bomb hold. Turn with !bomb turn. Show the edges with !bomb edgework. Show a specific edge with !bomb top. Display the bomb start time with !bomb time. Edges are top, bottom, left and right.");
+            ircConnection.SendMessage("The Bomb: !bomb hold [pick up] | !bomb drop | !bomb turn [turn to the other side] | !bomb edgework [show the widgets on the sides] | !bomb top [show one side; sides are Top/Bottom/Left/Right | !bomb time [time remaining] | !bomb timestamp [bomb start time]");
 
             icrn.ProcessResponse(CommandResponse.EndNotComplete);
         }
