@@ -61,8 +61,6 @@ public class BombMessageResponder : MessageResponder
         TwitchPlaysService.logUploader.Clear();
 
         StartCoroutine(CheckForBomb());
-
-        moduleCameras = Instantiate<ModuleCameras>(moduleCamerasPrefab);
     }
 
     private void OnDisable()
@@ -138,6 +136,11 @@ public class BombMessageResponder : MessageResponder
         }
 
         parentService.StartCoroutine(SendDelayedMessage(1.0f, bombMessage, SendAnalysisLink));
+
+        if (moduleCameras != null)
+        {
+            moduleCameras.gameObject.SetActive(false);
+        }
 
         foreach (var handle in _bombHandles)
         {
@@ -220,6 +223,8 @@ public class BombMessageResponder : MessageResponder
                 _coroutineQueue.AddToQueue(_bombHandles[0].OnMessageReceived(_bombHandles[0].nameText.text, "red", "!bomb hold"), 0);
             }
         } while (bombs == null || bombs.Length == 0);
+
+        moduleCameras = Instantiate<ModuleCameras>(moduleCamerasPrefab);
     }
 
     private void SetBomb(MonoBehaviour bomb, int id)
@@ -344,6 +349,8 @@ public class BombMessageResponder : MessageResponder
             handle.transform.SetParent(bombComponent.transform.parent, true);
             handle.basePosition = handle.transform.localPosition;
             handle.idealHandlePositionOffset = bombComponent.transform.parent.InverseTransformDirection(idealOffset);
+
+            handle.bombCommander._bombSolvableModules++;
 
             _componentHandles.Add(handle);
         }

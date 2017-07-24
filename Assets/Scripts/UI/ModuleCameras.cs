@@ -12,11 +12,14 @@ public class ModuleCameras : MonoBehaviour
     {
         public MonoBehaviour component = null;
         public MonoBehaviour handle = null;
+        public int priority = CameraNotInUse;
+        public int index = 0;
 
-        public ModuleItem(MonoBehaviour c, MonoBehaviour h)
+        public ModuleItem(MonoBehaviour c, MonoBehaviour h, int p)
         {
             component = c;
             handle = h;
+            priority = p;
         }
     }
 
@@ -39,33 +42,36 @@ public class ModuleCameras : MonoBehaviour
         public void Refresh()
         {
             Deactivate();
-            while ( (parent.priorityModuleStack.Count > 0) && (module == null) )
+
+            while (module == null)
             {
-                module = parent.priorityModuleStack.Pop();
+                module = parent.NextInStack;
+                if (module == null)
+                {
+                    /*
+                    if (!TakeFromBackupCamera())
+                    {
+                        break;
+                    }*/
+                    break;
+                }
                 if (ModuleIsSolved)
                 {
                     module = null;
+                    continue;
+                }
+
+                if (module.index > 0)
+                {
+                    index = module.index;
                 }
                 else
                 {
-                    priority = CameraPrioritised;
+                    index = ++ModuleCameras.index;
+                    module.index = index;
                 }
-            }
-            while ( (parent.moduleStack.Count > 0) && (module == null) )
-            {
-                module = parent.moduleStack.Pop();
-                if (ModuleIsSolved)
-                {
-                    module = null;
-                }
-                else
-                {
-                    priority = CameraInUse;
-                }
-            }
-            if (module != null)
-            {
-                index = ++ModuleCameras.index;
+                priority = module.priority;
+
                 // We know the camera's culling mask is pointing at a single layer, so let's find out what that layer is
                 int newLayer = (int)Math.Log(cameraInstance.cullingMask, 2);
                 originalLayer = module.component.gameObject.layer;
@@ -115,13 +121,36 @@ public class ModuleCameras : MonoBehaviour
 
 
     #region Public Fields
+    public Text timerPrefab = null;
+    public Text strikesPrefab = null;
+    public Text strikeLimitPrefab = null;
+    public Text solvesPrefab = null;
+    public Text totalModulesPrefab = null;
+    public Text confidencePrefab = null;
     public Camera[] cameraPrefabs = null;
+    public int firstBackupCamera = 3;
     #endregion
 
     #region Private Fields
+    private Stack<ModuleItem>[] stacks = new Stack<ModuleItem>[3];
     private Stack<ModuleItem> moduleStack = new Stack<ModuleItem>();
     private Stack<ModuleItem> priorityModuleStack = new Stack<ModuleItem>();
+    private Stack<ModuleItem> pinnedModuleStack = new Stack<ModuleItem>();
     private List<ModuleCamera> cameras = new List<ModuleCamera>();
+    private BombCommander currentBomb = null;
+
+    private int currentSolves;
+    private int currentStrikes;
+    private int currentTotalModules;
+    private int currentTotalStrikes;
+    private float currentSuccess;
+    #endregion
+
+    #region Public Constants
+    public const int CameraNotInUse = 0;
+    public const int CameraInUse = 1;
+    public const int CameraPrioritised = 2;
+    public const int CameraPinned = 3;
     #endregion
 
     #region Public Statics
@@ -129,10 +158,7 @@ public class ModuleCameras : MonoBehaviour
     #endregion
 
     #region Private Static Readonlys
-    private static readonly int CameraNotInUse = 0;
-    private static readonly int CameraInUse = 1;
-    private static readonly int CameraPrioritised = 2;
-    private static readonly string LogPrefix = "[ModuleCameras] ";
+    private const string LogPrefix = "[ModuleCameras] ";
     #endregion
 
     #region Unity Lifecycle
@@ -148,21 +174,29 @@ public class ModuleCameras : MonoBehaviour
             Camera instantiatedCamera = Instantiate<Camera>(camera);
             cameras.Add( new ModuleCamera(instantiatedCamera, this) );
         }
+        stacks[0] = pinnedModuleStack;
+        stacks[1] = priorityModuleStack;
+        stacks[2] = moduleStack;
     }
 
     private void LateUpdate()
     {
-        
+        if (currentBomb != null)
+        {
+            timerPrefab.text = DisplayTime;
+            UpdateConfidence();
+        }
     }
     #endregion
 
     #region Public Methods
-    public void AttachToModule(MonoBehaviour component, MonoBehaviour handle, bool priority = false)
+    public void AttachToModule(MonoBehaviour component, MonoBehaviour handle, int priority = CameraInUse)
     {
         int existingCamera = CurrentModulesContains(component);
         if (existingCamera > -1)
         {
             cameras[existingCamera].index = ++index;
+            cameras[existingCamera].module.index = cameras[existingCamera].index;
             return;
         }
         ModuleCamera camera = AvailableCamera(priority);
@@ -171,8 +205,8 @@ public class ModuleCameras : MonoBehaviour
             // If the camera is in use, return its module to the appropriate stack
             if ((camera.priority > CameraNotInUse) && (camera.module.component != null))
             {
-                bool oldPriority = (camera.priority == CameraPrioritised);
-                AddModuleToStack(camera.module.component, camera.module.handle, oldPriority);
+                camera.module.index = camera.index;
+                AddModuleToStack(camera.module.component, camera.module.handle, camera.priority);
                 camera.priority = CameraNotInUse;
             }
 
@@ -202,17 +236,144 @@ public class ModuleCameras : MonoBehaviour
     {
         SetCameraVisibility(true);
     }
+
+    public void UpdateStrikes(bool delay = false)
+    {
+        StartCoroutine(UpdateStrikesCoroutine(delay));
+    }
+
+    public void UpdateStrikeLimit()
+    {
+        if (currentBomb != null)
+        {
+            currentTotalStrikes = (int)CommonReflectedTypeInfo.NumStrikesToLoseField.GetValue(currentBomb.Bomb);
+            string totalStrikesText = currentTotalStrikes.ToString();
+            Debug.Log(LogPrefix + "Updating strike limit to " + totalStrikesText);
+            strikeLimitPrefab.text = "/" + totalStrikesText;
+        }
+    }
+
+    public void UpdateSolves()
+    {
+        if (currentBomb != null)
+        {
+            currentSolves = currentBomb._bombSolvedModules;
+            string solves = currentSolves.ToString().PadLeft(currentBomb._bombSolvableModules.ToString().Length, Char.Parse("0"));
+            Debug.Log(LogPrefix + "Updating solves to " + solves);
+            solvesPrefab.text = solves;
+        }
+    }
+
+    public void UpdateTotalModules()
+    {
+        if (currentBomb != null)
+        {
+            currentTotalModules = currentBomb._bombSolvableModules;
+            string total = currentTotalModules.ToString();
+            Debug.Log(LogPrefix + "Updating total modules to " + total);
+            totalModulesPrefab.text = "/" + total;
+        }
+    }
+
+    public void UpdateConfidence()
+    {
+        int previousSuccess = (int)(currentSuccess * 100);
+        currentSuccess = PlayerSuccessRating;
+
+        if (previousSuccess != (int)(currentSuccess * 100))
+        {
+            float minHue = 0.0f; // red (0deg)
+            float maxHue = (float)1 / 3; // green (120deg)
+            float minBeforeValueDown = 0.25f;
+            float maxBeforeSaturationDown = 0.75f;
+            float minValue = 0.25f;
+            float minSaturation = 0.0f;
+            float lowSuccessDesaturationSpeed = 3.0f;
+
+            float hueSuccessRange = maxBeforeSaturationDown - minBeforeValueDown;
+            float hueRange = maxHue - minHue;
+            float valueRange = 1.0f - minValue;
+            float saturationRange = 1.0f - minSaturation;
+
+            float hue, pointOnScale;
+            float saturation = 1.0f;
+            float value = 1.0f;
+
+            if (currentSuccess < minBeforeValueDown)
+            {
+                // At very low ratings, move from red to dark grey
+                hue = minHue;
+                pointOnScale = (currentSuccess - (minBeforeValueDown / lowSuccessDesaturationSpeed)) * lowSuccessDesaturationSpeed;
+                pointOnScale = Math.Max(pointOnScale, 0.0f) / minBeforeValueDown;
+                saturation = minSaturation + (saturationRange * pointOnScale);
+                pointOnScale = currentSuccess / maxBeforeSaturationDown;
+                value = minValue + (valueRange * pointOnScale);
+            }
+            else if (currentSuccess > maxBeforeSaturationDown)
+            {
+                // At very high ratings, move from green to white
+                hue = maxHue;
+                pointOnScale = ((1.0f - currentSuccess) / (1.0f - maxBeforeSaturationDown));
+                saturation = minSaturation + (saturationRange * pointOnScale);
+            }
+            else
+            {
+                // At moderate ratings, move between red and green
+                pointOnScale = ((currentSuccess - minBeforeValueDown) / hueSuccessRange);
+                hue = minHue + (hueRange * pointOnScale);
+            }
+
+            confidencePrefab.color = Color.HSVToRGB(hue, saturation, value);
+        }
+
+        string conf = string.Format("{0:00}%", currentSuccess * 100);
+        confidencePrefab.text = conf;
+    }
+
+    public void ChangeBomb(BombCommander bomb)
+    {
+        Debug.Log(LogPrefix + "Switching bomb");
+        currentBomb = bomb;
+        UpdateStrikes();
+        UpdateStrikeLimit();
+        UpdateSolves();
+        UpdateTotalModules();
+        UpdateConfidence();
+    }
     #endregion
 
     #region Private Methods
-    private void AddModuleToStack(MonoBehaviour component, MonoBehaviour handle, bool priority)
+    private IEnumerator UpdateStrikesCoroutine(bool delay)
     {
-        ModuleItem item = new ModuleItem(component, handle);
-        if (priority)
+        if (delay)
+        {
+            // Delay for a single frame if this has been called from an OnStrike method
+            // Necessary since the bomb doesn't update its internal counter until all its OnStrike handlers are finished
+            yield return 0;
+        }
+        if (currentBomb != null)
+        {
+            currentStrikes = (int)CommonReflectedTypeInfo.NumStrikesField.GetValue(currentBomb.Bomb);
+            currentTotalStrikes = (int)CommonReflectedTypeInfo.NumStrikesToLoseField.GetValue(currentBomb.Bomb);
+            string strikesText = currentStrikes.ToString().PadLeft(currentTotalStrikes.ToString().Length, Char.Parse("0"));
+            Debug.Log(LogPrefix + "Updating strikes to " + strikesText);
+            strikesPrefab.text = strikesText;
+        }
+        yield break;
+    }
+
+    private void AddModuleToStack(MonoBehaviour component, MonoBehaviour handle, int priority = CameraInUse)
+    {
+        ModuleItem item = new ModuleItem(component, handle, priority);
+        if (priority >= CameraPinned)
+        {
+            pinnedModuleStack.Push(item);
+        }
+        else if (priority >= CameraPrioritised)
         {
             priorityModuleStack.Push(item);
         }
-        else if (!moduleStack.Any(m => object.ReferenceEquals(component, m.component)))
+        else
         {
             moduleStack.Push(item);
         }
@@ -222,23 +383,30 @@ public class ModuleCameras : MonoBehaviour
     {
         foreach (ModuleCamera camera in cameras)
         {
-            if ( (camera.module != null) && 
-                (object.ReferenceEquals(camera.module.component, component)) )
+            if ((camera.module != null) &&
+                (object.ReferenceEquals(camera.module.component, component)))
             {
                 if (delay)
                 {
-                    yield return new WaitForSeconds(1.5f);
+                    yield return new WaitForSeconds(1.0f);
                 }
-                camera.Refresh();
+                // This second check is necessary, in case another module has moved in during the delay
+                // As long as the delay ends before the current move does, this won't be an issue for most modules
+                // But some modules with delayed solves would fall foul of it
+                if ((camera.module != null) &&
+                    (object.ReferenceEquals(camera.module.component, component)))
+                {
+                    camera.Refresh();
+                }
             }
         }
         yield break;
     }
 
-    private ModuleCamera AvailableCamera(bool priority = false)
+    private ModuleCamera AvailableCamera(int priority = CameraInUse)
     {
         ModuleCamera bestCamera = null;
-        int minPriority = CameraPrioritised + 1;
+        int minPriority = CameraPinned + 1;
         int minIndex = int.MaxValue;
 
         foreach (ModuleCamera cam in cameras)
@@ -261,7 +429,12 @@ public class ModuleCameras : MonoBehaviour
         // If no unused camera...
         // return the "best" camera (topmost camera of lowest priority)
         // but not if it's already prioritised and we're not demanding priority
-        return ((minPriority < CameraPrioritised) || (priority)) ? bestCamera : null;
+        return (minPriority <= priority) ? bestCamera : null;
+    }
+
+    private IEnumerable<ModuleCamera> AvailableCameras(int priority = CameraInUse)
+    {
+        return cameras.Where(c => c.priority <= priority);
     }
 
     private int CurrentModulesContains(MonoBehaviour component)
@@ -291,7 +464,97 @@ public class ModuleCameras : MonoBehaviour
     }
     #endregion
 
-    #region Private Properties
+    #region Properties
+    private ModuleItem NextInStack
+    {
+        get
+        {
+            foreach (Stack<ModuleItem> stack in stacks)
+            {
+                while (stack.Count > 0)
+                {
+                    ModuleItem module = stack.Pop();
+                    int existing = CurrentModulesContains(module.component);
+                    if (existing > -1)
+                    {
+                        cameras[existing].index = ++index;
+                    }
+                    else
+                    {
+                        return module;
+                    }
+                }
+            }
+           
+            /*
+            while (priorityModuleStack.Count > 0)
+            {
+                ModuleItem module = priorityModuleStack.Pop();
+                int existing = CurrentModulesContains(module.component);
+                if (existing > -1)
+                {
+                    cameras[existing].index = ++index;
+                }
+                else
+                {
+                    return module;
+                }
+            }
+            while (moduleStack.Count > 0)
+            {
+                ModuleItem module = moduleStack.Pop();
+                int existing = CurrentModulesContains(module.component);
+                if (existing > -1)
+                {
+                    cameras[existing].index = ++index;
+                }
+                else
+                {
+                    return module;
+                }
+            }
+            */
+            
+            return null;
+        }
+    }
 
+    private string DisplayTime
+    {
+        get
+        {
+            string output = currentBomb.GetFullFormattedTime;
+            if (output.Length < 7)
+            {
+                output = "0:" + output;
+            }
+            return output;
+        }
+    }
+
+    public float PlayerSuccessRating
+    {
+        get
+        {
+            float solvesMax = 0.5f;
+            float strikesMax = 0.3f;
+            float timeMax = 0.2f;
+
+            float timeRemaining = currentBomb.CurrentTimer;
+            float totalTime = currentBomb._bombStartingTimer;
+
+            int strikesAvailable = (currentTotalStrikes - 1) - currentStrikes; // Strikes without exploding
+
+            float solvesCounter = (float)currentSolves / (currentTotalModules - 1);
+            float strikesCounter = (float)strikesAvailable / (currentTotalStrikes - 1);
+            float timeCounter = timeRemaining / totalTime;
+
+            float solvesScore = solvesCounter * solvesMax;
+            float strikesScore = strikesCounter * strikesMax;
+            float timeScore = timeCounter * timeMax;
+
+            return solvesScore + strikesScore + timeScore;
+        }
+    }
     #endregion
 }

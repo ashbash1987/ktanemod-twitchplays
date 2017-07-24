@@ -31,6 +31,8 @@ public static class CommonReflectedTypeInfo
         BombComponentsField = BombType.GetField("BombComponents", BindingFlags.Public | BindingFlags.Instance);
         HasDetonatedProperty = BombType.GetProperty("HasDetonated", BindingFlags.Public | BindingFlags.Instance);
         GetTimerMethod = BombType.GetMethod("GetTimer", BindingFlags.Public | BindingFlags.Instance);
+        NumStrikesField = BombType.GetField("NumStrikes", BindingFlags.Public | BindingFlags.Instance);
+        NumStrikesToLoseField = BombType.GetField("NumStrikesToLose", BindingFlags.Public | BindingFlags.Instance);
 
         BombComponentType = ReflectionHelper.FindType("BombComponent");
         ComponentTypeField = BombComponentType.GetField("ComponentType", BindingFlags.Public | BindingFlags.Instance);
@@ -73,6 +75,18 @@ public static class CommonReflectedTypeInfo
     } 
 
     public static MethodInfo GetTimerMethod
+    {
+        get;
+        private set;
+    }
+
+    public static FieldInfo NumStrikesField
+    {
+        get;
+        private set;
+    }
+
+    public static FieldInfo NumStrikesToLoseField
     {
         get;
         private set;

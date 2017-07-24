@@ -126,9 +126,10 @@ public class BombCommander : ICommandResponder
         {
             BombMessageResponder.moduleCameras.DetachFromModule(_timerComponent);
         }
-        else if (message.Equals("view", StringComparison.InvariantCultureIgnoreCase))
+        else if (message.StartsWith("view", StringComparison.InvariantCultureIgnoreCase))
         {
-            BombMessageResponder.moduleCameras.AttachToModule(_timerComponent, null, true);
+            int priority = (message.Equals("view pin", StringComparison.InvariantCultureIgnoreCase)) ? ModuleCameras.CameraPinned : ModuleCameras.CameraPrioritised;
+            BombMessageResponder.moduleCameras.AttachToModule(_timerComponent, null, priority);
         }
         else
         {
@@ -147,6 +148,7 @@ public class BombCommander : ICommandResponder
         {
             SelectObject(Selectable);
             doForceRotate = true;
+            BombMessageResponder.moduleCameras.ChangeBomb(this);
         }
         else if (frontFace != _heldFrontFace)
         {
