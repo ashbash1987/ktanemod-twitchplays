@@ -222,6 +222,18 @@ public class ModuleCameras : MonoBehaviour
         }
     }
 
+    public void AttachToModules(List<TwitchComponentHandle> handles, int priority = CameraInUse)
+    {
+        foreach (TwitchComponentHandle handle in Enumerable.Reverse(handles))
+        {
+            AddModuleToStack(handle.bombComponent, handle, priority);
+        }
+        foreach (ModuleCamera camera in AvailableCameras(priority - 1))
+        {
+            camera.Refresh();
+        }
+    }
+
     public void DetachFromModule(MonoBehaviour component, bool delay = false)
     {
         StartCoroutine(DetachFromModuleCoroutine(component, delay));

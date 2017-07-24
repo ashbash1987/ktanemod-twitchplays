@@ -251,6 +251,12 @@ public class BombMessageResponder : MessageResponder
             return;
         }
 
+        if (text.Equals("!modules", StringComparison.InvariantCultureIgnoreCase))
+        {
+            moduleCameras.AttachToModules(_componentHandles);
+            return;
+        }
+
         if (_currentBomb > -1)
         {
             //Check for !bomb messages, and pass them off to the currently held bomb.
