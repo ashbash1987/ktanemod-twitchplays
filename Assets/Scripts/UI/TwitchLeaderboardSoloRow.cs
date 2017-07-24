@@ -40,8 +40,8 @@ public class TwitchLeaderboardSoloRow : MonoBehaviour
             userNameText.text = leaderboardEntry.UserName;
             userNameText.color = leaderboardEntry.UserColor;
             totalClearsText.text = leaderboardEntry.TotalSoloClears.ToString();
-            recordTimeText.text = string.Format("{0}:{1:00}", (int)recordTimeSpan.TotalMinutes, recordTimeSpan.Seconds);
-            avgSolveTimeText.text = string.Format("{0}:{1:00.0}", (int)averageTimeSpan.TotalMinutes, averageTimeSpan.Seconds);
+            recordTimeText.text = string.Format("{0}:{1:00}", (int)recordTimeSpan.TotalMinutes, recordTimeSpan.TotalSeconds % 60);
+            avgSolveTimeText.text = string.Format("{0}:{1:00.0}", (int)averageTimeSpan.TotalMinutes, averageTimeSpan.TotalSeconds % 60);
         }
 
         yield return new WaitForSeconds(delay);
