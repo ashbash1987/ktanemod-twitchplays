@@ -169,25 +169,35 @@ public class TwitchComponentHandle : MonoBehaviour
         string messageOut = null;
         if (internalCommand.Equals("help", StringComparison.InvariantCultureIgnoreCase)) {
             if (_solver.helpMessage == null) {
-                messageOut = "No help message for {1}! Try here: http://bombch.us/CdqJ";
+                bool moddedModule = ( (componentType == ComponentTypeEnum.Mod) || (componentType == ComponentTypeEnum.NeedyMod) );
+                messageOut = "No help message for {1}! Try here: " + TwitchPlaysService.urlHelper.Reference(moddedModule);
             }
             else {
                 messageOut = string.Format("{0}: {1}", headerText.text, _solver.helpMessage);
             }
         }
-        else if (internalCommand.Equals("manual", StringComparison.InvariantCultureIgnoreCase)) {
+        else if (internalCommand.StartsWith("manual", StringComparison.InvariantCultureIgnoreCase)) {
             string manualText = null;
+            string manualType = "html";
+            if ( (internalCommand.Length > 7) && (internalCommand.Substring(7) == "pdf") )
+            {
+                manualType = "pdf";
+            }
             if (_solver.manualCode == null) {
                 manualText = headerText.text;
             }
             else {
-              manualText = _solver.manualCode;
+                manualText = _solver.manualCode;
             }
             if (manualText.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase) ||
                 manualText.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
+            {
                 messageOut = manualText;
+            }
             else
-                messageOut = string.Format("{0}: https://ktane.timwi.de/HTML/{1}.html", headerText.text, SafeManualCode);
+            {
+                messageOut = string.Format("{0}: {1}", headerText.text, TwitchPlaysService.urlHelper.ManualFor(manualText, manualType));
+            }
         }
         else if (Regex.IsMatch(internalCommand, "^(bomb|queue) (turn( a?round)?|flip|spin)$", RegexOptions.IgnoreCase))
         {
@@ -304,16 +314,6 @@ public class TwitchComponentHandle : MonoBehaviour
                 default:
                     return null;
             }
-        }
-    }
-
-    private string SafeManualCode
-    {
-        get
-        {
-            string manualText = (_solver.manualCode == null) ? manualText = headerText.text : _solver.manualCode;
-
-            return Regex.Replace(manualText, @"[^\w%]", m => "%" + ((int)m.Value[0]).ToString("X2"));
         }
     }
     #endregion
