@@ -31,18 +31,17 @@ public class MiscellaneousMessageResponder : MessageResponder
         else if (text.StartsWith("!rank", StringComparison.InvariantCultureIgnoreCase))
         {
             Leaderboard.LeaderboardEntry entry = null;
-            int rank = 0;
             if (text.Length > 6)
             {
                 string[] parts = text.Split(' ');
                 int desiredRank;
                 if ( parts[1].Equals("solo", StringComparison.InvariantCultureIgnoreCase) && int.TryParse(parts[2], out desiredRank) )
                 {
-                    rank = leaderboard.GetSoloRank(desiredRank, out entry);
+                    leaderboard.GetSoloRank(desiredRank, out entry);
                 }
                 else if (int.TryParse(parts[1], out desiredRank))
                 {
-                    rank = leaderboard.GetRank(desiredRank, out entry);
+                    leaderboard.GetRank(desiredRank, out entry);
                 }
                 else
                 {
@@ -56,7 +55,7 @@ public class MiscellaneousMessageResponder : MessageResponder
             }
             if (entry == null)
             {
-                rank = leaderboard.GetRank(userNickName, out entry);
+                leaderboard.GetRank(userNickName, out entry);
             }
             if (entry != null)
             {
