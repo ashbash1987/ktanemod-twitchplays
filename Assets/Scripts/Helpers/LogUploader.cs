@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
 
 public class LogUploader : MonoBehaviour
@@ -19,10 +20,24 @@ public class LogUploader : MonoBehaviour
 
     private string output;
 
+    private OrderedDictionary domainNames = new OrderedDictionary
+    {
+        // In order of preference (favourite first)
+        // The integer value is the data size limit in bytes
+        { "hastebin.com", 400000 },
+        { "ktane.w00ty.com", 2000000 }
+    };
+
+
     public void OnEnable()
     {
         LOGPREFIX = "[" + GetType().Name + "] ";
         Application.logMessageReceived += HandleLog;
+    }
+
+    public void OnDisable()
+    {
+        Application.logMessageReceived -= HandleLog;
     }
 
     public void Clear()
@@ -41,43 +56,70 @@ public class LogUploader : MonoBehaviour
     {
         analysisUrl = null;
         postOnComplete = false;
-        StartCoroutine( DoPost("https://hastebin.com/documents", log, postToChat) );
+        StartCoroutine( DoPost(log, postToChat) );
     }
 
-    private IEnumerator DoPost(string url, string data, bool postToChat)
+    private IEnumerator DoPost(string data, bool postToChat)
     {
         // This first line is necessary as the Log Analyser uses it as an identifier
         data = "Initialize engine version: Twitch Plays\n" + data;
 
-        Debug.Log(LOGPREFIX + "Posting new log to Hastebin");
+        byte[] encodedData = System.Text.Encoding.UTF8.GetBytes(data);
+        int dataLength = encodedData.Length;
 
-        WWW www = new WWW(url, System.Text.Encoding.UTF8.GetBytes(data));
+        bool tooLong = false;
 
-        yield return www;
-
-        if (www.error == null)
+        foreach (DictionaryEntry domain in domainNames)
         {
-            // example result
-            // {"key":"oxekofidik"}
+            string domainName = (string)domain.Key;
+            int maxLength = (int)domain.Value;
 
-            string key = www.text;
-            key = key.Substring(0, key.Length - 2);
-            key = key.Substring(key.LastIndexOf("\"") + 1);
-            string rawUrl = "https://hastebin.com/raw/" + key;
-
-            Debug.Log(LOGPREFIX + "Paste now available at " + rawUrl);
-
-            // original url: https://ktane.timwi.de/More/Logfile%20Analyzer.html
-            analysisUrl = "http://bombch.us/Chw_#url=" + rawUrl;
-
-            if (postOnComplete)
+            tooLong = false;
+            if (dataLength >= maxLength)
             {
-                PostToChat();
+                Debug.LogFormat(LOGPREFIX + "Data ({0}B) is too long for {1} ({2}B)", dataLength, domainName, maxLength);
+                tooLong = true;
+                continue;
+            }
+
+            Debug.Log(LOGPREFIX + "Posting new log to " + domainName);
+
+            string url = "https://" + domainName + "/documents";
+
+            WWW www = new WWW(url, encodedData);
+
+            yield return www;
+
+            if (www.error == null)
+            {
+                // example result
+                // {"key":"oxekofidik"}
+
+                string key = www.text;
+                key = key.Substring(0, key.Length - 2);
+                key = key.Substring(key.LastIndexOf("\"") + 1);
+                string rawUrl = "https://" + domainName + "/raw/" + key;
+
+                Debug.Log(LOGPREFIX + "Paste now available at " + rawUrl);
+
+                analysisUrl = TwitchPlaysService.urlHelper.LogAnalyserFor(rawUrl);
+
+                if (postOnComplete)
+                {
+                    PostToChat();
+                }
+
+                break;
+            }
+            else
+            {
+                Debug.Log(LOGPREFIX + "Error: " + www.error);
             }
         }
-        else
+
+        if (tooLong)
         {
-            Debug.Log(LOGPREFIX + "Error: " + www.error);
+            ircConnection.SendMessage("BibleThump The bomb log is too big to upload to any of the supported services, sorry!");
         }
 
         yield break;
@@ -85,7 +127,7 @@ public class LogUploader : MonoBehaviour
 
     public bool PostToChat(string format = "Analysis for this bomb: {0}", string emote = "copyThis")
     {
-        if (analysisUrl == null)
+        if (string.IsNullOrEmpty(analysisUrl))
         {
             Debug.Log(LOGPREFIX + "No analysis URL available, can't post to chat");
             return false;
