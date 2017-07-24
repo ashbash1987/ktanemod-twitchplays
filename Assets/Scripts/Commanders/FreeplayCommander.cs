@@ -231,7 +231,7 @@ public class FreeplayCommander : ICommandResponder
                         changeModulesTo = modulesMatch.Value;
                     }
 
-                    Debug.Log(string.Format("Setting {1} to {0}", modulesMatch.Value,
+                    Debug.Log(string.Format("[FreeplayCommander] Setting {1} to {0}", modulesMatch.Value,
                         count <= 2 ? "bombs" : "modules"));
                 }
                 message = message.Remove(modulesMatch.Index, modulesMatch.Length);

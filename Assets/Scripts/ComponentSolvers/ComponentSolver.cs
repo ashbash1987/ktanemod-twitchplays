@@ -260,7 +260,7 @@ public abstract class ComponentSolver : ICommandResponder
         
         if (_turnQueued)
         {
-            Debug.LogFormat("ComponentSolver: Activating queued turn for completed module {0}.", Code);
+            Debug.LogFormat("[ComponentSolver] Activating queued turn for completed module {0}.", Code);
             _readyToTurn = true;
             _turnQueued = false;
         }
