@@ -38,6 +38,8 @@ public class TwitchComponentHandle : MonoBehaviour
     public Image leftArrowHighlight = null;
     public Image rightArrowHighlight = null;
 
+    public Color claimedBackgroundColour = new Color(255, 0, 0);
+
     [HideInInspector]
     public IRCConnection ircConnection = null;
 
@@ -75,6 +77,8 @@ public class TwitchComponentHandle : MonoBehaviour
     #region Private Fields
     private string _code = null;
     private ComponentSolver _solver = null;
+    private Color unclaimedBackgroundColor = new Color(0, 0, 0);
+    private string playerName = null;
     #endregion
 
     #region Private Statics
@@ -105,6 +109,8 @@ public class TwitchComponentHandle : MonoBehaviour
         highlightGroup.alpha = 0.0f;
 
         canvasGroupMultiDecker.alpha = bombCommander._multiDecker ? 1.0f : 0.0f;
+
+        unclaimedBackgroundColor = idBannerPrefab.GetComponent<Image>().color;
 
         Arrow.gameObject.SetActive(true);
         HighlightArrow.gameObject.SetActive(true);
@@ -213,6 +219,31 @@ public class TwitchComponentHandle : MonoBehaviour
             _solver._turnQueued = false;
             messageOut = string.Format("Bomb turn on Module {0} solve cancelled", targetModule);
         }
+        else if (internalCommand.Equals("claim", StringComparison.InvariantCultureIgnoreCase))
+        {
+            if (playerName == null)
+            {
+                SetBannerColor(claimedBackgroundColour);
+                playerName = userNickName;
+                ircConnection.SendMessage(string.Format("Module {0} claimed by {1}", targetModule, playerName));
+            }
+        }
+        else if (internalCommand.Equals("unclaim", StringComparison.InvariantCultureIgnoreCase))
+        {
+            if ((playerName != null) && (playerName == userNickName))
+            {
+                SetBannerColor(unclaimedBackgroundColor);
+                playerName = null;
+                messageOut = string.Format("Module {0} released by {1}", targetModule, userNickName);
+            }
+        }
+        else if (internalCommand.Equals("player", StringComparison.InvariantCultureIgnoreCase))
+        {
+            if (playerName != null)
+            {
+                messageOut = string.Format("Module {0} was claimed by {1}", targetModule, playerName);
+            }
+        }
         if (!string.IsNullOrEmpty(messageOut))
         {
             ircConnection.SendMessage(string.Format(messageOut, _code, headerText.text));
@@ -271,6 +302,12 @@ public class TwitchComponentHandle : MonoBehaviour
             yield return null;
         }
         highlightGroup.alpha = 0.0f;
+    }
+
+    private void SetBannerColor(Color color)
+    {
+        idBannerPrefab.GetComponent<Image>().color = color;
+        canvasGroupMultiDecker.GetComponent<Image>().color = color;
     }
     #endregion
 
