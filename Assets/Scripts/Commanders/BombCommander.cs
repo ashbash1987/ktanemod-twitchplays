@@ -81,6 +81,7 @@ public class BombCommander : ICommandResponder
         else if (message.Equals("turn", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("turn round", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("turn around", StringComparison.InvariantCultureIgnoreCase) ||
+                 message.Equals("rotate", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("flip", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("spin", StringComparison.InvariantCultureIgnoreCase))
         {
