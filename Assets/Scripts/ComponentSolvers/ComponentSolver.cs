@@ -472,6 +472,8 @@ public abstract class ComponentSolver : ICommandResponder
     
     public string helpMessage = null;
     public string manualCode = null;
+    public bool statusLightLeft = false;
+    public bool statusLightBottom = false;
     public bool delayInvokation = false;
     public int cameraPriority = ModuleCameras.CameraInUse;
 

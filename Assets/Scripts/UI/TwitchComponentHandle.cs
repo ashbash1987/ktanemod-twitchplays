@@ -122,6 +122,16 @@ public class TwitchComponentHandle : MonoBehaviour
             {
                 _solver.Code = _code;
                 _solver.ComponentHandle = this;
+                if (_solver.statusLightLeft)
+                    canvasGroupMultiDecker.transform.localPosition =
+                        new Vector3(-canvasGroupMultiDecker.transform.localPosition.x,
+                            canvasGroupMultiDecker.transform.localPosition.y,
+                            canvasGroupMultiDecker.transform.localPosition.z);
+                if (_solver.statusLightBottom)
+                    canvasGroupMultiDecker.transform.localPosition =
+                        new Vector3(canvasGroupMultiDecker.transform.localPosition.x,
+                            canvasGroupMultiDecker.transform.localPosition.y,
+                            -canvasGroupMultiDecker.transform.localPosition.z);
             }
         }
         catch (NotSupportedException e)
