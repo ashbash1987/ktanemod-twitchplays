@@ -13,6 +13,7 @@ public static class ComponentSolverFactory
     private static readonly Dictionary<string, bool> ModComponentSolverDelayInvoke;
     private static readonly Dictionary<string, bool> ModComponentSolverStatusLightLeft;
     private static readonly Dictionary<string, bool> ModComponentSolverStatusLightBottom;
+    private static readonly Dictionary<string, float> ModComponentSolverChatRotation;
 
     private enum ModCommandType
     {
@@ -28,6 +29,7 @@ public static class ComponentSolverFactory
         ModComponentSolverDelayInvoke = new Dictionary<string, bool>();
         ModComponentSolverStatusLightLeft = new Dictionary<string, bool>();
         ModComponentSolverStatusLightBottom = new Dictionary<string, bool>();
+        ModComponentSolverChatRotation = new Dictionary<string, float>();
 
         //AT_Bash Modules
         ModComponentSolverCreators["MotionSense"] = (bombCommander, bombComponent, ircConnection, canceller) => new MotionSenseComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
@@ -162,6 +164,10 @@ public static class ComponentSolverFactory
         //of the ID location.
         /*ModComponentSolverStatusLightLeft["ThirdBase"] = true;
         ModComponentSolverStatusLightBottom["ThirdBase"] = true;*/
+
+        //Chat Rotation
+        //Most modules behave correctly, and have NOT rotated the StatusLightParent needlessly.  There are a few that have done exactly that.
+
     }
 
     public static ComponentSolver CreateSolver(BombCommander bombCommander, MonoBehaviour bombComponent, ComponentTypeEnum componentType, IRCConnection ircConnection, CoroutineCanceller canceller)
