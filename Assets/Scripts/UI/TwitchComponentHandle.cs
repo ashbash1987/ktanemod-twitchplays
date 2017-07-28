@@ -122,16 +122,12 @@ public class TwitchComponentHandle : MonoBehaviour
             {
                 _solver.Code = _code;
                 _solver.ComponentHandle = this;
-                if (_solver.statusLightLeft)
-                    canvasGroupMultiDecker.transform.localPosition =
-                        new Vector3(-canvasGroupMultiDecker.transform.localPosition.x,
-                            canvasGroupMultiDecker.transform.localPosition.y,
-                            canvasGroupMultiDecker.transform.localPosition.z);
-                if (_solver.statusLightBottom)
-                    canvasGroupMultiDecker.transform.localPosition =
-                        new Vector3(canvasGroupMultiDecker.transform.localPosition.x,
-                            canvasGroupMultiDecker.transform.localPosition.y,
-                            -canvasGroupMultiDecker.transform.localPosition.z);
+                Vector3 pos = canvasGroupMultiDecker.transform.localPosition;
+                Vector3 angle = canvasGroupMultiDecker.transform.eulerAngles;
+                canvasGroupMultiDecker.transform.localPosition = new Vector3(_solver.statusLightLeft ? -pos.x : pos.x, pos.y, _solver.statusLightBottom ? -pos.z : pos.z);
+                canvasGroupMultiDecker.transform.localEulerAngles = new Vector3(angle.x, _solver.IDRotation, angle.z);
+                angle = canvasGroupMultiDecker.transform.localEulerAngles;
+                canvasGroup.transform.localEulerAngles = new Vector3(angle.x, _solver.IDRotation, angle.z);
             }
         }
         catch (NotSupportedException e)

@@ -158,9 +158,10 @@ public static class ComponentSolverFactory
         //Status Light Locations.
         //For most modules, the Status light is in the Top Right corner.  However, there is the odd module where the status
         //light might be in the Top left, Bottom right, or Bottom left corner.  In these cases, the ID number for multi-decker
-        //should be moved accordingly.
-        ModComponentSolverStatusLightLeft["ThirdBase"] = true;
-        ModComponentSolverStatusLightBottom["ThirdBase"] = true;
+        //should be moved accordingly.  //Use this only in cases where the location detection code results in incorrect placement
+        //of the ID location.
+        /*ModComponentSolverStatusLightLeft["ThirdBase"] = true;
+        ModComponentSolverStatusLightBottom["ThirdBase"] = true;*/
     }
 
     public static ComponentSolver CreateSolver(BombCommander bombCommander, MonoBehaviour bombComponent, ComponentTypeEnum componentType, IRCConnection ircConnection, CoroutineCanceller canceller)
@@ -250,8 +251,10 @@ public static class ComponentSolverFactory
         string help = FindHelpMessage(bombComponent);
         string manual = FindManualCode(bombComponent);
         bool delayInvoke = false;
-        bool statusLeft = false;
         bool statusBottom = false;
+        float rotation = 0;
+        bool statusLeft = FindStatusLightPosition(bombComponent, out statusBottom, out rotation);
+        
 
         if (help == null && ModComponentSolverHelpMessages.ContainsKey(moduleType))
             help = ModComponentSolverHelpMessages[moduleType];
@@ -259,10 +262,10 @@ public static class ComponentSolverFactory
         if (manual == null && ModComponentSolverManualCodes.ContainsKey(moduleType))
             manual = ModComponentSolverManualCodes[moduleType];
 
-        if (!statusLeft && ModComponentSolverStatusLightLeft.ContainsKey(moduleType))
+        if (ModComponentSolverStatusLightLeft.ContainsKey(moduleType))
             statusLeft = ModComponentSolverStatusLightLeft[moduleType];
 
-        if (!statusBottom && ModComponentSolverStatusLightBottom.ContainsKey(moduleType))
+        if (ModComponentSolverStatusLightBottom.ContainsKey(moduleType))
             statusBottom = ModComponentSolverStatusLightBottom[moduleType];
 
         if (ModComponentSolverDelayInvoke.ContainsKey(moduleType))
@@ -276,7 +279,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke, statusLeft, statusBottom);
+                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke, statusLeft, statusBottom, rotation);
                     };
                 case ModCommandType.Coroutine:
                     FieldInfo cancelfield;
@@ -285,7 +288,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke, cancelfield, canceltype, statusLeft, statusBottom);
+                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke, cancelfield, canceltype, statusLeft, statusBottom, rotation);
                     };
 
                 default:
@@ -296,12 +299,35 @@ public static class ComponentSolverFactory
         return null;
     }
 
+    private static bool FindStatusLightPosition(MonoBehaviour bombComponent, out bool StatusLightBottom, out float Rotation)
+    {
+        Debug.Log("[TwitchPlays] Attempting to find the modules StatusLightParent");
+        Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
+        foreach (Component component in allComponents)
+        {
+            Type type = component.GetType();
+            if(type == ReflectionHelper.FindType("StatusLightParent"))
+            {
+                Debug.LogFormat("Local Position - X = {0}, Y = {1}, Z = {2}", component.transform.localPosition.x, component.transform.localPosition.y, component.transform.localPosition.z);
+                Debug.LogFormat("Local Euler Angles - X = {0}, Y = {1}, Z = {2}", component.transform.localEulerAngles.x, component.transform.localEulerAngles.y, component.transform.localEulerAngles.z);
+                StatusLightBottom = (component.transform.localPosition.z < 0);
+                Rotation = component.transform.localEulerAngles.y;
+                return (component.transform.localPosition.x < 0);
+            }
+        }
+        Debug.Log("StatusLightParent not found :(");
+        StatusLightBottom = false;
+        Rotation = 0;
+        return false;
+    }
+
     private static string FindManualCode(MonoBehaviour bombComponent)
     {
         Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
         foreach (Component component in allComponents)
         {
             Type type = component.GetType();
+            //Debug.LogFormat("[TwitchPlays] component.GetType(): FullName = {0}, Name = {1}",type.FullName, type.Name);
             FieldInfo candidateString = type.GetField("TwitchManualCode", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             if (candidateString == null)
             {

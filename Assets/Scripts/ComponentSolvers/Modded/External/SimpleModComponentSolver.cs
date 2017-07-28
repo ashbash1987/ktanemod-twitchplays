@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class SimpleModComponentSolver : ComponentSolver
 {
-    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool delayinvoke, bool statusLeft, bool statusBottom) :
+    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool delayinvoke, bool statusLeft, bool statusBottom, float rotation) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
@@ -15,6 +15,7 @@ public class SimpleModComponentSolver : ComponentSolver
         delayInvokation = delayinvoke;
         statusLightLeft = statusLeft;
         statusLightBottom = statusBottom;
+        IDRotation = rotation;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
