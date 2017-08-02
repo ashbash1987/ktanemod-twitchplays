@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -239,6 +240,12 @@ public abstract class ComponentSolver : ICommandResponder
 
     private bool OnPass(object _ignore)
     {
+        string componentType = ComponentHandle.componentType.ToString();
+        if ( (componentType.Length > 4) && (componentType.Substring(0, 5).Equals("Needy")) )
+        {
+            return false;
+        }
+
         if (_delegatedSolveUserNickName != null && _delegatedSolveResponseNotifier != null)
         {
             AwardSolve(_delegatedSolveUserNickName, _delegatedSolveResponseNotifier);
@@ -251,10 +258,11 @@ public abstract class ComponentSolver : ICommandResponder
         }
 
         BombCommander._bombSolvedModules++;
-        
+        BombMessageResponder.moduleCameras.UpdateSolves();
+
         if (_turnQueued)
         {
-            Debug.LogFormat("ComponentSolver: Activating queued turn for completed module {0}.", Code);
+            Debug.LogFormat("[ComponentSolver] Activating queued turn for completed module {0}.", Code);
             _readyToTurn = true;
             _turnQueued = false;
         }
@@ -304,6 +312,8 @@ public abstract class ComponentSolver : ICommandResponder
         {
             AwardStrikes(_currentUserNickName, _currentResponseNotifier, 1);
         }
+
+        BombMessageResponder.moduleCameras.UpdateStrikes(true);
 
         return false;
     }
@@ -407,18 +417,18 @@ public abstract class ComponentSolver : ICommandResponder
     {
         if (inputCommand.Equals("unview", StringComparison.InvariantCultureIgnoreCase))
         {
-            cameraPriority = false;
+            cameraPriority = ModuleCameras.CameraNotInUse;
             BombMessageResponder.moduleCameras.DetachFromModule(BombComponent);
         }
         else
         {
-            if (inputCommand.Equals("view", StringComparison.InvariantCultureIgnoreCase))
+            if (inputCommand.StartsWith("view", StringComparison.InvariantCultureIgnoreCase))
             {
-                cameraPriority = true;
+                cameraPriority = (inputCommand.Equals("view pin", StringComparison.InvariantCultureIgnoreCase)) ? ModuleCameras.CameraPinned : ModuleCameras.CameraPrioritised;
             }
-            if ( (BombCommander._multiDecker) || (cameraPriority) )
+            if ( (BombCommander._multiDecker) || (cameraPriority > ModuleCameras.CameraNotInUse) )
             {
-                BombMessageResponder.moduleCameras.AttachToModule(BombComponent, ComponentHandle, cameraPriority);
+                BombMessageResponder.moduleCameras.AttachToModule(BombComponent, ComponentHandle, Math.Max(cameraPriority, ModuleCameras.CameraInUse));
             }
         }
 
@@ -463,7 +473,7 @@ public abstract class ComponentSolver : ICommandResponder
     public string helpMessage = null;
     public string manualCode = null;
     public bool delayInvokation = false;
-    public bool cameraPriority = false;
+    public int cameraPriority = ModuleCameras.CameraNotInUse;
 
     public bool _turnQueued = false;
     private bool _readyToTurn = false;

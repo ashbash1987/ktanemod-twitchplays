@@ -140,6 +140,7 @@ GameObject:
   - 114: {fileID: 114000011240893280}
   - 114: {fileID: 114000013407019822}
   - 114: {fileID: 114000013751686150}
+  - 114: {fileID: 114000012005248468}
   m_Layer: 0
   m_Name: TwitchPlaysService
   m_TagString: Untagged
@@ -1228,6 +1229,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ebd31ad0452bd94cad87051ad67a331, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &114000012005248468
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000012806938254}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30d5be60333cf0c45afd7062cf1bef44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  VanillaManual: http://www.bombmanual.com
+  Repository: https://ktane.timwi.de/
 --- !u!114 &114000012065963178
 MonoBehaviour:
   m_ObjectHideFlags: 1

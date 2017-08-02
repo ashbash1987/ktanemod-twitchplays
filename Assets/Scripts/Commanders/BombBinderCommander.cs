@@ -49,6 +49,8 @@ public class BombBinderCommander : ICommandResponder
 
         _missionTableOfContentsMissionEntryType = ReflectionHelper.FindType("MissionTableOfContentsMissionEntry");
         _missionIDField = _missionTableOfContentsMissionEntryType.GetField("MissionID", BindingFlags.Public | BindingFlags.Instance);
+        _missionEntryTextField = _missionTableOfContentsMissionEntryType.GetField("EntryText", BindingFlags.Public | BindingFlags.Instance);
+        _missionSubsectionTextField = _missionTableOfContentsMissionEntryType.GetField("SubsectionText", BindingFlags.Public | BindingFlags.Instance);
 
         _missionManagerType = ReflectionHelper.FindType("Assets.Scripts.Missions.MissionManager");
         _missionManagerInstanceProperty = _missionManagerType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
@@ -105,12 +107,16 @@ public class BombBinderCommander : ICommandResponder
             {
                 string[] commandParts = message.Split(' ');
                 int index = 0;
-                if ( (commandParts.Length != 2) ||
-                    (!int.TryParse(commandParts[1], out index)) )
+                IEnumerator selectCoroutine = null;
+                if ( (commandParts.Length == 2) &&
+                    (int.TryParse(commandParts[1], out index)) )
                 {
-                    yield break;
+                    selectCoroutine = SelectOnPage(index);
                 }
-                IEnumerator selectCoroutine = SelectOnPage(index);
+                else
+                {
+                    selectCoroutine = SelectOnPage(0, commandParts.Skip(1).ToArray());
+                }
                 while (selectCoroutine.MoveNext())
                 {
                     yield return selectCoroutine.Current;
@@ -240,9 +246,9 @@ public class BombBinderCommander : ICommandResponder
         _currentSelectableIndex = oldSelectableIndex;
     }
 
-    private IEnumerator SelectOnPage(int index = 0)
+    private IEnumerator SelectOnPage(int index = 0, string[] search = null)
     {
-        if (index > 0)
+        if ( (index > 0) || (search != null) )
         {
             if ( (_currentSelectables == null) || (index > _currentSelectables.Length) )
             {
@@ -253,11 +259,59 @@ public class BombBinderCommander : ICommandResponder
             MonoBehaviour newSelectable = null;
             for (_currentSelectableIndex = 0; _currentSelectableIndex < _currentSelectables.Length; ++_currentSelectableIndex)
             {
-                Debug.Log(string.Format("BombBinderCommander: Selecting item {0}", _currentSelectableIndex));
                 newSelectable = (MonoBehaviour)_currentSelectables.GetValue(_currentSelectableIndex);
-                if ( (newSelectable != null) && (++i == index) )
+                if (newSelectable != null)
                 {
-                    break;
+                    // Index mode
+                    if (index > 0)
+                    {
+                        if (++i == index)
+                        {
+                            break;
+                        }
+                    }
+                    // Search mode
+                    else
+                    {
+                        object tableOfContentsEntryObject = newSelectable.GetComponent(_missionTableOfContentsMissionEntryType);
+                        if (tableOfContentsEntryObject == null)
+                        {
+                            // Previous/Next buttons!
+                            newSelectable = null;
+                            break;
+                        }
+                        
+                        object entryTextField = _missionEntryTextField.GetValue(tableOfContentsEntryObject);
+                        Type entryTextType = entryTextField.GetType();
+                        PropertyInfo entryTextProperty = entryTextType.GetProperty("text");
+                        string entryText = entryTextProperty.GetValue(entryTextField, null).ToString().ToLowerInvariant();
+
+                        object subsectionTextField = _missionSubsectionTextField.GetValue(tableOfContentsEntryObject);
+                        Type subsectionTextType = subsectionTextField.GetType();
+                        PropertyInfo subsectionTextProperty = subsectionTextType.GetProperty("text");
+                        string subsectionText = subsectionTextProperty.GetValue(subsectionTextField, null).ToString().ToLowerInvariant();
+
+                        if (subsectionText.Equals(search[0]))
+                        {
+                            // The first search term matches the mission ID ("2.1" etc)
+                            break;
+                        }
+
+                        foreach (string s in search)
+                        {
+                            // All search terms must be found in the mission name
+                            if (!entryText.Contains(s.ToLowerInvariant()))
+                            {
+                                newSelectable = null;
+                                break;
+                            }
+                        }
+
+                        if (newSelectable != null)
+                        {
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -364,6 +418,8 @@ public class BombBinderCommander : ICommandResponder
 
     private static Type _missionTableOfContentsMissionEntryType = null;
     private static FieldInfo _missionIDField = null;
+    private static FieldInfo _missionEntryTextField = null;
+    private static FieldInfo _missionSubsectionTextField = null;
 
     private static Type _missionManagerType = null;
     private static PropertyInfo _missionManagerInstanceProperty = null;

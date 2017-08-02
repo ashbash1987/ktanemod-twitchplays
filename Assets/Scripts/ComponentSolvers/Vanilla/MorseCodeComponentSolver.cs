@@ -13,8 +13,8 @@ public class MorseCodeComponentSolver : ComponentSolver
         _upButton = (MonoBehaviour)_upButtonField.GetValue(bombComponent);
         _downButton = (MonoBehaviour)_downButtonField.GetValue(bombComponent);
         _transmitButton = (MonoBehaviour)_transmitButtonField.GetValue(bombComponent);
-        
-        helpMessage = "Transmit a frequency with !{0} transmit 573. Last 3 digits only.";
+
+        helpMessage = "!{0} transmit 3.573, !{0} trans 573, !{0} tx 573 [transmit frequency 3.573]";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

@@ -13,6 +13,7 @@ public class TwitchPlaysService : MonoBehaviour
         public string serverName;
         public int serverPort;
         public bool debug = false;
+        public bool shortUrls = false;
     }
 
     public BombMessageResponder bombMessageResponder = null;
@@ -31,6 +32,7 @@ public class TwitchPlaysService : MonoBehaviour
 
     public static bool DebugMode = false;
     public static LogUploader logUploader = null;
+    public static UrlHelper urlHelper = null;
 
     private void Start()
     {
@@ -58,6 +60,9 @@ public class TwitchPlaysService : MonoBehaviour
 
         logUploader = GetComponent<LogUploader>();
         logUploader.ircConnection = _ircConnection;
+
+        urlHelper = GetComponent<UrlHelper>();
+        urlHelper.ChangeMode(settings.shortUrls == true);
 
         _leaderboard = new Leaderboard();
         _leaderboard.LoadDataFromFile();

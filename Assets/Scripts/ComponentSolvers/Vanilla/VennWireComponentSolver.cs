@@ -12,7 +12,7 @@ public class VennWireComponentSolver : ComponentSolver
         _wires = (Array)_activeWiresProperty.GetValue(bombComponent, null);
         _cutWires = new bool[6];
         
-        helpMessage = "Cut the third wire with !{0} cut 3. Cut multiple wires with !{0} cut 2 3 6. Wires ordered from left to right, empty spaces do not count.";
+        helpMessage = "!{0} cut 3 [cut wire 3] | !{0} cut 2 3 6 [cut multiple wires] | Wires are ordered from left to right | Empty spaces are not counted"; 
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

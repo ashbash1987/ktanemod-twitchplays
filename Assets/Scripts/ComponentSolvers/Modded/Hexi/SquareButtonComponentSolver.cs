@@ -64,12 +64,19 @@ public class SquareButtonComponentSolver : ComponentSolver
             int time = -1;
             if(!int.TryParse(value, out time))
             {
-                int pos = value.IndexOf(':');
+                int pos = value.LastIndexOf(':');
                 if(pos == -1) continue;
+                int hour = 0;
                 int min, sec;
-                if(!int.TryParse(value.Substring(0, pos), out min)) continue;
+                if(!int.TryParse(value.Substring(0, pos), out min))
+                {
+                    int pos2 = value.IndexOf(":");
+                    if ( (pos2 == -1) || (pos == pos2) ) continue;
+                    if (!int.TryParse(value.Substring(0, pos2), out hour)) continue;
+                    if (!int.TryParse(value.Substring(pos2+1, pos-pos2-1), out min)) continue;
+                }
                 if(!int.TryParse(value.Substring(pos+1), out sec)) continue;
-                time = min * 60 + sec;
+                time = (hour * 3600) + (min * 60) + sec;
             }
             sortedTimes.Add(time);
         }

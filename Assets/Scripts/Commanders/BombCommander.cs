@@ -23,6 +23,8 @@ public class BombCommander : ICommandResponder
 
         _selectableType = ReflectionHelper.FindType("Selectable");
         _handleSelectMethod = _selectableType.GetMethod("HandleSelect", BindingFlags.Public | BindingFlags.Instance);
+        _handleSelectableInteractMethod = _selectableType.GetMethod("HandleInteract", BindingFlags.Public | BindingFlags.Instance);
+        _handleSelectableCancelMethod = _selectableType.GetMethod("HandleCancel", BindingFlags.Public | BindingFlags.Instance);
         _onInteractEndedMethod = _selectableType.GetMethod("OnInteractEnded", BindingFlags.Public | BindingFlags.Instance);
 
         _selectableManagerType = ReflectionHelper.FindType("SelectableManager");
@@ -79,6 +81,7 @@ public class BombCommander : ICommandResponder
         else if (message.Equals("turn", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("turn round", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("turn around", StringComparison.InvariantCultureIgnoreCase) ||
+                 message.Equals("rotate", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("flip", StringComparison.InvariantCultureIgnoreCase) ||
                  message.Equals("spin", StringComparison.InvariantCultureIgnoreCase))
         {
@@ -123,9 +126,10 @@ public class BombCommander : ICommandResponder
         {
             BombMessageResponder.moduleCameras.DetachFromModule(_timerComponent);
         }
-        else if (message.Equals("view", StringComparison.InvariantCultureIgnoreCase))
+        else if (message.StartsWith("view", StringComparison.InvariantCultureIgnoreCase))
         {
-            BombMessageResponder.moduleCameras.AttachToModule(_timerComponent, null, true);
+            int priority = (message.Equals("view pin", StringComparison.InvariantCultureIgnoreCase)) ? ModuleCameras.CameraPinned : ModuleCameras.CameraPrioritised;
+            BombMessageResponder.moduleCameras.AttachToModule(_timerComponent, null, priority);
         }
         else
         {
@@ -144,6 +148,7 @@ public class BombCommander : ICommandResponder
         {
             SelectObject(Selectable);
             doForceRotate = true;
+            BombMessageResponder.moduleCameras.ChangeBomb(this);
         }
         else if (frontFace != _heldFrontFace)
         {
@@ -343,13 +348,13 @@ public class BombCommander : ICommandResponder
 
         float focusTime = (float)_focusTimeField.GetValue(FloatingHoldable);
         _focusMethod.Invoke(FloatingHoldable, new object[] { selectable.transform, focusDistance, false, false, focusTime });
-        _handleSelectMethod.Invoke(selectable, new object[] { false });
+        _handleSelectableInteractMethod.Invoke(selectable, null);
     }
 
     public IEnumerator Defocus(MonoBehaviour selectable, bool frontFace)
     {
         _defocusMethod.Invoke(FloatingHoldable, new object[] { false, false });
-        _handleCancelMethod.Invoke(selectable, null);
+        _handleSelectableCancelMethod.Invoke(selectable, null);
         yield break;
     }
 
@@ -478,6 +483,8 @@ public class BombCommander : ICommandResponder
 
     private static Type _selectableType = null;
     private static MethodInfo _handleSelectMethod = null;
+    private static MethodInfo _handleSelectableInteractMethod = null;
+    private static MethodInfo _handleSelectableCancelMethod = null;
     private static MethodInfo _onInteractEndedMethod = null;
 
     private static Type _selectableManagerType = null;

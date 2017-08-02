@@ -12,7 +12,7 @@ public class SimonComponentSolver : ComponentSolver
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
         
-        helpMessage = "Press a sequence of colours with !{0} press r g b y.";
+        helpMessage = "!{0} press red green blue yellow, !{0} press rgby [press a sequence of colours] | You must include the input from any previous stages";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

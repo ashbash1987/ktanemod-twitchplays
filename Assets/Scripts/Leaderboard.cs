@@ -224,6 +224,20 @@ public class Leaderboard
         return _entryList.IndexOf(entry) + 1;
     }
 
+    public int GetRank(int rank, out LeaderboardEntry entry)
+    {
+        CheckAndSort();
+        entry = (_entryList.Count >= rank) ? _entryList[rank - 1] : null;
+        return (entry != null) ? entry.Rank : 0;
+    }
+
+    public int GetSoloRank(int rank, out LeaderboardEntry entry)
+    {
+        CheckAndSort();
+        entry = (_entryListSolo.Count >= rank) ? _entryListSolo[rank - 1] : null;
+        return (entry != null) ? entry.SoloRank : 0;
+    }
+
     public void GetTotalSolveStrikeCounts(out int solveCount, out int strikeCount)
     {
         solveCount = 0;

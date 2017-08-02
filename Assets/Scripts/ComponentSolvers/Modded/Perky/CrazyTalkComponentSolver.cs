@@ -33,7 +33,7 @@ public class CrazyTalkComponentSolver : ComponentSolver
 
         while ((timeRemaining%10) != downtime)
         {
-            yield return new WaitForSeconds(0.1f);
+            yield return null;
             timeRemaining = (int)((float)CommonReflectedTypeInfo.TimeRemainingField.GetValue(timerComponent));
         }
 
@@ -46,7 +46,7 @@ public class CrazyTalkComponentSolver : ComponentSolver
 
         while ((timeRemaining % 10) != uptime)
         {
-            yield return new WaitForSeconds(0.1f);
+            yield return null;
             timeRemaining = (int)((float)CommonReflectedTypeInfo.TimeRemainingField.GetValue(timerComponent));
         }
 

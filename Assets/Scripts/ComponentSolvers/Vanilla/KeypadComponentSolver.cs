@@ -11,7 +11,7 @@ public class KeypadComponentSolver : ComponentSolver
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
         
-        helpMessage = "Press the buttons with !{0} press 1 2 3 4. Order is TL, TR, BL, BR.";
+        helpMessage = "!{0} press 3 1 2 4 | The buttons are 1=TL, 2=TR, 3=BL, 4=BR";
         manualCode = "Keypads";
     }
 

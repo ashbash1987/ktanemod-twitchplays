@@ -10,7 +10,8 @@ public class NeedyKnobComponentSolver : ComponentSolver
     {
         _pointingKnob = (MonoBehaviour)_pointingKnobField.GetValue(bombComponent);
         
-        helpMessage = "Rotate the knob 3 quarter-turns with !{0} rotate 3.";
+        helpMessage = "!{0} rotate 3, !{0} turn 3 [rotate the knob 3 quarter-turns]";
+        manualCode = "Knobs";
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

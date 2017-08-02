@@ -64,6 +64,7 @@ public static class ComponentSolverFactory
         ModComponentSolverHelpMessages["BitmapsModule"] = "Submit the correct answer with !{0} press 2.";
         ModComponentSolverHelpMessages["BitOps"] = "Submit the correct answer with !{0} submit 10101010.";
         ModComponentSolverHelpMessages["BlindAlleyModule"] = "Hit the correct spots with !{0} press bl mm tm tl.  (Locations are tl, tm, ml, mm, mr, bl, bm, br)";
+        ModComponentSolverHelpMessages["booleanVennModule"] = "Select parts of the diagram with !{0} a bc abc. Options are A, AB, ABC, AC, B, BC, C, O (none).";
         ModComponentSolverHelpMessages["BrokenButtonsModule"] = "Press the button by name with !{0} press \"this\".  Press the button in column 2 row 3 with !{0} press 2 3. Press the right submit button with !{0} submit right.";
         ModComponentSolverHelpMessages["CaesarCipherModule"] = "Press the correct cipher text with !{0} press K B Q I S.";
         ModComponentSolverHelpMessages["CheapCheckoutModule"] = "Cycle the items with !{0} items. Get customers to pay the correct amount with !{0} submit.  Return the proper change with !{0} submit 3.24.";
@@ -88,7 +89,8 @@ public static class ComponentSolverFactory
         ModComponentSolverHelpMessages["FriendshipModule"] = "Submit the desired friendship element with !{0} submit Fairness Conscientiousness Kindness Authenticity.";
         ModComponentSolverHelpMessages["HexamazeModule"] = "Move towards the exit with !{0} move 12 10 6 6 6 2, or with !{0} move N NW S S S NE.  (clockface or cardinal)";
         ModComponentSolverHelpMessages["http"] = "Submit the response with !{0} resp 123.";
-        ModComponentSolverHelpMessages["Laundry"] = "Set all of the options with !{0} set all 30C,2 dot,110C,Wet Cleaning.  Set just washing with !{0} set wash 40C.  Submit with !{0} insert coin. Prey for that 4 in 2 + lit bob. Kappa";
+        ModComponentSolverHelpMessages["iceCreamModule"] = "Move left/right with !{0} left and !{0} right. Sell with !{0} sell.";
+        ModComponentSolverHelpMessages["Laundry"] = "Set all of the options with !{0} set all 30C,2 dot,110C,Wet Cleaning.  Set just washing with !{0} set wash 40C.  Submit with !{0} insert coin. ...pray for that 4 in 2 & lit BOB Kappa";
         ModComponentSolverHelpMessages["LEDEnc"] = "Press the button with label B with !{0} press b.";
         //ModComponentSolverHelpMessages["LetterKeys"] = "";
         ModComponentSolverHelpMessages["LightCycleModule"] = "Submit your answer with !{0} B R W M G Y. (note, this module WILL try to input any answer you put into it. Don't do !{0} claim or !{0} mine here.)";
@@ -96,16 +98,17 @@ public static class ComponentSolverFactory
         ModComponentSolverHelpMessages["Logic"] = "Logic is answered with !{0} submit F T.";
         //ModComponentSolverHelpMessages["MazeV2"] = "";
         //ModComponentSolverHelpMessages["Microcontroller"] = "";
+        ModComponentSolverHelpMessages["MinesweeperModule"] = "Clear the initial colour with !{0} dig blue. Clear the square on column 1 row 2 with !{0} dig 1 2. Flag the square on column 3 row 4 with !{0} flag 3 4. Separate multiple squares with a semicolon to interact with all of them.";
         ModComponentSolverHelpMessages["ModuleAgainstHumanity"] = "Reset the module with !{0} press reset.  Move the black card +2 with !{0} move black 2.  Move the white card -3 with !{0} move white -3. Submit with !{0} press submit.";
         ModComponentSolverHelpMessages["monsplodeFight"] = "Use a move with !{0} use explode.";
         //ModComponentSolverHelpMessages["monsplodeWho"] = "";
         //ModComponentSolverHelpMessages["MorseV2"] = "";
-        ModComponentSolverHelpMessages["MouseInTheMaze"] = "Move forward with !{0} move forward. Turn left/right with !{0} turn right. Commands can be chained, e.g. !{0} move back turn left.";
+        ModComponentSolverHelpMessages["MouseInTheMaze"] = "Move with !{0} forward back. Turn with !{0} left right u-turn. The first letter only can be used instead. Submit with !{0} submit.";
         //ModComponentSolverHelpMessages["murder"] = "";
         //ModComponentSolverHelpMessages["MusicRhythms"] = "";
         ModComponentSolverHelpMessages["MysticSquareModule"] = "Move the numbers around with !{0} press 1 3 2 1 3 4 6 8.  (Note, this module will NOT stop moving numbers around on a strike. Make sure that knight gets uncovered asap.)";
         //ModComponentSolverHelpMessages["Needy Math"] = "";
-        ModComponentSolverHelpMessages["neutralization"] = "Turn the filter on/off with !{0} filter. Move to the next base with !{0} base next.  Move to previous base with !{0} base prev. Set drop count with !{0} conc set 48. Submit with !{0} titrate.";
+        ModComponentSolverHelpMessages["neutralization"] = "Select a base with !{0} base NaOH. Turn the filter on/off with !{0} filter. Set drop count with !{0} conc set 48. Submit with !{0} titrate.";
         //ModComponentSolverHelpMessages["NumberPad"] = "";
         ModComponentSolverHelpMessages["OnlyConnectModule"] = "Press a button by position with !{0} press tm or !{0} press 2. Round 1 also accepts symbol names (e.g. reeds, eye, flax, lion, water, viper).";
         //ModComponentSolverHelpMessages["spwizPerspectivePegs"] = "";
@@ -113,6 +116,7 @@ public static class ComponentSolverFactory
         //ModComponentSolverHelpMessages["resistors"] = "";
         ModComponentSolverHelpMessages["RockPaperScissorsLizardSpockModule"] = "Submit your answer with !{0} press scissors lizard.";
         ModComponentSolverHelpMessages["RubiksCubeModule"] = "View the colors on all sides with !{0} rotate. Reset the cube to starting state with !{0} reset. Solve the Cube with !{0} r' d u f' r' d' u b' u' f";
+        ModComponentSolverHelpMessages["screw"] = "Screw with !{0} screw tr or !{0} screw 3. Options are TL, TM, TR, BL, BM, BR. Press a button with !{0} press b or !{0} press 2.";
         //ModComponentSolverHelpMessages["SeaShells"] = "";
         ModComponentSolverHelpMessages["Semaphore"] = "Move to the next flag with !{0} move right or !{0} press right. Move to previous flag with !{0} move left or !{0} press left.  Submit with !{0} press ok.";
         //ModComponentSolverHelpMessages["shapeshift"] = "";
@@ -133,6 +137,7 @@ public static class ComponentSolverFactory
         ModComponentSolverHelpMessages["WirePlacementModule"] = "Cut the correct wires with !{0} cut A2 B4 D3.";
         //ModComponentSolverHelpMessages["WordScrambleModule"] = "";
         ModComponentSolverHelpMessages["WordSearchModule"] = "Select the word starting at column B row 3, and ending at column C row 4, with !{0} select B3 C4.";
+        ModComponentSolverHelpMessages["YahtzeeModule"] = "Roll the dice with !{0} roll. Keep some dice with !{0} keep white,purple,blue,yellow,black. Roll the remaining dice until a 3 appears with !{0} roll until 3.";
         
         //Manual Codes
         ModComponentSolverManualCodes["ColourFlash"] = "Color Flash";
