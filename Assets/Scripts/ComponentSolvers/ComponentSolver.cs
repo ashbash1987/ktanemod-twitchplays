@@ -428,7 +428,7 @@ public abstract class ComponentSolver : ICommandResponder
             }
             if ( (BombCommander._multiDecker) || (cameraPriority > ModuleCameras.CameraNotInUse) )
             {
-                BombMessageResponder.moduleCameras.AttachToModule(BombComponent, ComponentHandle, cameraPriority);
+                BombMessageResponder.moduleCameras.AttachToModule(BombComponent, ComponentHandle, Math.Max(cameraPriority, ModuleCameras.CameraInUse));
             }
         }
 
@@ -476,7 +476,7 @@ public abstract class ComponentSolver : ICommandResponder
     public bool statusLightBottom = false;
     public bool delayInvokation = false;
     public float IDRotation = 0;
-    public int cameraPriority = ModuleCameras.CameraInUse;
+    public int cameraPriority = ModuleCameras.CameraNotInUse;
 
     public bool _turnQueued = false;
     private bool _readyToTurn = false;
