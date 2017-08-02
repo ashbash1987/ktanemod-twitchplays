@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class CoroutineModComponentSolver : ComponentSolver
 {
-    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool delayInvoke, FieldInfo cancelfield, Type canceltype) :
+    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool delayInvoke, FieldInfo cancelfield, Type canceltype, bool statusLeft, bool statusBottom, float rotation) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
@@ -16,6 +16,9 @@ public class CoroutineModComponentSolver : ComponentSolver
         TryCancelField = cancelfield;
         TryCancelComponentSolverType = canceltype;
         delayInvokation = delayInvoke;
+        statusLightLeft = statusLeft;
+        statusLightBottom = statusBottom;
+        IDRotation = rotation;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

@@ -112,9 +112,6 @@ public class TwitchComponentHandle : MonoBehaviour
 
         unclaimedBackgroundColor = idBannerPrefab.GetComponent<Image>().color;
 
-        Arrow.gameObject.SetActive(true);
-        HighlightArrow.gameObject.SetActive(true);
-
         try
         {
             _solver = ComponentSolverFactory.CreateSolver(bombCommander, bombComponent, componentType, ircConnection, coroutineCanceller);
@@ -122,6 +119,73 @@ public class TwitchComponentHandle : MonoBehaviour
             {
                 _solver.Code = _code;
                 _solver.ComponentHandle = this;
+                Vector3 pos = canvasGroupMultiDecker.transform.localPosition;
+                canvasGroupMultiDecker.transform.localPosition = new Vector3(_solver.statusLightLeft ? -pos.x : pos.x, pos.y, _solver.statusLightBottom ? -pos.z : pos.z);
+                /*
+                Vector3 angle = canvasGroupMultiDecker.transform.eulerAngles;
+                canvasGroupMultiDecker.transform.localEulerAngles = new Vector3(angle.x, _solver.IDRotation, angle.z);
+                angle = canvasGroupMultiDecker.transform.localEulerAngles;
+                canvasGroup.transform.localEulerAngles = new Vector3(angle.x, _solver.IDRotation, angle.z);
+
+                switch ((int) _solver.IDRotation)
+                {
+                    case 90:
+                    case -270:
+                        switch (direction)
+                        {
+                            case Direction.Up:
+                                direction = Direction.Left;
+                                break;
+                            case Direction.Left:
+                                direction = Direction.Down;
+                                break;
+                            case Direction.Down:
+                                direction = Direction.Right;
+                                break;
+                            case Direction.Right:
+                                direction = Direction.Up;
+                                break;
+                        }
+                        break;
+
+                    case 180:
+                    case -180:
+                        switch (direction)
+                        {
+                            case Direction.Up:
+                                direction = Direction.Down;
+                                break;
+                            case Direction.Left:
+                                direction = Direction.Right;
+                                break;
+                            case Direction.Down:
+                                direction = Direction.Up;
+                                break;
+                            case Direction.Right:
+                                direction = Direction.Left;
+                                break;
+                        }
+                        break;
+
+                    case 270:
+                    case -90:
+                        switch (direction)
+                        {
+                            case Direction.Up:
+                                direction = Direction.Right;
+                                break;
+                            case Direction.Left:
+                                direction = Direction.Up;
+                                break;
+                            case Direction.Down:
+                                direction = Direction.Left;
+                                break;
+                            case Direction.Right:
+                                direction = Direction.Down;
+                                break;
+                        }
+                        break;
+                }*/
             }
         }
         catch (NotSupportedException e)
@@ -131,6 +195,9 @@ public class TwitchComponentHandle : MonoBehaviour
             idBannerPrefab.gameObject.SetActive(false);
             canvasGroupMultiDecker.alpha = 0.0f;
         }
+
+        Arrow.gameObject.SetActive(true);
+        HighlightArrow.gameObject.SetActive(true);
     }
 
     private void LateUpdate()

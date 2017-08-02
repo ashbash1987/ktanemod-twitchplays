@@ -11,6 +11,9 @@ public static class ComponentSolverFactory
     private static readonly Dictionary<string, string> ModComponentSolverHelpMessages;
     private static readonly Dictionary<string, string> ModComponentSolverManualCodes;
     private static readonly Dictionary<string, bool> ModComponentSolverDelayInvoke;
+    private static readonly Dictionary<string, bool> ModComponentSolverStatusLightLeft;
+    private static readonly Dictionary<string, bool> ModComponentSolverStatusLightBottom;
+    private static readonly Dictionary<string, float> ModComponentSolverChatRotation;
 
     private enum ModCommandType
     {
@@ -24,6 +27,9 @@ public static class ComponentSolverFactory
         ModComponentSolverHelpMessages = new Dictionary<string, string>();
         ModComponentSolverManualCodes = new Dictionary<string, string>();
         ModComponentSolverDelayInvoke = new Dictionary<string, bool>();
+        ModComponentSolverStatusLightLeft = new Dictionary<string, bool>();
+        ModComponentSolverStatusLightBottom = new Dictionary<string, bool>();
+        ModComponentSolverChatRotation = new Dictionary<string, float>();
 
         //AT_Bash Modules
         ModComponentSolverCreators["MotionSense"] = (bombCommander, bombComponent, ircConnection, canceller) => new MotionSenseComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
@@ -150,6 +156,18 @@ public static class ComponentSolverFactory
         //The standard is to return the KMSelectable[] array, or yield return something, before interaction with the module
         //actually starts. The following modules don't follow this standard, and therefore need to be forcefully delayed.
         ModComponentSolverDelayInvoke["SimonScreamsModule"] = true;
+
+        //Status Light Locations.
+        //For most modules, the Status light is in the Top Right corner.  However, there is the odd module where the status
+        //light might be in the Top left, Bottom right, or Bottom left corner.  In these cases, the ID number for multi-decker
+        //should be moved accordingly.  //Use this only in cases where the location detection code results in incorrect placement
+        //of the ID location.
+        /*ModComponentSolverStatusLightLeft["ThirdBase"] = true;
+        ModComponentSolverStatusLightBottom["ThirdBase"] = true;*/
+
+        //Chat Rotation
+        //Most modules behave correctly, and have NOT rotated the StatusLightParent needlessly.  There are a few that have done exactly that.
+
     }
 
     public static ComponentSolver CreateSolver(BombCommander bombCommander, MonoBehaviour bombComponent, ComponentTypeEnum componentType, IRCConnection ircConnection, CoroutineCanceller canceller)
@@ -239,12 +257,22 @@ public static class ComponentSolverFactory
         string help = FindHelpMessage(bombComponent);
         string manual = FindManualCode(bombComponent);
         bool delayInvoke = false;
+        bool statusBottom = false;
+        float rotation = 0;
+        bool statusLeft = FindStatusLightPosition(bombComponent, out statusBottom, out rotation);
+        
 
         if (help == null && ModComponentSolverHelpMessages.ContainsKey(moduleType))
             help = ModComponentSolverHelpMessages[moduleType];
 
         if (manual == null && ModComponentSolverManualCodes.ContainsKey(moduleType))
             manual = ModComponentSolverManualCodes[moduleType];
+
+        if (ModComponentSolverStatusLightLeft.ContainsKey(moduleType))
+            statusLeft = ModComponentSolverStatusLightLeft[moduleType];
+
+        if (ModComponentSolverStatusLightBottom.ContainsKey(moduleType))
+            statusBottom = ModComponentSolverStatusLightBottom[moduleType];
 
         if (ModComponentSolverDelayInvoke.ContainsKey(moduleType))
             delayInvoke = ModComponentSolverDelayInvoke[moduleType];
@@ -257,7 +285,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke);
+                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke, statusLeft, statusBottom, rotation);
                     };
                 case ModCommandType.Coroutine:
                     FieldInfo cancelfield;
@@ -266,7 +294,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke, cancelfield, canceltype);
+                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke, cancelfield, canceltype, statusLeft, statusBottom, rotation);
                     };
 
                 default:
@@ -277,12 +305,35 @@ public static class ComponentSolverFactory
         return null;
     }
 
+    private static bool FindStatusLightPosition(MonoBehaviour bombComponent, out bool StatusLightBottom, out float Rotation)
+    {
+        Debug.Log("[TwitchPlays] Attempting to find the modules StatusLightParent");
+        Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
+        foreach (Component component in allComponents)
+        {
+            Type type = component.GetType();
+            if(type == ReflectionHelper.FindType("StatusLightParent"))
+            {
+                Debug.LogFormat("Local Position - X = {0}, Y = {1}, Z = {2}", component.transform.localPosition.x, component.transform.localPosition.y, component.transform.localPosition.z);
+                Debug.LogFormat("Local Euler Angles - X = {0}, Y = {1}, Z = {2}", component.transform.localEulerAngles.x, component.transform.localEulerAngles.y, component.transform.localEulerAngles.z);
+                StatusLightBottom = (component.transform.localPosition.z < 0);
+                Rotation = component.transform.localEulerAngles.y;
+                return (component.transform.localPosition.x < 0);
+            }
+        }
+        Debug.Log("StatusLightParent not found :(");
+        StatusLightBottom = false;
+        Rotation = 0;
+        return false;
+    }
+
     private static string FindManualCode(MonoBehaviour bombComponent)
     {
         Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
         foreach (Component component in allComponents)
         {
             Type type = component.GetType();
+            //Debug.LogFormat("[TwitchPlays] component.GetType(): FullName = {0}, Name = {1}",type.FullName, type.Name);
             FieldInfo candidateString = type.GetField("TwitchManualCode", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             if (candidateString == null)
             {
