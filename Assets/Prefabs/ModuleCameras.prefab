@@ -275,7 +275,6 @@ GameObject:
   - 92: {fileID: 92000010623977178}
   - 81: {fileID: 81000011199582954}
   - 222: {fileID: 222000010380426574}
-  - 114: {fileID: 114000011272570918}
   m_Layer: 0
   m_Name: Camera1
   m_TagString: Untagged
@@ -353,8 +352,8 @@ Camera:
     y: 0.56
     width: 0.16
     height: 0.28
-  near clip plane: 0.01
-  far clip plane: 5
+  near clip plane: 1
+  far clip plane: 3
   field of view: 5
   orthographic: 0
   orthographic size: 5
@@ -387,8 +386,8 @@ Camera:
     y: 0
     width: 0.16
     height: 0.28
-  near clip plane: 0.01
-  far clip plane: 5
+  near clip plane: 1
+  far clip plane: 3
   field of view: 5
   orthographic: 0
   orthographic size: 5
@@ -421,8 +420,8 @@ Camera:
     y: 0.28
     width: 0.16
     height: 0.28
-  near clip plane: 0.01
-  far clip plane: 5
+  near clip plane: 1
+  far clip plane: 3
   field of view: 5
   orthographic: 0
   orthographic size: 5
@@ -455,8 +454,8 @@ Camera:
     y: 0.56
     width: 0.16
     height: 0.28
-  near clip plane: 0.01
-  far clip plane: 5
+  near clip plane: 1
+  far clip plane: 3
   field of view: 5
   orthographic: 0
   orthographic size: 5
@@ -489,8 +488,8 @@ Camera:
     y: 0
     width: 0.16
     height: 0.28
-  near clip plane: 0.01
-  far clip plane: 5
+  near clip plane: 1
+  far clip plane: 3
   field of view: 5
   orthographic: 0
   orthographic size: 5
@@ -523,8 +522,8 @@ Camera:
     y: 0.28
     width: 0.16
     height: 0.28
-  near clip plane: 0.01
-  far clip plane: 5
+  near clip plane: 1
+  far clip plane: 3
   field of view: 5
   orthographic: 0
   orthographic size: 5
@@ -737,27 +736,6 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: /967
---- !u!114 &114000011272570918
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1000013176390424}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92779233cf543df408df6e81c83d05f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  updateSpeed: 0.005
-  keyCodeLog: 102
-  keyCodeUp: 273
-  keyCodeDown: 274
-  keyCodeX: 122
-  keyCodeY: 120
-  keyCodeZ: 99
-  keyCodeRX: 118
-  keyCodeRY: 98
-  keyCodeRZ: 110
 --- !u!114 &114000011558730752
 MonoBehaviour:
   m_ObjectHideFlags: 1
