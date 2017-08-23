@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class CoroutineModComponentSolver : ComponentSolver
 {
-    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool delayInvoke, FieldInfo cancelfield, Type canceltype, bool statusLeft, bool statusBottom, float rotation) :
+    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, FieldInfo cancelfield, Type canceltype, bool statusLeft, bool statusBottom, float rotation) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
@@ -15,7 +15,6 @@ public class CoroutineModComponentSolver : ComponentSolver
         manualCode = manual;
         TryCancelField = cancelfield;
         TryCancelComponentSolverType = canceltype;
-        delayInvokation = delayInvoke;
         statusLightLeft = statusLeft;
         statusLightBottom = statusBottom;
         IDRotation = rotation;
@@ -31,8 +30,6 @@ public class CoroutineModComponentSolver : ComponentSolver
 
         int beforeStrikeCount = StrikeCount;
         IEnumerator responseCoroutine = null;
-        if (delayInvokation)
-            yield return "CoroutineModComponentSolver";
 
         try
         {
@@ -49,7 +46,13 @@ public class CoroutineModComponentSolver : ComponentSolver
             yield break;
         }
 
-        bool moveNext = false;
+        //Previous changelists mentioned that people using the TPAPI were not following strict rules about how coroutine implementations should be done, w.r.t. required yield returning first before doing things.
+        //From the TPAPI side of things, this was *never* an explicit requirement. This yield return is here to explicitly follow the internal design for how component solvers are structured, so that external
+        //code would never be executed until absolutely necessary.
+        //There is the side-effect though that invalid commands sent to the module will appear as if they were 'correctly' processed, by executing the focus.
+        //I'd rather have interactions that are not broken by timing mismatches, even if the tradeoff is that it looks like it accepted invalid commands.
+        yield return "modcoroutine";
+
         while (beforeStrikeCount == StrikeCount && !Solved)
         {
             try
@@ -64,11 +67,6 @@ public class CoroutineModComponentSolver : ComponentSolver
                     ProcessMethod.DeclaringType.FullName, ProcessMethod.Name);
                 Debug.LogException(ex);
                 yield break;
-            }
-            if (!moveNext)
-            {
-                moveNext = true;
-                yield return "CoroutineModComponentSolver";
             }
 
             object currentObject = responseCoroutine.Current;

@@ -10,7 +10,6 @@ public static class ComponentSolverFactory
     private static readonly Dictionary<string, ModComponentSolverDelegate> ModComponentSolverCreators;
     private static readonly Dictionary<string, string> ModComponentSolverHelpMessages;
     private static readonly Dictionary<string, string> ModComponentSolverManualCodes;
-    private static readonly Dictionary<string, bool> ModComponentSolverDelayInvoke;
     private static readonly Dictionary<string, bool> ModComponentSolverStatusLightLeft;
     private static readonly Dictionary<string, bool> ModComponentSolverStatusLightBottom;
     private static readonly Dictionary<string, float> ModComponentSolverChatRotation;
@@ -26,7 +25,6 @@ public static class ComponentSolverFactory
         ModComponentSolverCreators = new Dictionary<string, ModComponentSolverDelegate>();
         ModComponentSolverHelpMessages = new Dictionary<string, string>();
         ModComponentSolverManualCodes = new Dictionary<string, string>();
-        ModComponentSolverDelayInvoke = new Dictionary<string, bool>();
         ModComponentSolverStatusLightLeft = new Dictionary<string, bool>();
         ModComponentSolverStatusLightBottom = new Dictionary<string, bool>();
         ModComponentSolverChatRotation = new Dictionary<string, float>();
@@ -152,11 +150,6 @@ public static class ComponentSolverFactory
         ModComponentSolverManualCodes["BitOps"] = "Bitwise Operators";
         ModComponentSolverManualCodes["RubiksCubeModule"] = "Rubik%E2%80%99s Cube";
 
-        //Delay Invokation. (Modules start processing commands before the very first yield return, so need to be delayed.)
-        //The standard is to return the KMSelectable[] array, or yield return something, before interaction with the module
-        //actually starts. The following modules don't follow this standard, and therefore need to be forcefully delayed.
-        ModComponentSolverDelayInvoke["SimonScreamsModule"] = true;
-
         //Status Light Locations.
         //For most modules, the Status light is in the Top Right corner.  However, there is the odd module where the status
         //light might be in the Top left, Bottom right, or Bottom left corner.  In these cases, the ID number for multi-decker
@@ -256,7 +249,6 @@ public static class ComponentSolverFactory
         MethodInfo method = FindProcessCommandMethod(bombComponent, out commandType, out commandComponentType);
         string help = FindHelpMessage(bombComponent);
         string manual = FindManualCode(bombComponent);
-        bool delayInvoke = false;
         bool statusBottom = false;
         float rotation = 0;
         bool statusLeft = FindStatusLightPosition(bombComponent, out statusBottom, out rotation);
@@ -274,9 +266,6 @@ public static class ComponentSolverFactory
         if (ModComponentSolverStatusLightBottom.ContainsKey(moduleType))
             statusBottom = ModComponentSolverStatusLightBottom[moduleType];
 
-        if (ModComponentSolverDelayInvoke.ContainsKey(moduleType))
-            delayInvoke = ModComponentSolverDelayInvoke[moduleType];
-
         if (method != null)
         {
             switch (commandType)
@@ -285,7 +274,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke, statusLeft, statusBottom, rotation);
+                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, statusLeft, statusBottom, rotation);
                     };
                 case ModCommandType.Coroutine:
                     FieldInfo cancelfield;
@@ -294,7 +283,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, delayInvoke, cancelfield, canceltype, statusLeft, statusBottom, rotation);
+                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, cancelfield, canceltype, statusLeft, statusBottom, rotation);
                     };
 
                 default:

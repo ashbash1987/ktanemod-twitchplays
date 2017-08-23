@@ -5,14 +5,13 @@ using UnityEngine;
 
 public class SimpleModComponentSolver : ComponentSolver
 {
-    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool delayinvoke, bool statusLeft, bool statusBottom, float rotation) :
+    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool statusLeft, bool statusBottom, float rotation) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
         CommandComponent = commandComponent;
         helpMessage = help;
         manualCode = manual;
-        delayInvokation = delayinvoke;
         statusLightLeft = statusLeft;
         statusLightBottom = statusBottom;
         IDRotation = rotation;
@@ -27,8 +26,6 @@ public class SimpleModComponentSolver : ComponentSolver
         }
 
         KMSelectable[] selectableSequence = null;
-        if(delayInvokation)
-            yield return "modsequence";
 
         try
         {
