@@ -39,6 +39,7 @@ public class CoroutineModComponentSolver : ComponentSolver
         {
             foreach (string regex in RegexList)
             {
+                RegexValid = Regex.IsMatch(inputCommand, regex, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
                 if (RegexValid)
                 {
                     break;
