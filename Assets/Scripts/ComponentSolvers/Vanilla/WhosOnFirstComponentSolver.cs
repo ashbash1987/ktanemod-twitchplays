@@ -9,9 +9,7 @@ public class WhosOnFirstComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
-        
-        helpMessage = "!{0} what? [press the button that says \"WHAT?\"] | The phrase must match exactly | Not case sensitive";
-        manualCode = "Who%E2%80%99s on First";
+        modInfo = ComponentSolverFactory.GetModuleInfo("WhosOnFirstComponentSolver");
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

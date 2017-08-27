@@ -49,6 +49,44 @@ public static class ComponentSolverFactory
         //Kaneb Modules
         ModComponentSolverCreators["TwoBits"] = (bombCommander, bombComponent, ircConnection, canceller) => new TwoBitsComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
+        ModComponetSolverInformation["MotionSense"] = new ModuleInformation {moduleID = "MotionSense", moduleDisplayName = "Motion Sense", helpText = "I am a passive module that awards strikes for motion while I am active. Use !{0} status to find out if I am active, and for how long." };
+
+        ModComponetSolverInformation["MemoryV2"] = new ModuleInformation { moduleID = "MemoryV2", moduleDisplayName = "Forget Me Not", helpText = "Enter forget me not sequence with !{0} press 5 3 1 8 2 0... The Sequence length depends on how many modules were on the bomb." };
+        ModComponetSolverInformation["KeypadV2"] = new ModuleInformation { moduleID = "KeypadV2", moduleDisplayName = "Round Keypad", helpText = "Solve the module with !{0} press 2 4 6 7 8. Button 1 is the top most botton, and are numbered in clockwise order." };
+        ModComponetSolverInformation["ButtonV2"] = new ModuleInformation { moduleID = "ButtonV2", moduleDisplayName = "Square Button", helpText = "Click the button with !{0} tap. Click the button at time with !{0} tap 8:55 8:44 8:33. Hold the button with !{0} hold. Release the button with !{0} release 9:58 9:49 9:30." };
+        ModComponetSolverInformation["SimonV2"] = new ModuleInformation { moduleID = "SimonV2", moduleDisplayName = "Simon States", helpText = "Enter the response with !{0} press B Y R G." };
+        ModComponetSolverInformation["PasswordV2"] = new ModuleInformation { moduleID = "PasswordV2", moduleDisplayName = "Safety Safe", helpText = "Listen to the dials with !{0} cycle. Listen to a single dial with !{0} cycle BR. Make a correction to a single dial with !{0} BM 3. Enter the solution with !{0} 6 0 6 8 2 5. Submit the answer with !{0} submit. Dial positions are TL, TM, TR, BL, BM, BR." };
+        ModComponetSolverInformation["MazeV2"] = new ModuleInformation { moduleID = "MazeV2", moduleDisplayName = "Plumbing", helpText = "Rotate the pipes with !{0} rotate A1 A1 B2 B3 C2 C3 C3. Check your work for leaks Kappa with !{0} submit. (Pipes rotate clockwise. Top left is A1, Bottom right is F6)" };
+        ModComponetSolverInformation["MorseV2"] = new ModuleInformation { moduleID = "MorseV2", moduleDisplayName = "Moresmatics", helpText = "Turn the lights off with !{0} lights off. Turn the lights on with !{0} lights on. Tranmit the answer with !{0} transmit -..-" };
+        ModComponetSolverInformation["NeedyVentV2"] = new ModuleInformation { moduleID = "NeedyVentV2", moduleDisplayName = "Needy Answering Questions", helpText = "Answer the question with !{0} Y or !{0} N.", manualCode = "Answering%20Questions" };
+        ModComponetSolverInformation["NeedyKnobV2"] = new ModuleInformation { moduleID = "NeedyKnobV2", moduleDisplayName = "Needy Rotary Phone", helpText = "Respond to the phone call with !{0} press 8 4 9.", manualCode = "Rotary%20Phone" };
+
+        ModComponetSolverInformation["CrazyTalk"] = new ModuleInformation { moduleID = "CrazyTalk", moduleDisplayName = "Crazy Talk", helpText = "Toggle the switch down and up with !{0} toggle 4 5. The order is down, then up." };
+        ModComponetSolverInformation["CryptModule"] = new ModuleInformation { moduleID = "CryptModule", moduleDisplayName = "Cryptography", helpText = "Solve the cryptography puzzle with !{0} press N B V T K." };
+        ModComponetSolverInformation["ForeignExchangeRates"] = new ModuleInformation { moduleID = "ForeignExchangeRates", moduleDisplayName = "Foreign Exchange Rates", helpText = "Solve the module with !{0} press ML. Positions are TL, TM, TR, ML, MM, MR, BL, BM, BR." };
+        ModComponetSolverInformation["Listening"] = new ModuleInformation { moduleID = "Listening", moduleDisplayName = "Listening", helpText = "Listen to the sound with !{0} press play. Enter the response with !{0} press $ & * * #." };
+        ModComponetSolverInformation["OrientationCube"] = new ModuleInformation { moduleID = "OrientationCube", moduleDisplayName = "Orientation Cube", helpText = "Move the cube with !{0} press cw l set.  The buttons are l, r, cw, ccw, set." };
+        ModComponetSolverInformation["Probing"] = new ModuleInformation { moduleID = "Probing", moduleDisplayName = "Probing", helpText = "Get the readings with !{0} cycle. Try a combination with !{0} connect 4 3.  Cycle reads 1&2, 1&3, 1&4, 1&5, 1&6." };
+        ModComponetSolverInformation["TurnTheKey"] = new ModuleInformation { moduleID = "TurnTheKey", moduleDisplayName = "Turn The Key", helpText = "Turn the key at specified time with !{0} turn 8:29" };
+        ModComponetSolverInformation["TurnTheKeyAdvanced"] = new ModuleInformation { moduleID = "TurnTheKeyAdvanced", moduleDisplayName = "Turn The Keys", helpText = "Turn the left key with !{0} turn left. Turn the right key with !{0} turn right." };
+
+        ModComponetSolverInformation["TwoBits"] = new ModuleInformation { moduleID = "TwoBits", moduleDisplayName = "Two Bits", helpText = "Query the answer with !{0} press K T query. Submit the answer with !{0} press G Z submit." };
+
+        ModComponetSolverInformation["WireSetComponentSolver"] = new ModuleInformation { moduleID = "WireSetComponentSolver", moduleDisplayName = "Simple Wires", helpText = "!{0} cut 3 [cut wire 3] | Wires are ordered from top to bottom | Empty spaces are not counted" };
+        ModComponetSolverInformation["ButtonComponentSolver"] = new ModuleInformation { moduleID = "ButtonComponentSolver", moduleDisplayName = "Big Button", helpText = "!{0} tap [tap the button] | !{0} hold [hold the button] | !{0} release 7 [release when the digit shows 7]" };
+        ModComponetSolverInformation["WireSequenceComponentSolver"] = new ModuleInformation { moduleID = "WireSequenceComponentSolver", moduleDisplayName = "Wire Sequence", helpText = "!{0} cut 7 [cut wire 7] | !{0} down, !{0} d [next stage] | !{0} up, !{0} u [previous stage] | !{0} cut 7 8 9 d [cut multiple wires and continue] | Use the numbers shown on the module", manualCode = "Wire Sequences" };
+        ModComponetSolverInformation["WhosOnFirstComponentSolver"] = new ModuleInformation { moduleID = "WhosOnFirstComponentSolver", moduleDisplayName = "Who's on First", helpText = "!{0} what? [press the button that says \"WHAT?\"] | The phrase must match exactly | Not case sensitive", manualCode = "Who%E2%80%99s on First" };
+        ModComponetSolverInformation["VennWireComponentSolver"] = new ModuleInformation { moduleID = "VennWireComponentSolver", moduleDisplayName = "Complicated Wires", helpText = "!{0} cut 3 [cut wire 3] | !{0} cut 2 3 6 [cut multiple wires] | Wires are ordered from left to right | Empty spaces are not counted" };
+        ModComponetSolverInformation["ButtonComponentSolver"] = new ModuleInformation { moduleID = "ButtonComponentSolver", moduleDisplayName = "Simon Says", helpText = "!{0} press red green blue yellow, !{0} press rgby [press a sequence of colours] | You must include the input from any previous stages" };
+        ModComponetSolverInformation["PasswordComponentSolver"] = new ModuleInformation { moduleID = "PasswordComponentSolver", moduleDisplayName = "Password", helpText = "!{0} cycle 3 [cycle through the letters in column 3] | !{0} world [try to submit a word]", manualCode = "Passwords" };
+        ModComponetSolverInformation["NeedyVentComponentSolver"] = new ModuleInformation { moduleID = "NeedyVentComponentSolver", moduleDisplayName = "Needy Vent Gas", helpText = "!{0} yes, !{0} y [answer yes] | !{0} no, !{0} n [answer no]" };
+        ModComponetSolverInformation["NeedyKnobComponentSolver"] = new ModuleInformation { moduleID = "NeedyKnobComponentSolver", moduleDisplayName = "Needy Knob", helpText = "!{0} rotate 3, !{0} turn 3 [rotate the knob 3 quarter-turns]", manualCode = "Knobs" };
+        ModComponetSolverInformation["NeedyDischargeComponentSolver"] = new ModuleInformation { moduleID = "NeedyDischargeComponentSolver", moduleDisplayName = "Needy Capacitor", helpText = "!{0} hold 7 [hold the lever for 7 seconds]", manualCode = "Capacitor Discharge" };
+        ModComponetSolverInformation["MorseCodeComponentSolver"] = new ModuleInformation { moduleID = "MorseCodeComponentSolver", moduleDisplayName = "Morse Code", helpText = "!{0} transmit 3.573, !{0} trans 573, !{0} tx 573 [transmit frequency 3.573]" };
+        ModComponetSolverInformation["MemoryComponentSolver"] = new ModuleInformation { moduleID = "MemoryComponentSolver", moduleDisplayName = "Memory", helpText = "!{0} position 2, !{0} pos 2, !{0} p 2 [2nd position] | !{0} label 3, !{0} lab 3, !{0} l 3 [label 3]" };
+        ModComponetSolverInformation["KeypadComponentSolver"] = new ModuleInformation { moduleID = "KeypadComponentSolver", moduleDisplayName = "Keypad", helpText = "!{0} press 3 1 2 4 | The buttons are 1=TL, 2=TR, 3=BL, 4=BR", manualCode = "Keypads" };
+        ModComponetSolverInformation["InvisibleWallsComponentSolver"] = new ModuleInformation { moduleID = "InvisibleWallsComponentSolver", moduleDisplayName = "Maze", helpText = "!{0} move up down left right, !{0} move udlr [make a series of white icon moves]", manualCode = "Mazes" };
+
 
         //Help Messages
         //ModComponetSolverInformation["spwiz3DMaze"] = new ModuleInformation { helpText = ""};
@@ -140,7 +178,7 @@ public static class ComponentSolverFactory
             ModComponetSolverInformation[key].moduleID = key;
     }
 
-    private static ModuleInformation GetModuleInfo(string moduleType)
+    public static ModuleInformation GetModuleInfo(string moduleType)
     {
         if (!ModComponetSolverInformation.ContainsKey(moduleType))
         {
@@ -242,18 +280,18 @@ public static class ComponentSolverFactory
 
             case ComponentTypeEnum.Mod:
                 KMBombModule solvableModule = bombComponent.GetComponent<KMBombModule>();
-                return CreateModComponentSolver(bombCommander, bombComponent, ircConnection, canceller, solvableModule.ModuleType);                
+                return CreateModComponentSolver(bombCommander, bombComponent, ircConnection, canceller, solvableModule.ModuleType, solvableModule.ModuleDisplayName);                
 
             case ComponentTypeEnum.NeedyMod:
                 KMNeedyModule needyModule = bombComponent.GetComponent<KMNeedyModule>();
-                return CreateModComponentSolver(bombCommander, bombComponent, ircConnection, canceller, needyModule.ModuleType);
+                return CreateModComponentSolver(bombCommander, bombComponent, ircConnection, canceller, needyModule.ModuleType, needyModule.ModuleDisplayName);
 
             default:
                 throw new NotSupportedException(string.Format("Currently {0} is not supported by 'Twitch Plays'.", (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null)));
         }
     }
 
-    private static ComponentSolver CreateModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, string moduleType)
+    private static ComponentSolver CreateModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, string moduleType, string displayName)
     {
         if (ModComponentSolverCreators.ContainsKey(moduleType))
         {
@@ -264,7 +302,7 @@ public static class ComponentSolverFactory
 
         Debug.LogFormat("Attempting to find a valid process command method to respond with on component {0}...", moduleType);
 
-        ModComponentSolverDelegate modComponentSolverCreator = GenerateModComponentSolverCreator(bombComponent, moduleType);
+        ModComponentSolverDelegate modComponentSolverCreator = GenerateModComponentSolverCreator(bombComponent, moduleType, displayName);
         if (modComponentSolverCreator == null)
         {
             throw new NotSupportedException(string.Format("Currently {0} is not supported by 'Twitch Plays' - Could not generate a valid componentsolver for the mod component!", (string)CommonReflectedTypeInfo.ModuleDisplayNameField.Invoke(bombComponent, null)));
@@ -275,7 +313,7 @@ public static class ComponentSolverFactory
         return modComponentSolverCreator(bombCommander, bombComponent, ircConnection, canceller);
     }
 
-    private static ModComponentSolverDelegate GenerateModComponentSolverCreator(MonoBehaviour bombComponent, string moduleType)
+    private static ModComponentSolverDelegate GenerateModComponentSolverCreator(MonoBehaviour bombComponent, string moduleType, string displayName)
     {
         ModCommandType commandType = ModCommandType.Simple;
         Type commandComponentType = null;
@@ -290,13 +328,19 @@ public static class ComponentSolverFactory
         ModuleInformation info = GetModuleInfo(moduleType);
         if (!info.helpTextOverride && FindHelpMessage(bombComponent, out help))
         {
-            ModuleData.DataHasChanged |= !info.helpText.Equals(help);
+            if (help != null)
+                ModuleData.DataHasChanged |= !help.Equals(info.helpText);
+            else
+                ModuleData.DataHasChanged |= info.helpText != null;
             info.helpText = help;
         }
 
         if (!info.manualCodeOverride && FindManualCode(bombComponent, out manual))
         {
-            ModuleData.DataHasChanged |= !info.manualCode.Equals(manual);
+            if (manual != null)
+                ModuleData.DataHasChanged |= !manual.Equals(info.manualCode);
+            else
+                ModuleData.DataHasChanged |= info.manualCode != null;
             info.manualCode = manual;
         }
 
@@ -329,19 +373,12 @@ public static class ComponentSolverFactory
             info.validCommands = regexList;
         }
 
-        KMBombModule bombmodule = bombComponent.GetComponent<KMBombModule>();
-        if (bombmodule != null)
-        {
-            ModuleData.DataHasChanged |= !info.moduleDisplayName.Equals(bombmodule.ModuleDisplayName);
-            info.moduleDisplayName = bombmodule.ModuleDisplayName;
-        }
+        if (displayName != null)
+            ModuleData.DataHasChanged |= !displayName.Equals(info.moduleDisplayName);
+        else
+            ModuleData.DataHasChanged |= info.moduleID != null;
 
-        KMNeedyModule needymodule = bombComponent.GetComponent<KMNeedyModule>();
-        if (needymodule != null)
-        {
-            ModuleData.DataHasChanged |= !info.moduleDisplayName.Equals(needymodule.ModuleDisplayName);
-            info.moduleDisplayName = needymodule.ModuleDisplayName;
-        }
+        info.moduleDisplayName = displayName;
         ModuleData.WriteDataToFile();
 
         if (method != null)

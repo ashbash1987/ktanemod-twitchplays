@@ -10,7 +10,7 @@ public class CryptographyComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (MonoBehaviour[])_keysField.GetValue(bombComponent.GetComponent(_componentType));
-        helpMessage = "Solve the cryptography puzzle with !{0} press N B V T K.";
+        modInfo = ComponentSolverFactory.GetModuleInfo(GetModuleType());
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

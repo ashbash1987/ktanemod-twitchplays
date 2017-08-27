@@ -12,9 +12,7 @@ public class WireSequenceComponentSolver : ComponentSolver
         _wireSequence = (IList)_wireSequenceField.GetValue(bombComponent);
         _upButton = (MonoBehaviour)_upButtonField.GetValue(bombComponent);
         _downButton = (MonoBehaviour)_downButtonField.GetValue(bombComponent);
-
-        helpMessage = "!{0} cut 7 [cut wire 7] | !{0} down, !{0} d [next stage] | !{0} up, !{0} u [previous stage] | !{0} cut 7 8 9 d [cut multiple wires and continue] | Use the numbers shown on the module";
-        manualCode = "Wire Sequences";
+        modInfo = ComponentSolverFactory.GetModuleInfo("WireSequenceComponentSolver");
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

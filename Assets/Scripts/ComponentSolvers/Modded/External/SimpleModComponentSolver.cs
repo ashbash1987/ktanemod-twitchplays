@@ -11,13 +11,7 @@ public class SimpleModComponentSolver : ComponentSolver
     {
         ProcessMethod = processMethod;
         CommandComponent = commandComponent;
-        helpMessage = info.helpText;
-        manualCode = info.manualCode;
-        statusLightLeft = info.statusLightLeft;
-        statusLightBottom = info.statusLightDown;
-        IDRotation = info.chatRotation;
-        RegexList = info.validCommands;
-        doesTheRightThing = info.DoesTheRightThing;
+        modInfo = info;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -32,10 +26,10 @@ public class SimpleModComponentSolver : ComponentSolver
 
         try
         {
-            bool RegexValid = RegexList == null;
+            bool RegexValid = modInfo.validCommands == null;
             if (!RegexValid)
             {
-                foreach (string regex in RegexList)
+                foreach (string regex in modInfo.validCommands)
                 {
                     RegexValid = Regex.IsMatch(inputCommand, regex, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
                     if (RegexValid)
@@ -60,7 +54,7 @@ public class SimpleModComponentSolver : ComponentSolver
             yield break;
         }
 
-        if (!doesTheRightThing)
+        if (!modInfo.DoesTheRightThing)
         {
             yield return "modsequence";
         }

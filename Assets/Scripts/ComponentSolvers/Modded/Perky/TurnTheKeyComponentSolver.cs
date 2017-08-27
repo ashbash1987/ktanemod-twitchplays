@@ -10,7 +10,7 @@ public class TurnTheKeyComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _lock = (MonoBehaviour)_lockField.GetValue(bombComponent.GetComponent(_componentType));
-        helpMessage = "Turn the key at specified time with !{0} turn 8:29";
+        modInfo = ComponentSolverFactory.GetModuleInfo(GetModuleType());
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

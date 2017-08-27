@@ -209,13 +209,18 @@ public abstract class ComponentSolver : ICommandResponder
     public void UpdateModuleInformation(ModuleInformation info)
     {
         if (info == null) return;
-        statusLightBottom = info.statusLightDown;
-        statusLightLeft = info.statusLightLeft;
-        IDRotation = info.chatRotation;
-        doesTheRightThing = info.DoesTheRightThing;
-        RegexList = info.validCommands;
-        helpMessage = info.helpText;
-        manualCode = info.manualCode;
+        modInfo = info;
+    }
+
+    protected string GetModuleType()
+    {
+        KMBombModule bombModule = BombComponent.GetComponent<KMBombModule>();
+        if (bombModule != null)
+            return bombModule.ModuleType;
+        KMNeedyModule needyModule = BombComponent.GetComponent<KMNeedyModule>();
+        if (needyModule != null)
+            return needyModule.ModuleType;
+        return null;
     }
     #endregion
 
@@ -481,14 +486,9 @@ public abstract class ComponentSolver : ICommandResponder
     private ICommandResponseNotifier _currentResponseNotifier = null;
     private string _currentUserNickName = null;
     #endregion
-    
-    public string helpMessage = null;
-    public string manualCode = null;
-    public bool statusLightLeft = false;
-    public bool statusLightBottom = false;
-    public float IDRotation = 0;
-    public string[] RegexList = null;
-    public bool doesTheRightThing = false;
+
+
+    public ModuleInformation modInfo = null;
     public int cameraPriority = ModuleCameras.CameraNotInUse;
 
     public bool _turnQueued = false;

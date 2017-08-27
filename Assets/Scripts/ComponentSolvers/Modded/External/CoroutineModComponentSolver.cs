@@ -12,15 +12,9 @@ public class CoroutineModComponentSolver : ComponentSolver
     {
         ProcessMethod = processMethod;
         CommandComponent = commandComponent;
-        helpMessage = info.helpText;
-        manualCode = info.manualCode;
         TryCancelField = cancelfield;
         TryCancelComponentSolverType = canceltype;
-        statusLightLeft = info.statusLightLeft;
-        statusLightBottom = info.statusLightDown;
-        IDRotation = info.chatRotation;
-        RegexList = info.validCommands;
-        doesTheRightThing = info.DoesTheRightThing;
+        modInfo = info;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -34,10 +28,10 @@ public class CoroutineModComponentSolver : ComponentSolver
         int beforeStrikeCount = StrikeCount;
         IEnumerator responseCoroutine = null;
 
-        bool RegexValid = RegexList == null;
+        bool RegexValid = modInfo.validCommands == null;
         if (!RegexValid)
         {
-            foreach (string regex in RegexList)
+            foreach (string regex in modInfo.validCommands)
             {
                 RegexValid = Regex.IsMatch(inputCommand, regex, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
                 if (RegexValid)
@@ -69,7 +63,7 @@ public class CoroutineModComponentSolver : ComponentSolver
         //code would never be executed until absolutely necessary.
         //There is the side-effect though that invalid commands sent to the module will appear as if they were 'correctly' processed, by executing the focus.
         //I'd rather have interactions that are not broken by timing mismatches, even if the tradeoff is that it looks like it accepted invalid commands.
-        if (!doesTheRightThing)
+        if (!modInfo.DoesTheRightThing)
         {
             yield return "modcoroutine";
         }

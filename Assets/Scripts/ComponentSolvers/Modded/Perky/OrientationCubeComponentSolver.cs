@@ -14,8 +14,7 @@ public class OrientationCubeComponentSolver : ComponentSolver
         _right = (MonoBehaviour)_rightField.GetValue(bombComponent.GetComponent(_componentType));
         _ccw = (MonoBehaviour)_ccwField.GetValue(bombComponent.GetComponent(_componentType));
         _cw = (MonoBehaviour)_cwField.GetValue(bombComponent.GetComponent(_componentType));
-
-        helpMessage = "Move the cube with !{0} press cw l set.  The buttons are l, r, cw, ccw, set.";
+        modInfo = ComponentSolverFactory.GetModuleInfo(GetModuleType());
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
