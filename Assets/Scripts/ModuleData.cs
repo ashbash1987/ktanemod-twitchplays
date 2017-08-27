@@ -2,9 +2,12 @@
 using System.IO;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 public class ModuleInformation
 {
+    public string moduleDisplayName = string.Empty;
     public string moduleID;
     public string helpText;
     public string manualCode;
@@ -13,19 +16,25 @@ public class ModuleInformation
     public float chatRotation;
     public string[] validCommands;
     public bool DoesTheRightThing;
+    public bool helpTextOverride;
+    public bool manualCodeOverride;
+    public bool statusLightOverride;
+    public bool validCommandsOverride;
 }
 
 public static class ModuleData
 {
-    public static ModuleInformation[] modInfo;
-    private static bool _dataRead = false;
+    public static bool DataHasChanged = true;
     public static void WriteDataToFile()
     {
-        if (!_dataRead) return;
+        if (!DataHasChanged) return;
         string path = Path.Combine(Application.persistentDataPath, usersSavePath);
+        Debug.LogFormat("ModuleData: Writing file {0}", path);
         try
         {
-            ModuleInformation[] infoList = ComponentSolverFactory.GetModuleInformation();
+            List<ModuleInformation> infoList = ComponentSolverFactory.GetModuleInformation().ToList();
+            infoList = infoList.OrderBy(info => info.moduleDisplayName).ThenBy(info => info.moduleID).ToList();
+
             File.WriteAllText(path,JsonConvert.SerializeObject(infoList, Formatting.Indented));
         }
         catch (FileNotFoundException)
@@ -38,10 +47,13 @@ public static class ModuleData
             Debug.LogException(ex);
             return;
         }
+        DataHasChanged = false;
+        Debug.LogFormat("ModuleData: Writing of file {0} completed successfully", path);
     }
 
-    public static void LoadDataFromFile()
+    public static bool LoadDataFromFile()
     {
+        ModuleInformation[] modInfo;
         string path = Path.Combine(Application.persistentDataPath, usersSavePath);
         try
         {
@@ -51,19 +63,18 @@ public static class ModuleData
         catch (FileNotFoundException)
         {
             Debug.LogWarningFormat("ModuleData: File {0} was not found.", path);
-            return;
+            return false;
         }
         catch (Exception ex)
         {
             Debug.LogException(ex);
-            return;
+            return false;
         }
         foreach (ModuleInformation info in modInfo)
         {
            ComponentSolverFactory.AddModuleInformation(info);
         }
-        _dataRead = true;
-        WriteDataToFile();
+        return true;
     }
 
     public static string usersSavePath = "ModuleInformation.json";

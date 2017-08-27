@@ -6,18 +6,18 @@ using UnityEngine;
 
 public class SimpleModComponentSolver : ComponentSolver
 {
-    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool statusLeft, bool statusBottom, float rotation, string[] regexList, bool doestherightthing) :
+    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, ModuleInformation info) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
         CommandComponent = commandComponent;
-        helpMessage = help;
-        manualCode = manual;
-        statusLightLeft = statusLeft;
-        statusLightBottom = statusBottom;
-        IDRotation = rotation;
-        RegexList = regexList;
-        doesTheRightThing = doestherightthing;
+        helpMessage = info.helpText;
+        manualCode = info.manualCode;
+        statusLightLeft = info.statusLightLeft;
+        statusLightBottom = info.statusLightDown;
+        IDRotation = info.chatRotation;
+        RegexList = info.validCommands;
+        doesTheRightThing = info.DoesTheRightThing;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

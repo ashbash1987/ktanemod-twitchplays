@@ -7,20 +7,20 @@ using UnityEngine;
 
 public class CoroutineModComponentSolver : ComponentSolver
 {
-    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, FieldInfo cancelfield, Type canceltype, bool statusLeft, bool statusBottom, float rotation, string[] regexList, bool doestherightthing) :
+    public CoroutineModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, FieldInfo cancelfield, Type canceltype, ModuleInformation info) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
         CommandComponent = commandComponent;
-        helpMessage = help;
-        manualCode = manual;
+        helpMessage = info.helpText;
+        manualCode = info.manualCode;
         TryCancelField = cancelfield;
         TryCancelComponentSolverType = canceltype;
-        statusLightLeft = statusLeft;
-        statusLightBottom = statusBottom;
-        IDRotation = rotation;
-        RegexList = regexList;
-        doesTheRightThing = doestherightthing;
+        statusLightLeft = info.statusLightLeft;
+        statusLightBottom = info.statusLightDown;
+        IDRotation = info.chatRotation;
+        RegexList = info.validCommands;
+        doesTheRightThing = info.DoesTheRightThing;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

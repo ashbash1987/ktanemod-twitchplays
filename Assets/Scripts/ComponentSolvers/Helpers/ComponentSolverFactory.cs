@@ -9,13 +9,7 @@ public static class ComponentSolverFactory
 {
     private delegate ComponentSolver ModComponentSolverDelegate(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller);
     private static readonly Dictionary<string, ModComponentSolverDelegate> ModComponentSolverCreators;
-    private static readonly Dictionary<string, string> ModComponentSolverHelpMessages;
-    private static readonly Dictionary<string, string> ModComponentSolverManualCodes;
-    private static readonly Dictionary<string, bool> ModComponentSolverStatusLightLeft;
-    private static readonly Dictionary<string, bool> ModComponentSolverStatusLightBottom;
-    private static readonly Dictionary<string, float> ModComponentSolverChatRotation;
-    private static readonly Dictionary<string, string[]> ModComponentSolverRegexList;
-    private static readonly Dictionary<string, bool> ModComponentSolverDoesTheRightThing;
+    private static readonly Dictionary<string, ModuleInformation> ModComponetSolverInformation;
 
     private enum ModCommandType
     {
@@ -26,13 +20,7 @@ public static class ComponentSolverFactory
     static ComponentSolverFactory()
     {
         ModComponentSolverCreators = new Dictionary<string, ModComponentSolverDelegate>();
-        ModComponentSolverHelpMessages = new Dictionary<string, string>();
-        ModComponentSolverManualCodes = new Dictionary<string, string>();
-        ModComponentSolverStatusLightLeft = new Dictionary<string, bool>();
-        ModComponentSolverStatusLightBottom = new Dictionary<string, bool>();
-        ModComponentSolverChatRotation = new Dictionary<string, float>();
-        ModComponentSolverRegexList = new Dictionary<string, string[]>();
-        ModComponentSolverDoesTheRightThing = new Dictionary<string, bool>();
+        ModComponetSolverInformation = new Dictionary<string, ModuleInformation>();
 
         //AT_Bash Modules
         ModComponentSolverCreators["MotionSense"] = (bombCommander, bombComponent, ircConnection, canceller) => new MotionSenseComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
@@ -63,278 +51,147 @@ public static class ComponentSolverFactory
 
 
         //Help Messages
-        //ModComponentSolverHelpMessages["spwiz3DMaze"] = "";
-        ModComponentSolverHelpMessages["AdjacentLettersModule"] = "Set the Letters with !{0} set W D J S.  (warning, this will unset ALL letters not specified.)  Submit your answer with !{0} submit.";
-        ModComponentSolverHelpMessages["spwizAdventureGame"] = "Cycle the stats with !{0} cycle stats.  Cycle the Weapons/Items with !{0} cycle items. Use weapons/Items with !{0} use potion. (spell out the item name completely. not case sensitive)";
-        //ModComponentSolverHelpMessages["alphabet"] = "";
-        //ModComponentSolverHelpMessages["AnagramsModule"] = "";
-        ModComponentSolverHelpMessages["spwizAstrology"] = "Press good on 3 with !{0} press good on 3.  Press bad on 2 with !{0} press bad on 2. No Omen is !{0} press no";
-        ModComponentSolverHelpMessages["BattleshipModule"] = "Scan the safe spots with !{0} scan A2 B3 E5. Mark the spots as water with !{0} miss A1 A3 B4.  Mark the spots as ships with !{0} hit E3 E4. Fill in the rows with !{0} row 3 4. Fill in columns with !{0} col B D";
-        ModComponentSolverHelpMessages["BitmapsModule"] = "Submit the correct answer with !{0} press 2.";
-        ModComponentSolverHelpMessages["BitOps"] = "Submit the correct answer with !{0} submit 10101010.";
-        ModComponentSolverHelpMessages["BlindAlleyModule"] = "Hit the correct spots with !{0} press bl mm tm tl.  (Locations are tl, tm, ml, mm, mr, bl, bm, br)";
-        ModComponentSolverHelpMessages["booleanVennModule"] = "Select parts of the diagram with !{0} a bc abc. Options are A, AB, ABC, AC, B, BC, C, O (none).";
-        ModComponentSolverHelpMessages["BrokenButtonsModule"] = "Press the button by name with !{0} press \"this\".  Press the button in column 2 row 3 with !{0} press 2 3. Press the right submit button with !{0} submit right.";
-        ModComponentSolverHelpMessages["CaesarCipherModule"] = "Press the correct cipher text with !{0} press K B Q I S.";
-        ModComponentSolverHelpMessages["CheapCheckoutModule"] = "Cycle the items with !{0} items. Get customers to pay the correct amount with !{0} submit.  Return the proper change with !{0} submit 3.24.";
-        ModComponentSolverHelpMessages["ChessModule"] = "Cycle the positions with !{0} cycle.  Submit the safe spot with !{0} press C2.";
-        //ModComponentSolverHelpMessages["ChordQualities"] = "";
-        ModComponentSolverHelpMessages["colormath"] = "Set the correct number with !{0} set a,k,m,y.  Submit your set answer with !{0} submit. colors are Red, Orange, Yellow, Green, Blue, Purple, Magenta, White, grAy, blackK. (note what letter is capitalized in each color.)";
-        ModComponentSolverHelpMessages["ColoredSquaresModule"] = "Press the desired squares with !{0} red, !{0} green, !{0} blue, !{0} yellow, !{0} magenta, !{0} row, or !{0} col.";
-        ModComponentSolverHelpMessages["ColourFlash"] = "Submit the correct response with !{0} press yes 3, or !{0} press no 5.";
-        //ModComponentSolverHelpMessages["combinationLock"] = "";
-        ModComponentSolverHelpMessages["complicatedButtonsModule"] = "Press the top button with !{0} press top (also t, 1, etc.).";
-        ModComponentSolverHelpMessages["graphModule"] = "Submit an answer with !{0} submit green red true false. Order is TL, TR, BL, BR."; // Connection Check
-        ModComponentSolverHelpMessages["CoordinatesModule"] = "Cycle the options with !{0} cycle.  Submit your answer with !{0} submit <3,2>.  Partial answers are acceptable. To do chinese numbers, its !{0} submit chinese 12.";
-        ModComponentSolverHelpMessages["CreationModule"] = "Combine two elements with !{0} combine water fire.";
-        ModComponentSolverHelpMessages["DoubleOhModule"] = "Cycle the buttons with !{0} cycle. (Cycle presses each button 3 times, in the order of vert1, horiz1, horiz2, vert2, submit.)  Submit your answer with !{0} press vert1 horiz1 horiz2 vert2 submit.";
-        //ModComponentSolverHelpMessages["EdgeworkModule"] = "";
-        //ModComponentSolverHelpMessages["Emoji Math"] = "";
-        //ModComponentSolverHelpMessages["EnglishTest"] = "";
-        ModComponentSolverHelpMessages["fastMath"] = "Start the timer with !{0} go. Submit an answer with !{0} submit 12.";
-        //ModComponentSolverHelpMessages["Filibuster"] = "";
-        ModComponentSolverHelpMessages["fizzBuzzModule"] = "Press the top button with !{0} press top (also t, 1, etc.). Submit with !{0} press submit.";
-        ModComponentSolverHelpMessages["FollowTheLeaderModule"] = "Cut the wires in the order specified with !{0} cut 12 10 8 7 6 5 3 1. (note that order was the Lit CLR rule.)";
-        ModComponentSolverHelpMessages["FriendshipModule"] = "Submit the desired friendship element with !{0} submit Fairness Conscientiousness Kindness Authenticity.";
-        ModComponentSolverHelpMessages["HexamazeModule"] = "Move towards the exit with !{0} move 12 10 6 6 6 2, or with !{0} move N NW S S S NE.  (clockface or cardinal)";
-        ModComponentSolverHelpMessages["http"] = "Submit the response with !{0} resp 123.";
-        ModComponentSolverHelpMessages["iceCreamModule"] = "Move left/right with !{0} left and !{0} right. Sell with !{0} sell.";
-        ModComponentSolverHelpMessages["Laundry"] = "Set all of the options with !{0} set all 30C,2 dot,110C,Wet Cleaning.  Set just washing with !{0} set wash 40C.  Submit with !{0} insert coin. ...pray for that 4 in 2 & lit BOB Kappa";
-        ModComponentSolverHelpMessages["LEDEnc"] = "Press the button with label B with !{0} press b.";
-        //ModComponentSolverHelpMessages["LetterKeys"] = "";
-        ModComponentSolverHelpMessages["LightCycleModule"] = "Submit your answer with !{0} B R W M G Y. (note, this module WILL try to input any answer you put into it. Don't do !{0} claim or !{0} mine here.)";
-        ModComponentSolverHelpMessages["LightsOut"] = "Press the buttons with !{0} press 1 2 3. Buttons ordered from top to bottom, then left to right.";
-        ModComponentSolverHelpMessages["Logic"] = "Logic is answered with !{0} submit F T.";
-        //ModComponentSolverHelpMessages["MazeV2"] = "";
-        //ModComponentSolverHelpMessages["Microcontroller"] = "";
-        ModComponentSolverHelpMessages["MinesweeperModule"] = "Clear the initial colour with !{0} dig blue. Clear the square on column 1 row 2 with !{0} dig 1 2. Flag the square on column 3 row 4 with !{0} flag 3 4. Separate multiple squares with a semicolon to interact with all of them.";
-        ModComponentSolverHelpMessages["ModuleAgainstHumanity"] = "Reset the module with !{0} press reset.  Move the black card +2 with !{0} move black 2.  Move the white card -3 with !{0} move white -3. Submit with !{0} press submit.";
-        ModComponentSolverHelpMessages["monsplodeFight"] = "Use a move with !{0} use explode.";
-        //ModComponentSolverHelpMessages["monsplodeWho"] = "";
-        //ModComponentSolverHelpMessages["MorseV2"] = "";
-        ModComponentSolverHelpMessages["MouseInTheMaze"] = "Move with !{0} forward back. Turn with !{0} left right u-turn. The first letter only can be used instead. Submit with !{0} submit.";
-        //ModComponentSolverHelpMessages["murder"] = "";
-        //ModComponentSolverHelpMessages["MusicRhythms"] = "";
-        ModComponentSolverHelpMessages["MysticSquareModule"] = "Move the numbers around with !{0} press 1 3 2 1 3 4 6 8.  (Note, this module will NOT stop moving numbers around on a strike. Make sure that knight gets uncovered asap.)";
-        //ModComponentSolverHelpMessages["Needy Math"] = "";
-        ModComponentSolverHelpMessages["neutralization"] = "Select a base with !{0} base NaOH. Turn the filter on/off with !{0} filter. Set drop count with !{0} conc set 48. Submit with !{0} titrate.";
-        //ModComponentSolverHelpMessages["NumberPad"] = "";
-        ModComponentSolverHelpMessages["OnlyConnectModule"] = "Press a button by position with !{0} press tm or !{0} press 2. Round 1 also accepts symbol names (e.g. reeds, eye, flax, lion, water, viper).";
-        //ModComponentSolverHelpMessages["spwizPerspectivePegs"] = "";
-        ModComponentSolverHelpMessages["PianoKeys"] = "Submit your answer with !{0} press Bb Bb Bb Bb Gb Ab Bb Ab Bb.";
-        //ModComponentSolverHelpMessages["resistors"] = "";
-        ModComponentSolverHelpMessages["RockPaperScissorsLizardSpockModule"] = "Submit your answer with !{0} press scissors lizard.";
-        ModComponentSolverHelpMessages["RubiksCubeModule"] = "View the colors on all sides with !{0} rotate. Reset the cube to starting state with !{0} reset. Solve the Cube with !{0} r' d u f' r' d' u b' u' f";
-        ModComponentSolverHelpMessages["screw"] = "Screw with !{0} screw tr or !{0} screw 3. Options are TL, TM, TR, BL, BM, BR. Press a button with !{0} press b or !{0} press 2.";
-        //ModComponentSolverHelpMessages["SeaShells"] = "";
-        ModComponentSolverHelpMessages["Semaphore"] = "Move to the next flag with !{0} move right or !{0} press right. Move to previous flag with !{0} move left or !{0} press left.  Submit with !{0} press ok.";
-        //ModComponentSolverHelpMessages["shapeshift"] = "";
-        ModComponentSolverHelpMessages["SillySlots"] = "Keep the slots with !{0} keep.  Pull the slots with !{0} pull.";
-        ModComponentSolverHelpMessages["SimonScreamsModule"] = "Press the correct colors for each round with !{0} press B O Y.";
-        ModComponentSolverHelpMessages["SkewedSlotsModule"] = "Submit the correct response with !{0} submit 1 2 3.";
-        ModComponentSolverHelpMessages["SouvenirModule"] = "Submit the correct response with !{0} answer 3. Order is from top to bottom, then left to right.";
-        //ModComponentSolverHelpMessages["switchModule"] = "";
-        ModComponentSolverHelpMessages["symbolicPasswordModule"] = "Cycle a row with cycle t l. Cycle a column with cycle m. Submit with !{0} submit. Rows are TL/TR/BL/BR, columns are L/R/M. Spaces are important!";
-        //ModComponentSolverHelpMessages["spwizTetris"] = "";
-        ModComponentSolverHelpMessages["TextField"] = "Press the button in Row 2 column 3 and Row 3 Column 4 with !{0} press 3,2 4,3.";
-        ModComponentSolverHelpMessages["TheBulbModule"] = "Press O with !{0} press O.  Press I with !{0} press I. Unscrew the bulb with !{0} unscrew.  Screw in the bulb with !{0} screw.";
-        ModComponentSolverHelpMessages["TheClockModule"] = "Submit a time with !{0} set 12:34 am. Command must include a 12-hour time followed by AM/PM.";
-        ModComponentSolverHelpMessages["TheGamepadModule"] = "Submit your answer with !{0} submit l r u d a b.";
-        ModComponentSolverHelpMessages["ThirdBase"] = "Press a button with !{0} z0s8. Word must match the button as it would appear if the module was the right way up. Not case sensitive.";
-        ModComponentSolverHelpMessages["TicTacToeModule"] = "Press a button with !{0} tl. Buttons are tl, tm, tr, ml, mm, mr, bl, bm, br.";
-        ModComponentSolverHelpMessages["webDesign"] = "Accept the design with !{0} acc.  Consider the design with !{0} con.  Reject the design with !{0} reject.";
-        ModComponentSolverHelpMessages["WirePlacementModule"] = "Cut the correct wires with !{0} cut A2 B4 D3.";
-        //ModComponentSolverHelpMessages["WordScrambleModule"] = "";
-        ModComponentSolverHelpMessages["WordSearchModule"] = "Select the word starting at column B row 3, and ending at column C row 4, with !{0} select B3 C4.";
-        ModComponentSolverHelpMessages["YahtzeeModule"] = "Roll the dice with !{0} roll. Keep some dice with !{0} keep white,purple,blue,yellow,black. Roll the remaining dice until a 3 appears with !{0} roll until 3.";
-        
-        //Manual Codes
-        ModComponentSolverManualCodes["ColourFlash"] = "Color Flash";
-        ModComponentSolverManualCodes["RockPaperScissorsLizardSpockModule"] = "Rock-Paper-Scissors-Lizard-Spock";
-        ModComponentSolverManualCodes["TicTacToeModule"] = "Tic-Tac-Toe";
-        ModComponentSolverManualCodes["BitOps"] = "Bitwise Operators";
-        ModComponentSolverManualCodes["RubiksCubeModule"] = "Rubik%E2%80%99s Cube";
+        //ModComponetSolverInformation["spwiz3DMaze"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["spwizAdventureGame"] = new ModuleInformation { helpText = "Cycle the stats with !{0} cycle stats.  Cycle the Weapons/Items with !{0} cycle items. Use weapons/Items with !{0} use potion. (spell out the item name completely. not case sensitive)"};
+        ModComponetSolverInformation["AdjacentLettersModule"] = new ModuleInformation { helpText = "Set the Letters with !{0} set W D J S.  (warning, this will unset ALL letters not specified.)  Submit your answer with !{0} submit." };
+        //ModComponetSolverInformation["alphabet"] = new ModuleInformation { helpText = ""};
+        //ModComponetSolverInformation["AnagramsModule"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["spwizAstrology"] = new ModuleInformation { helpText = "Press good on 3 with !{0} press good on 3.  Press bad on 2 with !{0} press bad on 2. No Omen is !{0} press no"};
+        ModComponetSolverInformation["BattleshipModule"] = new ModuleInformation { helpText = "Scan the safe spots with !{0} scan A2 B3 E5. Mark the spots as water with !{0} miss A1 A3 B4.  Mark the spots as ships with !{0} hit E3 E4. Fill in the rows with !{0} row 3 4. Fill in columns with !{0} col B D"};
+        ModComponetSolverInformation["BitmapsModule"] = new ModuleInformation { helpText = "Submit the correct answer with !{0} press 2."};
+        ModComponetSolverInformation["BitOps"] = new ModuleInformation { helpText = "Submit the correct answer with !{0} submit 10101010.", manualCode = "Bitwise Operators", validCommands = new[] { "^submit [0-1]{8}$" } };
+        ModComponetSolverInformation["BlindAlleyModule"] = new ModuleInformation { helpText = "Hit the correct spots with !{0} press bl mm tm tl.  (Locations are tl, tm, ml, mm, mr, bl, bm, br)"};
+        ModComponetSolverInformation["booleanVennModule"] = new ModuleInformation { helpText = "Select parts of the diagram with !{0} a bc abc. Options are A, AB, ABC, AC, B, BC, C, O (none)."};
+        ModComponetSolverInformation["BrokenButtonsModule"] = new ModuleInformation { helpText = "Press the button by name with !{0} press \"this\".  Press the button in column 2 row 3 with !{0} press 2 3. Press the right submit button with !{0} submit right."};
+        ModComponetSolverInformation["CaesarCipherModule"] = new ModuleInformation { helpText = "Press the correct cipher text with !{0} press K B Q I S."};
+        ModComponetSolverInformation["CheapCheckoutModule"] = new ModuleInformation { helpText = "Cycle the items with !{0} items. Get customers to pay the correct amount with !{0} submit.  Return the proper change with !{0} submit 3.24."};
+        ModComponetSolverInformation["ChessModule"] = new ModuleInformation { helpText = "Cycle the positions with !{0} cycle.  Submit the safe spot with !{0} press C2."};
+        //ModComponetSolverInformation["ChordQualities"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["ColourFlash"] = new ModuleInformation { helpText = "Submit the correct response with !{0} press yes 3, or !{0} press no 5.", manualCode = "Color Flash" };
+        ModComponetSolverInformation["colormath"] = new ModuleInformation { helpText = "Set the correct number with !{0} set a,k,m,y.  Submit your set answer with !{0} submit. colors are Red, Orange, Yellow, Green, Blue, Purple, Magenta, White, grAy, blackK. (note what letter is capitalized in each color.)"};
+        ModComponetSolverInformation["ColoredSquaresModule"] = new ModuleInformation { helpText = "Press the desired squares with !{0} red, !{0} green, !{0} blue, !{0} yellow, !{0} magenta, !{0} row, or !{0} col."};
+        //ModComponetSolverInformation["combinationLock"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["complicatedButtonsModule"] = new ModuleInformation { helpText = "Press the top button with !{0} press top (also t, 1, etc.)."};
+        ModComponetSolverInformation["graphModule"] = new ModuleInformation { helpText = "Submit an answer with !{0} submit green red true false. Order is TL, TR, BL, BR."}; // Connection Check
+        ModComponetSolverInformation["CoordinatesModule"] = new ModuleInformation { helpText = "Cycle the options with !{0} cycle.  Submit your answer with !{0} submit <3,2>.  Partial answers are acceptable. To do chinese numbers, its !{0} submit chinese 12."};
+        ModComponetSolverInformation["CreationModule"] = new ModuleInformation { helpText = "Combine two elements with !{0} combine water fire."};
+        ModComponetSolverInformation["DoubleOhModule"] = new ModuleInformation { helpText = "Cycle the buttons with !{0} cycle. (Cycle presses each button 3 times, in the order of vert1, horiz1, horiz2, vert2, submit.)  Submit your answer with !{0} press vert1 horiz1 horiz2 vert2 submit."};
+        //ModComponetSolverInformation["EdgeworkModule"] = new ModuleInformation { helpText = ""};
+        //ModComponetSolverInformation["Emoji Math"] = new ModuleInformation { helpText = ""};
+        //ModComponetSolverInformation["EnglishTest"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["fastMath"] = new ModuleInformation { helpText = "Start the timer with !{0} go. Submit an answer with !{0} submit 12."};
+        //ModComponetSolverInformation["Filibuster"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["fizzBuzzModule"] = new ModuleInformation { helpText = "Press the top button with !{0} press top (also t, 1, etc.). Submit with !{0} press submit."};
+        ModComponetSolverInformation["FollowTheLeaderModule"] = new ModuleInformation { helpText = "Cut the wires in the order specified with !{0} cut 12 10 8 7 6 5 3 1. (note that order was the Lit CLR rule.)"};
+        ModComponetSolverInformation["FriendshipModule"] = new ModuleInformation { helpText = "Submit the desired friendship element with !{0} submit Fairness Conscientiousness Kindness Authenticity."};
+        ModComponetSolverInformation["HexamazeModule"] = new ModuleInformation { helpText = "Move towards the exit with !{0} move 12 10 6 6 6 2, or with !{0} move N NW S S S NE.  (clockface or cardinal)"};
+        ModComponetSolverInformation["http"] = new ModuleInformation { helpText = "Submit the response with !{0} resp 123."};
+        ModComponetSolverInformation["iceCreamModule"] = new ModuleInformation { helpText = "Move left/right with !{0} left and !{0} right. Sell with !{0} sell."};
+        ModComponetSolverInformation["Laundry"] = new ModuleInformation { helpText = "Set all of the options with !{0} set all 30C,2 dot,110C,Wet Cleaning.  Set just washing with !{0} set wash 40C.  Submit with !{0} insert coin. ...pray for that 4 in 2 & lit BOB Kappa"};
+        ModComponetSolverInformation["LEDEnc"] = new ModuleInformation { helpText = "Press the button with label B with !{0} press b."};
+        //ModComponetSolverInformation["LetterKeys"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["LightCycleModule"] = new ModuleInformation { helpText = "Submit your answer with !{0} B R W M G Y. (note, this module WILL try to input any answer you put into it. Don't do !{0} claim or !{0} mine here.)"};
+        ModComponetSolverInformation["LightsOut"] = new ModuleInformation { helpText = "Press the buttons with !{0} press 1 2 3. Buttons ordered from top to bottom, then left to right."};
+        ModComponetSolverInformation["Logic"] = new ModuleInformation { helpText = "Logic is answered with !{0} submit F T."};
+        //ModComponetSolverInformation["MazeV2"] = new ModuleInformation { helpText = ""};
+        //ModComponetSolverInformation["Microcontroller"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["MinesweeperModule"] = new ModuleInformation { helpText = "Clear the initial colour with !{0} dig blue. Clear the square on column 1 row 2 with !{0} dig 1 2. Flag the square on column 3 row 4 with !{0} flag 3 4. Separate multiple squares with a semicolon to interact with all of them."};
+        ModComponetSolverInformation["ModuleAgainstHumanity"] = new ModuleInformation { helpText = "Reset the module with !{0} press reset.  Move the black card +2 with !{0} move black 2.  Move the white card -3 with !{0} move white -3. Submit with !{0} press submit."};
+        ModComponetSolverInformation["monsplodeFight"] = new ModuleInformation { helpText = "Use a move with !{0} use explode."};
+        //ModComponetSolverInformation["monsplodeWho"] = new ModuleInformation { helpText = ""};
+        //ModComponetSolverInformation["MorseV2"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["MouseInTheMaze"] = new ModuleInformation { helpText = "Move with !{0} forward back. Turn with !{0} left right u-turn. The first letter only can be used instead. Submit with !{0} submit."};
+        //ModComponetSolverInformation["murder"] = new ModuleInformation { helpText = ""};
+        //ModComponetSolverInformation["MusicRhythms"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["MysticSquareModule"] = new ModuleInformation { helpText = "Move the numbers around with !{0} press 1 3 2 1 3 4 6 8.  (Note, this module will NOT stop moving numbers around on a strike. Make sure that knight gets uncovered asap.)"};
+        //ModComponetSolverInformation["Needy Math"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["neutralization"] = new ModuleInformation { helpText = "Select a base with !{0} base NaOH. Turn the filter on/off with !{0} filter. Set drop count with !{0} conc set 48. Submit with !{0} titrate."};
+        //ModComponetSolverInformation["NumberPad"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["OnlyConnectModule"] = new ModuleInformation { helpText = "Press a button by position with !{0} press tm or !{0} press 2. Round 1 also accepts symbol names (e.g. reeds, eye, flax, lion, water, viper)."};
+        //ModComponetSolverInformation["spwizPerspectivePegs"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["PianoKeys"] = new ModuleInformation { helpText = "Submit your answer with !{0} press Bb Bb Bb Bb Gb Ab Bb Ab Bb."};
+        //ModComponetSolverInformation["resistors"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["RockPaperScissorsLizardSpockModule"] = new ModuleInformation {  helpText = "Submit your answer with !{0} press scissors lizard.", manualCode = "Rock-Paper-Scissors-Lizard-Spock" };
+        ModComponetSolverInformation["RubiksCubeModule"] = new ModuleInformation { helpText = "View the colors on all sides with !{0} rotate. Reset the cube to starting state with !{0} reset. Solve the Cube with !{0} r' d u f' r' d' u b' u' f", manualCode = "Rubik%E2%80%99s Cube", validCommands = new[] { "^reset$", "^rotate$", "(?>[fbudlr]['2]?)(?> [fbudlr]['2]?)*$" } };
+        ModComponetSolverInformation["screw"] = new ModuleInformation { helpText = "Screw with !{0} screw tr or !{0} screw 3. Options are TL, TM, TR, BL, BM, BR. Press a button with !{0} press b or !{0} press 2."};
+        //ModComponetSolverInformation["SeaShells"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["Semaphore"] = new ModuleInformation { helpText = "Move to the next flag with !{0} move right or !{0} press right. Move to previous flag with !{0} move left or !{0} press left.  Submit with !{0} press ok."};
+        //ModComponetSolverInformation["shapeshift"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["SillySlots"] = new ModuleInformation { helpText = "Keep the slots with !{0} keep.  Pull the slots with !{0} pull."};
+        ModComponetSolverInformation["SimonScreamsModule"] = new ModuleInformation { helpText = "Press the correct colors for each round with !{0} press B O Y."};
+        ModComponetSolverInformation["SkewedSlotsModule"] = new ModuleInformation { helpText = "Submit the correct response with !{0} submit 1 2 3."};
+        ModComponetSolverInformation["SouvenirModule"] = new ModuleInformation { helpText = "Submit the correct response with !{0} answer 3. Order is from top to bottom, then left to right."};
+        //ModComponetSolverInformation["switchModule"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["symbolicPasswordModule"] = new ModuleInformation { helpText = "Cycle a row with cycle t l. Cycle a column with cycle m. Submit with !{0} submit. Rows are TL/TR/BL/BR, columns are L/R/M. Spaces are important!"};
+        //ModComponetSolverInformation["spwizTetris"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["TextField"] = new ModuleInformation { helpText = "Press the button in Row 2 column 3 and Row 3 Column 4 with !{0} press 3,2 4,3."};
+        ModComponetSolverInformation["TicTacToeModule"] = new ModuleInformation { helpText = "Press a button with !{0} tl. Buttons are tl, tm, tr, ml, mm, mr, bl, bm, br.", manualCode = "Tic-Tac-Toe" };
+        ModComponetSolverInformation["TheBulbModule"] = new ModuleInformation { helpText = "Press O with !{0} press O.  Press I with !{0} press I. Unscrew the bulb with !{0} unscrew.  Screw in the bulb with !{0} screw."};
+        ModComponetSolverInformation["TheClockModule"] = new ModuleInformation { helpText = "Submit a time with !{0} set 12:34 am. Command must include a 12-hour time followed by AM/PM."};
+        ModComponetSolverInformation["TheGamepadModule"] = new ModuleInformation { helpText = "Submit your answer with !{0} submit l r u d a b."};
+        ModComponetSolverInformation["ThirdBase"] = new ModuleInformation { helpText = "Press a button with !{0} z0s8. Word must match the button as it would appear if the module was the right way up. Not case sensitive."};
+        ModComponetSolverInformation["webDesign"] = new ModuleInformation { helpText = "Accept the design with !{0} acc.  Consider the design with !{0} con.  Reject the design with !{0} reject."};
+        ModComponetSolverInformation["WirePlacementModule"] = new ModuleInformation { helpText = "Cut the correct wires with !{0} cut A2 B4 D3."};
+        //ModComponetSolverInformation["WordScrambleModule"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["WordSearchModule"] = new ModuleInformation { helpText = "Select the word starting at column B row 3, and ending at column C row 4, with !{0} select B3 C4."};
+        ModComponetSolverInformation["YahtzeeModule"] = new ModuleInformation { helpText = "Roll the dice with !{0} roll. Keep some dice with !{0} keep white,purple,blue,yellow,black. Roll the remaining dice until a 3 appears with !{0} roll until 3."};
 
-        //Status Light Locations.
-        //For most modules, the Status light is in the Top Right corner.  However, there is the odd module where the status
-        //light might be in the Top left, Bottom right, or Bottom left corner.  In these cases, the ID number for multi-decker
-        //should be moved accordingly.  //Use this only in cases where the location detection code results in incorrect placement
-        //of the ID location.
-        /*ModComponentSolverStatusLightLeft["ThirdBase"] = true;
-        ModComponentSolverStatusLightBottom["ThirdBase"] = true;*/
-
-        //Chat Rotation
-        //Most modules behave correctly, and have NOT rotated the StatusLightParent needlessly.  There are a few that have done exactly that.
-
-        //Regex Lists
-        //This is list of commandds that are defined that determine if processing is passed onto the module.
-        //If the list isn't defined, or is empty, then command processing is ALWAYS passed to the module.
-        ModComponentSolverRegexList["BitOps"] = new[] { "^submit [0-1]{8}$" };
-        ModComponentSolverRegexList["RubiksCubeModule"] = new[] {"^reset$", "^rotate$", "(?>[fbudlr]['2]?)(?> [fbudlr]['2]?)*$"};
-
-        ModuleData.WriteDataToFile();
+        foreach (string key in ModComponetSolverInformation.Keys)
+            ModComponetSolverInformation[key].moduleID = key;
     }
 
     private static ModuleInformation GetModuleInfo(string moduleType)
     {
-        ModuleInformation info = new ModuleInformation();
-        info.moduleID = moduleType;
-
-        ModComponentSolverHelpMessages.TryGetValue(moduleType, out info.helpText);
-        ModComponentSolverManualCodes.TryGetValue(moduleType, out info.manualCode);
-        ModComponentSolverStatusLightLeft.TryGetValue(moduleType, out info.statusLightLeft);
-        ModComponentSolverStatusLightBottom.TryGetValue(moduleType, out info.statusLightDown);
-        ModComponentSolverChatRotation.TryGetValue(moduleType, out info.chatRotation);
-        ModComponentSolverRegexList.TryGetValue(moduleType, out info.validCommands);
-        ModComponentSolverDoesTheRightThing.TryGetValue(moduleType, out info.DoesTheRightThing);
-
-        return info;
+        if (!ModComponetSolverInformation.ContainsKey(moduleType))
+        {
+            ModComponetSolverInformation[moduleType] = new ModuleInformation();
+        }
+        ModComponetSolverInformation[moduleType].moduleID = moduleType;
+        return ModComponetSolverInformation[moduleType];
     }
 
     public static ModuleInformation[] GetModuleInformation()
     {
-        List<ModuleInformation> modInfoList = new List<ModuleInformation>();
-        foreach (string key in ModComponentSolverCreators.Keys)
-        {
-            modInfoList.Add(GetModuleInfo(key));
-        }
-        foreach (string key in ModComponentSolverHelpMessages.Keys)
-        {
-            if (!modInfoList.Exists(info => info.moduleID == key))
-            {
-                modInfoList.Add(GetModuleInfo(key));
-            }
-        }
-        foreach (string key in ModComponentSolverManualCodes.Keys)
-        {
-            if (!modInfoList.Exists(info => info.moduleID == key))
-            {
-                modInfoList.Add(GetModuleInfo(key));
-            }
-        }
-        foreach (string key in ModComponentSolverStatusLightLeft.Keys)
-        {
-            if (!modInfoList.Exists(info => info.moduleID == key))
-            {
-                modInfoList.Add(GetModuleInfo(key));
-            }
-        }
-        foreach (string key in ModComponentSolverStatusLightBottom.Keys)
-        {
-            if (!modInfoList.Exists(info => info.moduleID == key))
-            {
-                modInfoList.Add(GetModuleInfo(key));
-            }
-        }
-        foreach (string key in ModComponentSolverChatRotation.Keys)
-        {
-            if (!modInfoList.Exists(info => info.moduleID == key))
-            {
-                modInfoList.Add(GetModuleInfo(key));
-            }
-        }
-        foreach (string key in ModComponentSolverRegexList.Keys)
-        {
-            if (!modInfoList.Exists(info => info.moduleID == key))
-            {
-                modInfoList.Add(GetModuleInfo(key));
-            }
-        }
-        foreach (string key in ModComponentSolverDoesTheRightThing.Keys)
-        {
-            if (!modInfoList.Exists(info => info.moduleID == key))
-            {
-                modInfoList.Add(GetModuleInfo(key));
-            }
-        }
-        return modInfoList.ToArray();
+        return ModComponetSolverInformation.Values.ToArray();
     }
 
     public static void AddModuleInformation(ModuleInformation info)
     {
-        if (string.IsNullOrEmpty(info.moduleID))
+        if (info.moduleID == null) return;
+        if (ModComponetSolverInformation.ContainsKey(info.moduleID))
         {
-            return;
-        }
-        if (!string.IsNullOrEmpty(info.helpText))
-        {
-            if (ModComponentSolverHelpMessages.ContainsKey(info.moduleID))
+            ModuleInformation i = ModComponetSolverInformation[info.moduleID];
+            if (i == null)
             {
-                ModComponentSolverHelpMessages[info.moduleID] = info.helpText;
+                ModComponetSolverInformation[info.moduleID] = info;
+                return;
             }
-            else
-            {
-                ModComponentSolverHelpMessages.Add(info.moduleID, info.helpText);
-            }
-        }
+            i.moduleID = info.moduleID;
 
-        if (!string.IsNullOrEmpty(info.manualCode))
-        {
-            if (ModComponentSolverManualCodes.ContainsKey(info.moduleID))
-            {
-                ModComponentSolverManualCodes[info.moduleID] = info.manualCode;
-            }
-            else
-            {
-                ModComponentSolverManualCodes.Add(info.moduleID, info.manualCode);
-            }
-        }
+            if (!string.IsNullOrEmpty(info.moduleDisplayName))
+                i.moduleDisplayName = info.moduleDisplayName;
 
-        if (ModComponentSolverStatusLightLeft.ContainsKey(info.moduleID))
-        {
-            ModComponentSolverStatusLightLeft[info.moduleID] = info.statusLightLeft;
+            if (!string.IsNullOrEmpty(info.helpText) || info.helpTextOverride)
+                i.helpText = info.helpText;
+
+            if (!string.IsNullOrEmpty(info.manualCode) || info.manualCodeOverride)
+                i.helpText = info.manualCode;
+
+            i.DoesTheRightThing = info.DoesTheRightThing;
+            i.statusLightLeft = info.statusLightLeft;
+            i.statusLightDown = info.statusLightDown;
+            i.chatRotation = info.chatRotation;
+            i.validCommands = info.validCommands;
+
+            i.helpTextOverride = info.helpTextOverride;
+            i.manualCodeOverride = info.manualCodeOverride;
+            i.statusLightOverride = info.statusLightOverride;
+            i.validCommandsOverride = info.validCommandsOverride;
         }
         else
         {
-            ModComponentSolverStatusLightLeft.Add(info.moduleID, info.statusLightLeft);
+            ModComponetSolverInformation[info.moduleID] = info;
         }
-
-        if (ModComponentSolverStatusLightBottom.ContainsKey(info.moduleID))
-        {
-            ModComponentSolverStatusLightBottom[info.moduleID] = info.statusLightDown;
-        }
-        else
-        {
-            ModComponentSolverStatusLightBottom.Add(info.moduleID, info.statusLightDown);
-        }
-
-        if (ModComponentSolverChatRotation.ContainsKey(info.moduleID))
-        {
-            ModComponentSolverChatRotation[info.moduleID] = info.chatRotation;
-        }
-        else
-        {
-            ModComponentSolverChatRotation.Add(info.moduleID, info.chatRotation);
-        }
-
-        if (info.validCommands != null && info.validCommands.Length > 0)
-        {
-
-            if (ModComponentSolverRegexList.ContainsKey(info.moduleID))
-            {
-                ModComponentSolverRegexList[info.moduleID] = info.validCommands;
-            }
-            else
-            {
-                ModComponentSolverRegexList.Add(info.moduleID, info.validCommands);
-            }
-        }
-
-        if (ModComponentSolverDoesTheRightThing.ContainsKey(info.moduleID))
-        {
-            ModComponentSolverDoesTheRightThing[info.moduleID] = info.DoesTheRightThing;
-        }
-        else
-        {
-            ModComponentSolverDoesTheRightThing.Add(info.moduleID, info.DoesTheRightThing);
-        }
-
-        /*if (ModComponentSolverCreators.ContainsKey(info.moduleID))
-        {
-            ModComponentSolverDelegate componentSolver = ModComponentSolverCreators[info.moduleID];
-            if (componentSolver == null) return;
-            componentSolver
-        }*/
     }
 
     public static ComponentSolver CreateSolver(BombCommander bombCommander, MonoBehaviour bombComponent, ComponentTypeEnum componentType, IRCConnection ircConnection, CoroutineCanceller canceller)
@@ -415,7 +272,6 @@ public static class ComponentSolverFactory
 
         ModComponentSolverCreators[moduleType] = modComponentSolverCreator;
 
-        ModuleData.WriteDataToFile();
         return modComponentSolverCreator(bombCommander, bombComponent, ircConnection, canceller);
     }
 
@@ -424,32 +280,69 @@ public static class ComponentSolverFactory
         ModCommandType commandType = ModCommandType.Simple;
         Type commandComponentType = null;
         MethodInfo method = FindProcessCommandMethod(bombComponent, out commandType, out commandComponentType);
-        string help = FindHelpMessage(bombComponent);
-        string manual = FindManualCode(bombComponent);
-        bool statusBottom = false;
-        float rotation = 0;
-        bool statusLeft = FindStatusLightPosition(bombComponent, out statusBottom, out rotation);
-        string[] regexList = FindRegexList(bombComponent);
-        bool doestherightthing = false;
-        
+        string help;
+        string manual;
+        bool statusLeft;
+        bool statusBottom;
+        float rotation;
+        string[] regexList;
 
-        if (help == null && ModComponentSolverHelpMessages.ContainsKey(moduleType))
-            help = ModComponentSolverHelpMessages[moduleType];
+        ModuleInformation info = GetModuleInfo(moduleType);
+        if (!info.helpTextOverride && FindHelpMessage(bombComponent, out help))
+        {
+            ModuleData.DataHasChanged |= !info.helpText.Equals(help);
+            info.helpText = help;
+        }
 
-        if (manual == null && ModComponentSolverManualCodes.ContainsKey(moduleType))
-            manual = ModComponentSolverManualCodes[moduleType];
+        if (!info.manualCodeOverride && FindManualCode(bombComponent, out manual))
+        {
+            ModuleData.DataHasChanged |= !info.manualCode.Equals(manual);
+            info.manualCode = manual;
+        }
 
-        if (ModComponentSolverStatusLightLeft.ContainsKey(moduleType))
-            statusLeft = ModComponentSolverStatusLightLeft[moduleType];
+        if (!info.statusLightOverride && FindStatusLightPosition(bombComponent, out statusLeft, out statusBottom, out rotation))
+        {
+            ModuleData.DataHasChanged |= info.statusLightLeft != statusLeft;
+            ModuleData.DataHasChanged |= info.statusLightDown != statusBottom;
+            ModuleData.DataHasChanged |= (Mathf.Abs(info.chatRotation - rotation) >= 0.2f);
+            info.statusLightLeft = statusLeft;
+            info.statusLightDown = statusBottom;
+            info.chatRotation = rotation;
+        }
 
-        if (ModComponentSolverStatusLightBottom.ContainsKey(moduleType))
-            statusBottom = ModComponentSolverStatusLightBottom[moduleType];
+        if (!info.validCommandsOverride && FindRegexList(bombComponent, out regexList))
+        {
+            if (info.validCommands != null && regexList == null)
+                ModuleData.DataHasChanged = true;
+            else if (info.validCommands == null && regexList != null)
+                ModuleData.DataHasChanged = true;
+            else if (info.validCommands != null && regexList != null)
+            {
+                if (info.validCommands.Length != regexList.Length)
+                    ModuleData.DataHasChanged = true;
+                else
+                {
+                    for (int i = 0; i < regexList.Length; i++)
+                        ModuleData.DataHasChanged |= !info.validCommands[i].Equals(regexList[i]);
+                }
+            }
+            info.validCommands = regexList;
+        }
 
-        if (regexList == null && ModComponentSolverRegexList.ContainsKey(moduleType))
-            regexList = ModComponentSolverRegexList[moduleType];
+        KMBombModule bombmodule = bombComponent.GetComponent<KMBombModule>();
+        if (bombmodule != null)
+        {
+            ModuleData.DataHasChanged |= !info.moduleDisplayName.Equals(bombmodule.ModuleDisplayName);
+            info.moduleDisplayName = bombmodule.ModuleDisplayName;
+        }
 
-        if (ModComponentSolverDoesTheRightThing.ContainsKey(moduleType))
-            doestherightthing = ModComponentSolverDoesTheRightThing[moduleType];
+        KMNeedyModule needymodule = bombComponent.GetComponent<KMNeedyModule>();
+        if (needymodule != null)
+        {
+            ModuleData.DataHasChanged |= !info.moduleDisplayName.Equals(needymodule.ModuleDisplayName);
+            info.moduleDisplayName = needymodule.ModuleDisplayName;
+        }
+        ModuleData.WriteDataToFile();
 
         if (method != null)
         {
@@ -459,7 +352,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, statusLeft, statusBottom, rotation, regexList, doestherightthing);
+                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, info);
                     };
                 case ModCommandType.Coroutine:
                     FieldInfo cancelfield;
@@ -468,7 +361,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, cancelfield, canceltype, statusLeft, statusBottom, rotation, regexList, doestherightthing);
+                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, cancelfield, canceltype, info);
                     };
 
                 default:
@@ -479,7 +372,7 @@ public static class ComponentSolverFactory
         return null;
     }
 
-    private static bool FindStatusLightPosition(MonoBehaviour bombComponent, out bool StatusLightBottom, out float Rotation)
+    private static bool FindStatusLightPosition(MonoBehaviour bombComponent, out bool StatusLightLeft, out bool StatusLightBottom, out float Rotation)
     {
         Debug.Log("[TwitchPlays] Attempting to find the modules StatusLightParent");
         Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
@@ -490,18 +383,20 @@ public static class ComponentSolverFactory
             {
                 Debug.LogFormat("Local Position - X = {0}, Y = {1}, Z = {2}", component.transform.localPosition.x, component.transform.localPosition.y, component.transform.localPosition.z);
                 Debug.LogFormat("Local Euler Angles - X = {0}, Y = {1}, Z = {2}", component.transform.localEulerAngles.x, component.transform.localEulerAngles.y, component.transform.localEulerAngles.z);
+                StatusLightLeft = (component.transform.localPosition.x < 0);
                 StatusLightBottom = (component.transform.localPosition.z < 0);
                 Rotation = component.transform.localEulerAngles.y;
-                return (component.transform.localPosition.x < 0);
+                return true;
             }
         }
         Debug.Log("StatusLightParent not found :(");
+        StatusLightLeft = false;
         StatusLightBottom = false;
         Rotation = 0;
         return false;
     }
 
-    private static string[] FindRegexList(MonoBehaviour bombComponent)
+    private static bool FindRegexList(MonoBehaviour bombComponent, out string[] validCommands)
     {
         Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
         foreach (Component component in allComponents)
@@ -514,12 +409,16 @@ public static class ComponentSolverFactory
                 continue;
             }
             if (candidateString.GetValue(bombComponent.GetComponent(type)) is string[])
-                return (string[])candidateString.GetValue(bombComponent.GetComponent(type));
+            {
+                validCommands = (string[]) candidateString.GetValue(bombComponent.GetComponent(type));
+                return true;
+            }
         }
-        return null;
+        validCommands = null;
+        return false;
     }
 
-    private static string FindManualCode(MonoBehaviour bombComponent)
+    private static bool FindManualCode(MonoBehaviour bombComponent, out string manualCode)
     {
         Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
         foreach (Component component in allComponents)
@@ -532,12 +431,16 @@ public static class ComponentSolverFactory
                 continue;
             }
             if (candidateString.GetValue(bombComponent.GetComponent(type)) is string)
-                return (string)candidateString.GetValue(bombComponent.GetComponent(type));
+            {
+                manualCode = (string) candidateString.GetValue(bombComponent.GetComponent(type));
+                return true;
+            }
         }
-        return null;
+        manualCode = null;
+        return false;
     }
 
-    private static string FindHelpMessage(MonoBehaviour bombComponent)
+    private static bool FindHelpMessage(MonoBehaviour bombComponent, out string helpText)
     {
         Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
         foreach (Component component in allComponents)
@@ -549,9 +452,13 @@ public static class ComponentSolverFactory
                 continue;
             }
             if (candidateString.GetValue(bombComponent.GetComponent(type)) is string)
-                return (string)candidateString.GetValue(bombComponent.GetComponent(type));
+            {
+                helpText = (string) candidateString.GetValue(bombComponent.GetComponent(type));
+                return true;
+            }
         }
-        return null;
+        helpText = null;
+        return false;
     }
 
     private static bool FindCancelBool(MonoBehaviour bombComponent, out FieldInfo CancelField, out Type CancelType)
