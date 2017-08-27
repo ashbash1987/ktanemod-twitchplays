@@ -169,6 +169,7 @@ public class BombMessageResponder : MessageResponder
     private IEnumerator CheckForBomb()
     {
         TwitchComponentHandle.ResetId();
+        ModuleData.LoadDataFromFile();
 
         UnityEngine.Object[] bombs;
         do

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -13,6 +14,8 @@ public static class ComponentSolverFactory
     private static readonly Dictionary<string, bool> ModComponentSolverStatusLightLeft;
     private static readonly Dictionary<string, bool> ModComponentSolverStatusLightBottom;
     private static readonly Dictionary<string, float> ModComponentSolverChatRotation;
+    private static readonly Dictionary<string, string[]> ModComponentSolverRegexList;
+    private static readonly Dictionary<string, bool> ModComponentSolverDoesTheRightThing;
 
     private enum ModCommandType
     {
@@ -28,6 +31,8 @@ public static class ComponentSolverFactory
         ModComponentSolverStatusLightLeft = new Dictionary<string, bool>();
         ModComponentSolverStatusLightBottom = new Dictionary<string, bool>();
         ModComponentSolverChatRotation = new Dictionary<string, float>();
+        ModComponentSolverRegexList = new Dictionary<string, string[]>();
+        ModComponentSolverDoesTheRightThing = new Dictionary<string, bool>();
 
         //AT_Bash Modules
         ModComponentSolverCreators["MotionSense"] = (bombCommander, bombComponent, ircConnection, canceller) => new MotionSenseComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
@@ -161,6 +166,175 @@ public static class ComponentSolverFactory
         //Chat Rotation
         //Most modules behave correctly, and have NOT rotated the StatusLightParent needlessly.  There are a few that have done exactly that.
 
+        //Regex Lists
+        //This is list of commandds that are defined that determine if processing is passed onto the module.
+        //If the list isn't defined, or is empty, then command processing is ALWAYS passed to the module.
+        ModComponentSolverRegexList["BitOps"] = new[] { "^submit [0-1]{8}$" };
+        ModComponentSolverRegexList["RubiksCubeModule"] = new[] {"^reset$", "^rotate$", "(?>[fbudlr]['2]?)(?> [fbudlr]['2]?)*$"};
+
+        ModuleData.WriteDataToFile();
+    }
+
+    private static ModuleInformation GetModuleInfo(string moduleType)
+    {
+        ModuleInformation info = new ModuleInformation();
+        info.moduleID = moduleType;
+
+        ModComponentSolverHelpMessages.TryGetValue(moduleType, out info.helpText);
+        ModComponentSolverManualCodes.TryGetValue(moduleType, out info.manualCode);
+        ModComponentSolverStatusLightLeft.TryGetValue(moduleType, out info.statusLightLeft);
+        ModComponentSolverStatusLightBottom.TryGetValue(moduleType, out info.statusLightDown);
+        ModComponentSolverChatRotation.TryGetValue(moduleType, out info.chatRotation);
+        ModComponentSolverRegexList.TryGetValue(moduleType, out info.validCommands);
+        ModComponentSolverDoesTheRightThing.TryGetValue(moduleType, out info.DoesTheRightThing);
+
+        return info;
+    }
+
+    public static ModuleInformation[] GetModuleInformation()
+    {
+        List<ModuleInformation> modInfoList = new List<ModuleInformation>();
+        foreach (string key in ModComponentSolverCreators.Keys)
+        {
+            modInfoList.Add(GetModuleInfo(key));
+        }
+        foreach (string key in ModComponentSolverHelpMessages.Keys)
+        {
+            if (!modInfoList.Exists(info => info.moduleID == key))
+            {
+                modInfoList.Add(GetModuleInfo(key));
+            }
+        }
+        foreach (string key in ModComponentSolverManualCodes.Keys)
+        {
+            if (!modInfoList.Exists(info => info.moduleID == key))
+            {
+                modInfoList.Add(GetModuleInfo(key));
+            }
+        }
+        foreach (string key in ModComponentSolverStatusLightLeft.Keys)
+        {
+            if (!modInfoList.Exists(info => info.moduleID == key))
+            {
+                modInfoList.Add(GetModuleInfo(key));
+            }
+        }
+        foreach (string key in ModComponentSolverStatusLightBottom.Keys)
+        {
+            if (!modInfoList.Exists(info => info.moduleID == key))
+            {
+                modInfoList.Add(GetModuleInfo(key));
+            }
+        }
+        foreach (string key in ModComponentSolverChatRotation.Keys)
+        {
+            if (!modInfoList.Exists(info => info.moduleID == key))
+            {
+                modInfoList.Add(GetModuleInfo(key));
+            }
+        }
+        foreach (string key in ModComponentSolverRegexList.Keys)
+        {
+            if (!modInfoList.Exists(info => info.moduleID == key))
+            {
+                modInfoList.Add(GetModuleInfo(key));
+            }
+        }
+        foreach (string key in ModComponentSolverDoesTheRightThing.Keys)
+        {
+            if (!modInfoList.Exists(info => info.moduleID == key))
+            {
+                modInfoList.Add(GetModuleInfo(key));
+            }
+        }
+        return modInfoList.ToArray();
+    }
+
+    public static void AddModuleInformation(ModuleInformation info)
+    {
+        if (string.IsNullOrEmpty(info.moduleID))
+        {
+            return;
+        }
+        if (!string.IsNullOrEmpty(info.helpText))
+        {
+            if (ModComponentSolverHelpMessages.ContainsKey(info.moduleID))
+            {
+                ModComponentSolverHelpMessages[info.moduleID] = info.helpText;
+            }
+            else
+            {
+                ModComponentSolverHelpMessages.Add(info.moduleID, info.helpText);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(info.manualCode))
+        {
+            if (ModComponentSolverManualCodes.ContainsKey(info.moduleID))
+            {
+                ModComponentSolverManualCodes[info.moduleID] = info.manualCode;
+            }
+            else
+            {
+                ModComponentSolverManualCodes.Add(info.moduleID, info.manualCode);
+            }
+        }
+
+        if (ModComponentSolverStatusLightLeft.ContainsKey(info.moduleID))
+        {
+            ModComponentSolverStatusLightLeft[info.moduleID] = info.statusLightLeft;
+        }
+        else
+        {
+            ModComponentSolverStatusLightLeft.Add(info.moduleID, info.statusLightLeft);
+        }
+
+        if (ModComponentSolverStatusLightBottom.ContainsKey(info.moduleID))
+        {
+            ModComponentSolverStatusLightBottom[info.moduleID] = info.statusLightDown;
+        }
+        else
+        {
+            ModComponentSolverStatusLightBottom.Add(info.moduleID, info.statusLightDown);
+        }
+
+        if (ModComponentSolverChatRotation.ContainsKey(info.moduleID))
+        {
+            ModComponentSolverChatRotation[info.moduleID] = info.chatRotation;
+        }
+        else
+        {
+            ModComponentSolverChatRotation.Add(info.moduleID, info.chatRotation);
+        }
+
+        if (info.validCommands != null && info.validCommands.Length > 0)
+        {
+
+            if (ModComponentSolverRegexList.ContainsKey(info.moduleID))
+            {
+                ModComponentSolverRegexList[info.moduleID] = info.validCommands;
+            }
+            else
+            {
+                ModComponentSolverRegexList.Add(info.moduleID, info.validCommands);
+            }
+        }
+
+        if (ModComponentSolverDoesTheRightThing.ContainsKey(info.moduleID))
+        {
+            ModComponentSolverDoesTheRightThing[info.moduleID] = info.DoesTheRightThing;
+        }
+        else
+        {
+            ModComponentSolverDoesTheRightThing.Add(info.moduleID, info.DoesTheRightThing);
+        }
+
+        /*if (ModComponentSolverCreators.ContainsKey(info.moduleID))
+        {
+            ModComponentSolverDelegate componentSolver = ModComponentSolverCreators[info.moduleID];
+            if (componentSolver == null) return;
+            componentSolver
+        }*/
     }
 
     public static ComponentSolver CreateSolver(BombCommander bombCommander, MonoBehaviour bombComponent, ComponentTypeEnum componentType, IRCConnection ircConnection, CoroutineCanceller canceller)
@@ -226,7 +400,9 @@ public static class ComponentSolverFactory
     {
         if (ModComponentSolverCreators.ContainsKey(moduleType))
         {
-            return ModComponentSolverCreators[moduleType](bombCommander, bombComponent, ircConnection, canceller);
+            ComponentSolver solver = ModComponentSolverCreators[moduleType](bombCommander, bombComponent, ircConnection, canceller);
+            solver.UpdateModuleInformation(GetModuleInfo(moduleType));
+            return solver;
         }
 
         Debug.LogFormat("Attempting to find a valid process command method to respond with on component {0}...", moduleType);
@@ -239,6 +415,7 @@ public static class ComponentSolverFactory
 
         ModComponentSolverCreators[moduleType] = modComponentSolverCreator;
 
+        ModuleData.WriteDataToFile();
         return modComponentSolverCreator(bombCommander, bombComponent, ircConnection, canceller);
     }
 
@@ -252,6 +429,8 @@ public static class ComponentSolverFactory
         bool statusBottom = false;
         float rotation = 0;
         bool statusLeft = FindStatusLightPosition(bombComponent, out statusBottom, out rotation);
+        string[] regexList = FindRegexList(bombComponent);
+        bool doestherightthing = false;
         
 
         if (help == null && ModComponentSolverHelpMessages.ContainsKey(moduleType))
@@ -266,6 +445,12 @@ public static class ComponentSolverFactory
         if (ModComponentSolverStatusLightBottom.ContainsKey(moduleType))
             statusBottom = ModComponentSolverStatusLightBottom[moduleType];
 
+        if (regexList == null && ModComponentSolverRegexList.ContainsKey(moduleType))
+            regexList = ModComponentSolverRegexList[moduleType];
+
+        if (ModComponentSolverDoesTheRightThing.ContainsKey(moduleType))
+            doestherightthing = ModComponentSolverDoesTheRightThing[moduleType];
+
         if (method != null)
         {
             switch (commandType)
@@ -274,7 +459,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, statusLeft, statusBottom, rotation);
+                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, statusLeft, statusBottom, rotation, regexList, doestherightthing);
                     };
                 case ModCommandType.Coroutine:
                     FieldInfo cancelfield;
@@ -283,7 +468,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, cancelfield, canceltype, statusLeft, statusBottom, rotation);
+                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, manual, help, cancelfield, canceltype, statusLeft, statusBottom, rotation, regexList, doestherightthing);
                     };
 
                 default:
@@ -314,6 +499,24 @@ public static class ComponentSolverFactory
         StatusLightBottom = false;
         Rotation = 0;
         return false;
+    }
+
+    private static string[] FindRegexList(MonoBehaviour bombComponent)
+    {
+        Component[] allComponents = bombComponent.GetComponentsInChildren<Component>(true);
+        foreach (Component component in allComponents)
+        {
+            Type type = component.GetType();
+            //Debug.LogFormat("[TwitchPlays] component.GetType(): FullName = {0}, Name = {1}",type.FullName, type.Name);
+            FieldInfo candidateString = type.GetField("TwitchValidCommands", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (candidateString == null)
+            {
+                continue;
+            }
+            if (candidateString.GetValue(bombComponent.GetComponent(type)) is string[])
+                return (string[])candidateString.GetValue(bombComponent.GetComponent(type));
+        }
+        return null;
     }
 
     private static string FindManualCode(MonoBehaviour bombComponent)

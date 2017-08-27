@@ -205,6 +205,18 @@ public abstract class ComponentSolver : ICommandResponder
         _currentUserNickName = null;
         _processingTwitchCommand = false;
     }
+
+    public void UpdateModuleInformation(ModuleInformation info)
+    {
+        if (info == null) return;
+        statusLightBottom = info.statusLightDown;
+        statusLightLeft = info.statusLightLeft;
+        IDRotation = info.chatRotation;
+        doesTheRightThing = info.DoesTheRightThing;
+        RegexList = info.validCommands;
+        helpMessage = info.helpText;
+        manualCode = info.manualCode;
+    }
     #endregion
 
     #region Abstract Interface
@@ -475,11 +487,14 @@ public abstract class ComponentSolver : ICommandResponder
     public bool statusLightLeft = false;
     public bool statusLightBottom = false;
     public float IDRotation = 0;
+    public string[] RegexList = null;
+    public bool doesTheRightThing = false;
     public int cameraPriority = ModuleCameras.CameraNotInUse;
 
     public bool _turnQueued = false;
     private bool _readyToTurn = false;
     private bool _processingTwitchCommand = false;
+    
    
 
     public TwitchComponentHandle ComponentHandle = null;

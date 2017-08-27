@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class SimpleModComponentSolver : ComponentSolver
 {
-    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool statusLeft, bool statusBottom, float rotation) :
+    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, string manual, string help, bool statusLeft, bool statusBottom, float rotation, string[] regexList, bool doestherightthing) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
@@ -15,6 +16,8 @@ public class SimpleModComponentSolver : ComponentSolver
         statusLightLeft = statusLeft;
         statusLightBottom = statusBottom;
         IDRotation = rotation;
+        RegexList = regexList;
+        doesTheRightThing = doestherightthing;
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
@@ -29,6 +32,21 @@ public class SimpleModComponentSolver : ComponentSolver
 
         try
         {
+            bool RegexValid = RegexList == null;
+            if (!RegexValid)
+            {
+                foreach (string regex in RegexList)
+                {
+                    RegexValid = Regex.IsMatch(inputCommand, regex, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+                    if (RegexValid)
+                    {
+                        break;
+                    }
+                }
+            }
+            if (!RegexValid)
+                yield break;
+
             selectableSequence = (KMSelectable[])ProcessMethod.Invoke(CommandComponent, new object[] { inputCommand });
             if (selectableSequence == null || selectableSequence.Length == 0)
             {
@@ -41,8 +59,11 @@ public class SimpleModComponentSolver : ComponentSolver
             Debug.LogException(ex);
             yield break;
         }
-        
-        yield return "modsequence";
+
+        if (!doesTheRightThing)
+        {
+            yield return "modsequence";
+        }
 
         int beforeInteractionStrikeCount = StrikeCount;
 

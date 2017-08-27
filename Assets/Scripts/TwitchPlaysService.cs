@@ -67,6 +67,8 @@ public class TwitchPlaysService : MonoBehaviour
         _leaderboard = new Leaderboard();
         _leaderboard.LoadDataFromFile();
 
+        ModuleData.LoadDataFromFile();
+
         SetupResponder(bombMessageResponder);
         SetupResponder(postGameMessageResponder);
         SetupResponder(missionMessageResponder);
