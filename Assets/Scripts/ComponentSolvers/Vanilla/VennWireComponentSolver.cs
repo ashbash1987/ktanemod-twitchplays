@@ -11,7 +11,7 @@ public class VennWireComponentSolver : ComponentSolver
     {
         _wires = (Array)_activeWiresProperty.GetValue(bombComponent, null);
         _cutWires = new bool[6];
-        modInfo = ComponentSolverFactory.GetModuleInfo("ButtonComponentSolver");
+        modInfo = ComponentSolverFactory.GetModuleInfo("VennWireComponentSolver");
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

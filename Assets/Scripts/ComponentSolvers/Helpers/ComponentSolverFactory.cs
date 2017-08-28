@@ -49,51 +49,104 @@ public static class ComponentSolverFactory
         //Kaneb Modules
         ModComponentSolverCreators["TwoBits"] = (bombCommander, bombComponent, ircConnection, canceller) => new TwoBitsComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
-        ModComponetSolverInformation["MotionSense"] = new ModuleInformation {moduleID = "MotionSense", moduleDisplayName = "Motion Sense", helpText = "I am a passive module that awards strikes for motion while I am active. Use !{0} status to find out if I am active, and for how long." };
 
-        ModComponetSolverInformation["MemoryV2"] = new ModuleInformation { moduleID = "MemoryV2", moduleDisplayName = "Forget Me Not", helpText = "Enter forget me not sequence with !{0} press 5 3 1 8 2 0... The Sequence length depends on how many modules were on the bomb." };
-        ModComponetSolverInformation["KeypadV2"] = new ModuleInformation { moduleID = "KeypadV2", moduleDisplayName = "Round Keypad", helpText = "Solve the module with !{0} press 2 4 6 7 8. Button 1 is the top most botton, and are numbered in clockwise order." };
-        ModComponetSolverInformation["ButtonV2"] = new ModuleInformation { moduleID = "ButtonV2", moduleDisplayName = "Square Button", helpText = "Click the button with !{0} tap. Click the button at time with !{0} tap 8:55 8:44 8:33. Hold the button with !{0} hold. Release the button with !{0} release 9:58 9:49 9:30." };
-        ModComponetSolverInformation["SimonV2"] = new ModuleInformation { moduleID = "SimonV2", moduleDisplayName = "Simon States", helpText = "Enter the response with !{0} press B Y R G." };
-        ModComponetSolverInformation["PasswordV2"] = new ModuleInformation { moduleID = "PasswordV2", moduleDisplayName = "Safety Safe", helpText = "Listen to the dials with !{0} cycle. Listen to a single dial with !{0} cycle BR. Make a correction to a single dial with !{0} BM 3. Enter the solution with !{0} 6 0 6 8 2 5. Submit the answer with !{0} submit. Dial positions are TL, TM, TR, BL, BM, BR." };
-        ModComponetSolverInformation["MazeV2"] = new ModuleInformation { moduleID = "MazeV2", moduleDisplayName = "Plumbing", helpText = "Rotate the pipes with !{0} rotate A1 A1 B2 B3 C2 C3 C3. Check your work for leaks Kappa with !{0} submit. (Pipes rotate clockwise. Top left is A1, Bottom right is F6)" };
-        ModComponetSolverInformation["MorseV2"] = new ModuleInformation { moduleID = "MorseV2", moduleDisplayName = "Moresmatics", helpText = "Turn the lights off with !{0} lights off. Turn the lights on with !{0} lights on. Tranmit the answer with !{0} transmit -..-" };
-        ModComponetSolverInformation["NeedyVentV2"] = new ModuleInformation { moduleID = "NeedyVentV2", moduleDisplayName = "Needy Answering Questions", helpText = "Answer the question with !{0} Y or !{0} N.", manualCode = "Answering%20Questions" };
-        ModComponetSolverInformation["NeedyKnobV2"] = new ModuleInformation { moduleID = "NeedyKnobV2", moduleDisplayName = "Needy Rotary Phone", helpText = "Respond to the phone call with !{0} press 8 4 9.", manualCode = "Rotary%20Phone" };
+        //Module Information
+        //Information decleared here will be used to generate ModuleInformation.json if it doesn't already exist,  and will be overwritten by ModuleInformation.json if it does exist.
+        /*
+         * 
+            Typical ModuleInformation json entry
+            {
+                "moduleDisplayName": "Double-Oh",
+                "moduleID": "DoubleOhModule",
+                "helpText": "Cycle the buttons with !{0} cycle. (Cycle presses each button 3 times, in the order of vert1, horiz1, horiz2, vert2, submit.)  Submit your answer with !{0} press vert1 horiz1 horiz2 vert2 submit.",
+                "manualCode": null,
+                "statusLightLeft": false,
+                "statusLightDown": false,
+                "chatRotation": 0.0,
+                "validCommands": null,
+                "DoesTheRightThing": false,
+                "helpTextOverride": false,
+                "manualCodeOverride": false,
+                "statusLightOverride": true,
+                "validCommandsOverride": false
+            },
+         * 
+         * moduleDisplayName - The name of the module as displayed in Mod Selector or the chat box.
+         * moduleID - The unique identifier of the module.
+         * 
+         * helpTextOverride - Specifies whether the help text should not be overwritten by what is present in the module.
+         * helpText - Instructions on how to interact with the module in twitch plays.
+         * 
+         * manualCodeOverride - Specifies whether the manual code should not be overwritten by what is present in the module.
+         * manualCode - If defined, is used instead of moduleDisplayName to look up the html/pdf manual.
+         * 
+         * statusLightOverride - Specifies an override of the ID# position / rotation. (This must be set if you wish to have the ID be anywhere other than
+         *      Above the status light, or if you wish to rotate the ID / chat box.)
+         * statusLightLeft - Specifies whether the ID should be on the left side of the module.
+         * statusLightDown - Specifies whether the ID should be on the bottom side of the module.
+         * chatRotation - Specifies whether the chat box / ID should be rotated.  (not currently implemented yet.)
+         * 
+         * Finally, validCommands, DoesTheRightThing and all of the override flags will only show up in modules not built into Twitch plays.
+         * validCommandsOverride - Specifies whether the valid regular expression list should not be updated from the module.
+         * validCommands - A list of valid regular expression commands that define if the command should be passed onto the modules Twitch plays handler.
+         *      If null, the command will always be passed on.
+         *      
+         * DoesTheRightThing - Specifies whether the module properly yields return something BEFORE interacting with any buttons.
+         * 
+         * 
+         */
 
-        ModComponetSolverInformation["CrazyTalk"] = new ModuleInformation { moduleID = "CrazyTalk", moduleDisplayName = "Crazy Talk", helpText = "Toggle the switch down and up with !{0} toggle 4 5. The order is down, then up." };
-        ModComponetSolverInformation["CryptModule"] = new ModuleInformation { moduleID = "CryptModule", moduleDisplayName = "Cryptography", helpText = "Solve the cryptography puzzle with !{0} press N B V T K." };
-        ModComponetSolverInformation["ForeignExchangeRates"] = new ModuleInformation { moduleID = "ForeignExchangeRates", moduleDisplayName = "Foreign Exchange Rates", helpText = "Solve the module with !{0} press ML. Positions are TL, TM, TR, ML, MM, MR, BL, BM, BR." };
-        ModComponetSolverInformation["Listening"] = new ModuleInformation { moduleID = "Listening", moduleDisplayName = "Listening", helpText = "Listen to the sound with !{0} press play. Enter the response with !{0} press $ & * * #." };
-        ModComponetSolverInformation["OrientationCube"] = new ModuleInformation { moduleID = "OrientationCube", moduleDisplayName = "Orientation Cube", helpText = "Move the cube with !{0} press cw l set.  The buttons are l, r, cw, ccw, set." };
-        ModComponetSolverInformation["Probing"] = new ModuleInformation { moduleID = "Probing", moduleDisplayName = "Probing", helpText = "Get the readings with !{0} cycle. Try a combination with !{0} connect 4 3.  Cycle reads 1&2, 1&3, 1&4, 1&5, 1&6." };
-        ModComponetSolverInformation["TurnTheKey"] = new ModuleInformation { moduleID = "TurnTheKey", moduleDisplayName = "Turn The Key", helpText = "Turn the key at specified time with !{0} turn 8:29" };
-        ModComponetSolverInformation["TurnTheKeyAdvanced"] = new ModuleInformation { moduleID = "TurnTheKeyAdvanced", moduleDisplayName = "Turn The Keys", helpText = "Turn the left key with !{0} turn left. Turn the right key with !{0} turn right." };
+        //All of these modules are built into Twitch plays.
+        //AT_Bash / Bashly
+        ModComponetSolverInformation["MotionSense"] = new ModuleInformation {builtIntoTwitchPlays = true, moduleID = "MotionSense", moduleDisplayName = "Motion Sense", helpText = "I am a passive module that awards strikes for motion while I am active. Use !{0} status to find out if I am active, and for how long."};
 
-        ModComponetSolverInformation["TwoBits"] = new ModuleInformation { moduleID = "TwoBits", moduleDisplayName = "Two Bits", helpText = "Query the answer with !{0} press K T query. Submit the answer with !{0} press G Z submit." };
+        //Hexicube
+        ModComponetSolverInformation["MemoryV2"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "MemoryV2", moduleDisplayName = "Forget Me Not", helpText = "Enter forget me not sequence with !{0} press 5 3 1 8 2 0... The Sequence length depends on how many modules were on the bomb."};
+        ModComponetSolverInformation["KeypadV2"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "KeypadV2", moduleDisplayName = "Round Keypad", helpText = "Solve the module with !{0} press 2 4 6 7 8. Button 1 is the top most botton, and are numbered in clockwise order." };
+        ModComponetSolverInformation["ButtonV2"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "ButtonV2", moduleDisplayName = "Square Button", helpText = "Click the button with !{0} tap. Click the button at time with !{0} tap 8:55 8:44 8:33. Hold the button with !{0} hold. Release the button with !{0} release 9:58 9:49 9:30." };
+        ModComponetSolverInformation["SimonV2"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "SimonV2", moduleDisplayName = "Simon States", helpText = "Enter the response with !{0} press B Y R G." };
+        ModComponetSolverInformation["PasswordV2"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "PasswordV2", moduleDisplayName = "Safety Safe", helpText = "Listen to the dials with !{0} cycle. Listen to a single dial with !{0} cycle BR. Make a correction to a single dial with !{0} BM 3. Enter the solution with !{0} 6 0 6 8 2 5. Submit the answer with !{0} submit. Dial positions are TL, TM, TR, BL, BM, BR." };
+        ModComponetSolverInformation["MazeV2"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "MazeV2", moduleDisplayName = "Plumbing", helpText = "Rotate the pipes with !{0} rotate A1 A1 B2 B3 C2 C3 C3. Check your work for leaks Kappa with !{0} submit. (Pipes rotate clockwise. Top left is A1, Bottom right is F6)" };
+        ModComponetSolverInformation["MorseV2"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "MorseV2", moduleDisplayName = "Moresmatics", helpText = "Turn the lights off with !{0} lights off. Turn the lights on with !{0} lights on. Tranmit the answer with !{0} transmit -..-" };
+        ModComponetSolverInformation["NeedyVentV2"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "NeedyVentV2", moduleDisplayName = "Needy Answering Questions", helpText = "Answer the question with !{0} Y or !{0} N.", manualCode = "Answering%20Questions" };
+        ModComponetSolverInformation["NeedyKnobV2"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "NeedyKnobV2", moduleDisplayName = "Needy Rotary Phone", helpText = "Respond to the phone call with !{0} press 8 4 9.", manualCode = "Rotary%20Phone" };
 
-        ModComponetSolverInformation["WireSetComponentSolver"] = new ModuleInformation { moduleID = "WireSetComponentSolver", moduleDisplayName = "Simple Wires", helpText = "!{0} cut 3 [cut wire 3] | Wires are ordered from top to bottom | Empty spaces are not counted" };
-        ModComponetSolverInformation["ButtonComponentSolver"] = new ModuleInformation { moduleID = "ButtonComponentSolver", moduleDisplayName = "Big Button", helpText = "!{0} tap [tap the button] | !{0} hold [hold the button] | !{0} release 7 [release when the digit shows 7]" };
-        ModComponetSolverInformation["WireSequenceComponentSolver"] = new ModuleInformation { moduleID = "WireSequenceComponentSolver", moduleDisplayName = "Wire Sequence", helpText = "!{0} cut 7 [cut wire 7] | !{0} down, !{0} d [next stage] | !{0} up, !{0} u [previous stage] | !{0} cut 7 8 9 d [cut multiple wires and continue] | Use the numbers shown on the module", manualCode = "Wire Sequences" };
-        ModComponetSolverInformation["WhosOnFirstComponentSolver"] = new ModuleInformation { moduleID = "WhosOnFirstComponentSolver", moduleDisplayName = "Who's on First", helpText = "!{0} what? [press the button that says \"WHAT?\"] | The phrase must match exactly | Not case sensitive", manualCode = "Who%E2%80%99s on First" };
-        ModComponetSolverInformation["VennWireComponentSolver"] = new ModuleInformation { moduleID = "VennWireComponentSolver", moduleDisplayName = "Complicated Wires", helpText = "!{0} cut 3 [cut wire 3] | !{0} cut 2 3 6 [cut multiple wires] | Wires are ordered from left to right | Empty spaces are not counted" };
-        ModComponetSolverInformation["ButtonComponentSolver"] = new ModuleInformation { moduleID = "ButtonComponentSolver", moduleDisplayName = "Simon Says", helpText = "!{0} press red green blue yellow, !{0} press rgby [press a sequence of colours] | You must include the input from any previous stages" };
-        ModComponetSolverInformation["PasswordComponentSolver"] = new ModuleInformation { moduleID = "PasswordComponentSolver", moduleDisplayName = "Password", helpText = "!{0} cycle 3 [cycle through the letters in column 3] | !{0} world [try to submit a word]", manualCode = "Passwords" };
-        ModComponetSolverInformation["NeedyVentComponentSolver"] = new ModuleInformation { moduleID = "NeedyVentComponentSolver", moduleDisplayName = "Needy Vent Gas", helpText = "!{0} yes, !{0} y [answer yes] | !{0} no, !{0} n [answer no]" };
-        ModComponetSolverInformation["NeedyKnobComponentSolver"] = new ModuleInformation { moduleID = "NeedyKnobComponentSolver", moduleDisplayName = "Needy Knob", helpText = "!{0} rotate 3, !{0} turn 3 [rotate the knob 3 quarter-turns]", manualCode = "Knobs" };
-        ModComponetSolverInformation["NeedyDischargeComponentSolver"] = new ModuleInformation { moduleID = "NeedyDischargeComponentSolver", moduleDisplayName = "Needy Capacitor", helpText = "!{0} hold 7 [hold the lever for 7 seconds]", manualCode = "Capacitor Discharge" };
-        ModComponetSolverInformation["MorseCodeComponentSolver"] = new ModuleInformation { moduleID = "MorseCodeComponentSolver", moduleDisplayName = "Morse Code", helpText = "!{0} transmit 3.573, !{0} trans 573, !{0} tx 573 [transmit frequency 3.573]" };
-        ModComponetSolverInformation["MemoryComponentSolver"] = new ModuleInformation { moduleID = "MemoryComponentSolver", moduleDisplayName = "Memory", helpText = "!{0} position 2, !{0} pos 2, !{0} p 2 [2nd position] | !{0} label 3, !{0} lab 3, !{0} l 3 [label 3]" };
-        ModComponetSolverInformation["KeypadComponentSolver"] = new ModuleInformation { moduleID = "KeypadComponentSolver", moduleDisplayName = "Keypad", helpText = "!{0} press 3 1 2 4 | The buttons are 1=TL, 2=TR, 3=BL, 4=BR", manualCode = "Keypads" };
-        ModComponetSolverInformation["InvisibleWallsComponentSolver"] = new ModuleInformation { moduleID = "InvisibleWallsComponentSolver", moduleDisplayName = "Maze", helpText = "!{0} move up down left right, !{0} move udlr [make a series of white icon moves]", manualCode = "Mazes" };
+        //Perky
+        ModComponetSolverInformation["CrazyTalk"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "CrazyTalk", moduleDisplayName = "Crazy Talk", helpText = "Toggle the switch down and up with !{0} toggle 4 5. The order is down, then up." };
+        ModComponetSolverInformation["CryptModule"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "CryptModule", moduleDisplayName = "Cryptography", helpText = "Solve the cryptography puzzle with !{0} press N B V T K." };
+        ModComponetSolverInformation["ForeignExchangeRates"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "ForeignExchangeRates", moduleDisplayName = "Foreign Exchange Rates", helpText = "Solve the module with !{0} press ML. Positions are TL, TM, TR, ML, MM, MR, BL, BM, BR." };
+        ModComponetSolverInformation["Listening"] = new ModuleInformation { builtIntoTwitchPlays = true, statusLightLeft = true, moduleID = "Listening", moduleDisplayName = "Listening", helpText = "Listen to the sound with !{0} press play. Enter the response with !{0} press $ & * * #." };
+        ModComponetSolverInformation["OrientationCube"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "OrientationCube", moduleDisplayName = "Orientation Cube", helpText = "Move the cube with !{0} press cw l set.  The buttons are l, r, cw, ccw, set." };
+        ModComponetSolverInformation["Probing"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "Probing", moduleDisplayName = "Probing", helpText = "Get the readings with !{0} cycle. Try a combination with !{0} connect 4 3.  Cycle reads 1&2, 1&3, 1&4, 1&5, 1&6." };
+        ModComponetSolverInformation["TurnTheKey"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "TurnTheKey", moduleDisplayName = "Turn The Key", helpText = "Turn the key at specified time with !{0} turn 8:29" };
+        ModComponetSolverInformation["TurnTheKeyAdvanced"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "TurnTheKeyAdvanced", moduleDisplayName = "Turn The Keys", helpText = "Turn the left key with !{0} turn left. Turn the right key with !{0} turn right." };
+
+        //Kaneb
+        ModComponetSolverInformation["TwoBits"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "TwoBits", moduleDisplayName = "Two Bits", helpText = "Query the answer with !{0} press K T query. Submit the answer with !{0} press G Z submit." };
+
+        //Steel Crate Games (Need these in place even for the Vanilla modules)
+        ModComponetSolverInformation["WireSetComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "WireSetComponentSolver", moduleDisplayName = "Simple Wires", helpText = "!{0} cut 3 [cut wire 3] | Wires are ordered from top to bottom | Empty spaces are not counted" };
+        ModComponetSolverInformation["ButtonComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "ButtonComponentSolver", moduleDisplayName = "Big Button", helpText = "!{0} tap [tap the button] | !{0} hold [hold the button] | !{0} release 7 [release when the digit shows 7]" };
+        ModComponetSolverInformation["WireSequenceComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "WireSequenceComponentSolver", moduleDisplayName = "Wire Sequence", helpText = "!{0} cut 7 [cut wire 7] | !{0} down, !{0} d [next stage] | !{0} up, !{0} u [previous stage] | !{0} cut 7 8 9 d [cut multiple wires and continue] | Use the numbers shown on the module", manualCode = "Wire Sequences" };
+        ModComponetSolverInformation["WhosOnFirstComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "WhosOnFirstComponentSolver", moduleDisplayName = "Who's on First", helpText = "!{0} what? [press the button that says \"WHAT?\"] | The phrase must match exactly | Not case sensitive", manualCode = "Who%E2%80%99s on First" };
+        ModComponetSolverInformation["VennWireComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "VennWireComponentSolver", moduleDisplayName = "Complicated Wires", helpText = "!{0} cut 3 [cut wire 3] | !{0} cut 2 3 6 [cut multiple wires] | Wires are ordered from left to right | Empty spaces are not counted" };
+        ModComponetSolverInformation["SimonComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "SimonComponentSolver", moduleDisplayName = "Simon Says", helpText = "!{0} press red green blue yellow, !{0} press rgby [press a sequence of colours] | You must include the input from any previous stages" };
+        ModComponetSolverInformation["PasswordComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "PasswordComponentSolver", moduleDisplayName = "Password", helpText = "!{0} cycle 3 [cycle through the letters in column 3] | !{0} world [try to submit a word]", manualCode = "Passwords" };
+        ModComponetSolverInformation["NeedyVentComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "NeedyVentComponentSolver", moduleDisplayName = "Needy Vent Gas", helpText = "!{0} yes, !{0} y [answer yes] | !{0} no, !{0} n [answer no]" };
+        ModComponetSolverInformation["NeedyKnobComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "NeedyKnobComponentSolver", moduleDisplayName = "Needy Knob", helpText = "!{0} rotate 3, !{0} turn 3 [rotate the knob 3 quarter-turns]", manualCode = "Knobs" };
+        ModComponetSolverInformation["NeedyDischargeComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "NeedyDischargeComponentSolver", moduleDisplayName = "Needy Capacitor", helpText = "!{0} hold 7 [hold the lever for 7 seconds]", manualCode = "Capacitor Discharge" };
+        ModComponetSolverInformation["MorseCodeComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "MorseCodeComponentSolver", moduleDisplayName = "Morse Code", helpText = "!{0} transmit 3.573, !{0} trans 573, !{0} tx 573 [transmit frequency 3.573]" };
+        ModComponetSolverInformation["MemoryComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "MemoryComponentSolver", moduleDisplayName = "Memory", helpText = "!{0} position 2, !{0} pos 2, !{0} p 2 [2nd position] | !{0} label 3, !{0} lab 3, !{0} l 3 [label 3]" };
+        ModComponetSolverInformation["KeypadComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "KeypadComponentSolver", moduleDisplayName = "Keypad", helpText = "!{0} press 3 1 2 4 | The buttons are 1=TL, 2=TR, 3=BL, 4=BR", manualCode = "Keypads" };
+        ModComponetSolverInformation["InvisibleWallsComponentSolver"] = new ModuleInformation { builtIntoTwitchPlays = true, moduleID = "InvisibleWallsComponentSolver", moduleDisplayName = "Maze", helpText = "!{0} move up down left right, !{0} move udlr [make a series of white icon moves]", manualCode = "Mazes" };
 
 
-        //Help Messages
-        //ModComponetSolverInformation["spwiz3DMaze"] = new ModuleInformation { helpText = ""};
+        //Modded Modules not built into Twitch Plays
+        ModComponetSolverInformation["spwiz3DMaze"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["spwizAdventureGame"] = new ModuleInformation { helpText = "Cycle the stats with !{0} cycle stats.  Cycle the Weapons/Items with !{0} cycle items. Use weapons/Items with !{0} use potion. (spell out the item name completely. not case sensitive)"};
         ModComponetSolverInformation["AdjacentLettersModule"] = new ModuleInformation { helpText = "Set the Letters with !{0} set W D J S.  (warning, this will unset ALL letters not specified.)  Submit your answer with !{0} submit." };
-        //ModComponetSolverInformation["alphabet"] = new ModuleInformation { helpText = ""};
-        //ModComponetSolverInformation["AnagramsModule"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["alphabet"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["AnagramsModule"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["spwizAstrology"] = new ModuleInformation { helpText = "Press good on 3 with !{0} press good on 3.  Press bad on 2 with !{0} press bad on 2. No Omen is !{0} press no"};
         ModComponetSolverInformation["BattleshipModule"] = new ModuleInformation { helpText = "Scan the safe spots with !{0} scan A2 B3 E5. Mark the spots as water with !{0} miss A1 A3 B4.  Mark the spots as ships with !{0} hit E3 E4. Fill in the rows with !{0} row 3 4. Fill in columns with !{0} col B D"};
         ModComponetSolverInformation["BitmapsModule"] = new ModuleInformation { helpText = "Submit the correct answer with !{0} press 2."};
@@ -104,21 +157,21 @@ public static class ComponentSolverFactory
         ModComponetSolverInformation["CaesarCipherModule"] = new ModuleInformation { helpText = "Press the correct cipher text with !{0} press K B Q I S."};
         ModComponetSolverInformation["CheapCheckoutModule"] = new ModuleInformation { helpText = "Cycle the items with !{0} items. Get customers to pay the correct amount with !{0} submit.  Return the proper change with !{0} submit 3.24."};
         ModComponetSolverInformation["ChessModule"] = new ModuleInformation { helpText = "Cycle the positions with !{0} cycle.  Submit the safe spot with !{0} press C2."};
-        //ModComponetSolverInformation["ChordQualities"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["ChordQualities"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["ColourFlash"] = new ModuleInformation { helpText = "Submit the correct response with !{0} press yes 3, or !{0} press no 5.", manualCode = "Color Flash" };
         ModComponetSolverInformation["colormath"] = new ModuleInformation { helpText = "Set the correct number with !{0} set a,k,m,y.  Submit your set answer with !{0} submit. colors are Red, Orange, Yellow, Green, Blue, Purple, Magenta, White, grAy, blackK. (note what letter is capitalized in each color.)"};
         ModComponetSolverInformation["ColoredSquaresModule"] = new ModuleInformation { helpText = "Press the desired squares with !{0} red, !{0} green, !{0} blue, !{0} yellow, !{0} magenta, !{0} row, or !{0} col."};
-        //ModComponetSolverInformation["combinationLock"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["combinationLock"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["complicatedButtonsModule"] = new ModuleInformation { helpText = "Press the top button with !{0} press top (also t, 1, etc.)."};
         ModComponetSolverInformation["graphModule"] = new ModuleInformation { helpText = "Submit an answer with !{0} submit green red true false. Order is TL, TR, BL, BR."}; // Connection Check
         ModComponetSolverInformation["CoordinatesModule"] = new ModuleInformation { helpText = "Cycle the options with !{0} cycle.  Submit your answer with !{0} submit <3,2>.  Partial answers are acceptable. To do chinese numbers, its !{0} submit chinese 12."};
         ModComponetSolverInformation["CreationModule"] = new ModuleInformation { helpText = "Combine two elements with !{0} combine water fire."};
         ModComponetSolverInformation["DoubleOhModule"] = new ModuleInformation { helpText = "Cycle the buttons with !{0} cycle. (Cycle presses each button 3 times, in the order of vert1, horiz1, horiz2, vert2, submit.)  Submit your answer with !{0} press vert1 horiz1 horiz2 vert2 submit."};
-        //ModComponetSolverInformation["EdgeworkModule"] = new ModuleInformation { helpText = ""};
-        //ModComponetSolverInformation["Emoji Math"] = new ModuleInformation { helpText = ""};
-        //ModComponetSolverInformation["EnglishTest"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["EdgeworkModule"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["Emoji Math"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["EnglishTest"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["fastMath"] = new ModuleInformation { helpText = "Start the timer with !{0} go. Submit an answer with !{0} submit 12."};
-        //ModComponetSolverInformation["Filibuster"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["Filibuster"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["fizzBuzzModule"] = new ModuleInformation { helpText = "Press the top button with !{0} press top (also t, 1, etc.). Submit with !{0} press submit."};
         ModComponetSolverInformation["FollowTheLeaderModule"] = new ModuleInformation { helpText = "Cut the wires in the order specified with !{0} cut 12 10 8 7 6 5 3 1. (note that order was the Lit CLR rule.)"};
         ModComponetSolverInformation["FriendshipModule"] = new ModuleInformation { helpText = "Submit the desired friendship element with !{0} submit Fairness Conscientiousness Kindness Authenticity."};
@@ -127,41 +180,41 @@ public static class ComponentSolverFactory
         ModComponetSolverInformation["iceCreamModule"] = new ModuleInformation { helpText = "Move left/right with !{0} left and !{0} right. Sell with !{0} sell."};
         ModComponetSolverInformation["Laundry"] = new ModuleInformation { helpText = "Set all of the options with !{0} set all 30C,2 dot,110C,Wet Cleaning.  Set just washing with !{0} set wash 40C.  Submit with !{0} insert coin. ...pray for that 4 in 2 & lit BOB Kappa"};
         ModComponetSolverInformation["LEDEnc"] = new ModuleInformation { helpText = "Press the button with label B with !{0} press b."};
-        //ModComponetSolverInformation["LetterKeys"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["LetterKeys"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["LightCycleModule"] = new ModuleInformation { helpText = "Submit your answer with !{0} B R W M G Y. (note, this module WILL try to input any answer you put into it. Don't do !{0} claim or !{0} mine here.)"};
         ModComponetSolverInformation["LightsOut"] = new ModuleInformation { helpText = "Press the buttons with !{0} press 1 2 3. Buttons ordered from top to bottom, then left to right."};
         ModComponetSolverInformation["Logic"] = new ModuleInformation { helpText = "Logic is answered with !{0} submit F T."};
-        //ModComponetSolverInformation["MazeV2"] = new ModuleInformation { helpText = ""};
-        //ModComponetSolverInformation["Microcontroller"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["MazeV2"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["Microcontroller"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["MinesweeperModule"] = new ModuleInformation { helpText = "Clear the initial colour with !{0} dig blue. Clear the square on column 1 row 2 with !{0} dig 1 2. Flag the square on column 3 row 4 with !{0} flag 3 4. Separate multiple squares with a semicolon to interact with all of them."};
         ModComponetSolverInformation["ModuleAgainstHumanity"] = new ModuleInformation { helpText = "Reset the module with !{0} press reset.  Move the black card +2 with !{0} move black 2.  Move the white card -3 with !{0} move white -3. Submit with !{0} press submit."};
         ModComponetSolverInformation["monsplodeFight"] = new ModuleInformation { helpText = "Use a move with !{0} use explode."};
-        //ModComponetSolverInformation["monsplodeWho"] = new ModuleInformation { helpText = ""};
-        //ModComponetSolverInformation["MorseV2"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["monsplodeWho"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["MorseV2"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["MouseInTheMaze"] = new ModuleInformation { helpText = "Move with !{0} forward back. Turn with !{0} left right u-turn. The first letter only can be used instead. Submit with !{0} submit."};
-        //ModComponetSolverInformation["murder"] = new ModuleInformation { helpText = ""};
-        //ModComponetSolverInformation["MusicRhythms"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["murder"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["MusicRhythms"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["MysticSquareModule"] = new ModuleInformation { helpText = "Move the numbers around with !{0} press 1 3 2 1 3 4 6 8.  (Note, this module will NOT stop moving numbers around on a strike. Make sure that knight gets uncovered asap.)"};
-        //ModComponetSolverInformation["Needy Math"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["Needy Math"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["neutralization"] = new ModuleInformation { helpText = "Select a base with !{0} base NaOH. Turn the filter on/off with !{0} filter. Set drop count with !{0} conc set 48. Submit with !{0} titrate."};
-        //ModComponetSolverInformation["NumberPad"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["NumberPad"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["OnlyConnectModule"] = new ModuleInformation { helpText = "Press a button by position with !{0} press tm or !{0} press 2. Round 1 also accepts symbol names (e.g. reeds, eye, flax, lion, water, viper)."};
-        //ModComponetSolverInformation["spwizPerspectivePegs"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["spwizPerspectivePegs"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["PianoKeys"] = new ModuleInformation { helpText = "Submit your answer with !{0} press Bb Bb Bb Bb Gb Ab Bb Ab Bb."};
-        //ModComponetSolverInformation["resistors"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["resistors"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["RockPaperScissorsLizardSpockModule"] = new ModuleInformation {  helpText = "Submit your answer with !{0} press scissors lizard.", manualCode = "Rock-Paper-Scissors-Lizard-Spock" };
         ModComponetSolverInformation["RubiksCubeModule"] = new ModuleInformation { helpText = "View the colors on all sides with !{0} rotate. Reset the cube to starting state with !{0} reset. Solve the Cube with !{0} r' d u f' r' d' u b' u' f", manualCode = "Rubik%E2%80%99s Cube", validCommands = new[] { "^reset$", "^rotate$", "(?>[fbudlr]['2]?)(?> [fbudlr]['2]?)*$" } };
         ModComponetSolverInformation["screw"] = new ModuleInformation { helpText = "Screw with !{0} screw tr or !{0} screw 3. Options are TL, TM, TR, BL, BM, BR. Press a button with !{0} press b or !{0} press 2."};
-        //ModComponetSolverInformation["SeaShells"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["SeaShells"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["Semaphore"] = new ModuleInformation { helpText = "Move to the next flag with !{0} move right or !{0} press right. Move to previous flag with !{0} move left or !{0} press left.  Submit with !{0} press ok."};
-        //ModComponetSolverInformation["shapeshift"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["shapeshift"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["SillySlots"] = new ModuleInformation { helpText = "Keep the slots with !{0} keep.  Pull the slots with !{0} pull."};
         ModComponetSolverInformation["SimonScreamsModule"] = new ModuleInformation { helpText = "Press the correct colors for each round with !{0} press B O Y."};
         ModComponetSolverInformation["SkewedSlotsModule"] = new ModuleInformation { helpText = "Submit the correct response with !{0} submit 1 2 3."};
         ModComponetSolverInformation["SouvenirModule"] = new ModuleInformation { helpText = "Submit the correct response with !{0} answer 3. Order is from top to bottom, then left to right."};
-        //ModComponetSolverInformation["switchModule"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["switchModule"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["symbolicPasswordModule"] = new ModuleInformation { helpText = "Cycle a row with cycle t l. Cycle a column with cycle m. Submit with !{0} submit. Rows are TL/TR/BL/BR, columns are L/R/M. Spaces are important!"};
-        //ModComponetSolverInformation["spwizTetris"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["spwizTetris"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["TextField"] = new ModuleInformation { helpText = "Press the button in Row 2 column 3 and Row 3 Column 4 with !{0} press 3,2 4,3."};
         ModComponetSolverInformation["TicTacToeModule"] = new ModuleInformation { helpText = "Press a button with !{0} tl. Buttons are tl, tm, tr, ml, mm, mr, bl, bm, br.", manualCode = "Tic-Tac-Toe" };
         ModComponetSolverInformation["TheBulbModule"] = new ModuleInformation { helpText = "Press O with !{0} press O.  Press I with !{0} press I. Unscrew the bulb with !{0} unscrew.  Screw in the bulb with !{0} screw."};
@@ -170,7 +223,7 @@ public static class ComponentSolverFactory
         ModComponetSolverInformation["ThirdBase"] = new ModuleInformation { helpText = "Press a button with !{0} z0s8. Word must match the button as it would appear if the module was the right way up. Not case sensitive."};
         ModComponetSolverInformation["webDesign"] = new ModuleInformation { helpText = "Accept the design with !{0} acc.  Consider the design with !{0} con.  Reject the design with !{0} reject."};
         ModComponetSolverInformation["WirePlacementModule"] = new ModuleInformation { helpText = "Cut the correct wires with !{0} cut A2 B4 D3."};
-        //ModComponetSolverInformation["WordScrambleModule"] = new ModuleInformation { helpText = ""};
+        ModComponetSolverInformation["WordScrambleModule"] = new ModuleInformation { helpText = ""};
         ModComponetSolverInformation["WordSearchModule"] = new ModuleInformation { helpText = "Select the word starting at column B row 3, and ending at column C row 4, with !{0} select B3 C4."};
         ModComponetSolverInformation["YahtzeeModule"] = new ModuleInformation { helpText = "Roll the dice with !{0} roll. Keep some dice with !{0} keep white,purple,blue,yellow,black. Roll the remaining dice until a 3 appears with !{0} roll until 3."};
 
@@ -296,7 +349,6 @@ public static class ComponentSolverFactory
         if (ModComponentSolverCreators.ContainsKey(moduleType))
         {
             ComponentSolver solver = ModComponentSolverCreators[moduleType](bombCommander, bombComponent, ircConnection, canceller);
-            solver.UpdateModuleInformation(GetModuleInfo(moduleType));
             return solver;
         }
 
@@ -389,7 +441,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, info);
+                        return new SimpleModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent);
                     };
                 case ModCommandType.Coroutine:
                     FieldInfo cancelfield;
@@ -398,7 +450,7 @@ public static class ComponentSolverFactory
                     return delegate (BombCommander _bombCommander, MonoBehaviour _bombComponent, IRCConnection _ircConnection, CoroutineCanceller _canceller)
                     {
                         Component commandComponent = _bombComponent.GetComponentInChildren(commandComponentType);
-                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, cancelfield, canceltype, info);
+                        return new CoroutineModComponentSolver(_bombCommander, _bombComponent, _ircConnection, _canceller, method, commandComponent, cancelfield, canceltype);
                     };
 
                 default:

@@ -11,7 +11,7 @@ public class PasswordComponentSolver : ComponentSolver
     {
         _spinners = (IList)_spinnersField.GetValue(bombComponent);
         _submitButton = (MonoBehaviour)_submitButtonField.GetValue(bombComponent);
-        modInfo = ComponentSolverFactory.GetModuleInfo("ButtonComponentSolver");
+        modInfo = ComponentSolverFactory.GetModuleInfo("PasswordComponentSolver");
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

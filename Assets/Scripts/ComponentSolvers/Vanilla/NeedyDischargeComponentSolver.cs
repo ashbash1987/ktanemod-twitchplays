@@ -9,7 +9,7 @@ public class NeedyDischargeComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _dischargeButton = (MonoBehaviour)_dischargeButtonField.GetValue(bombComponent);
-        modInfo = ComponentSolverFactory.GetModuleInfo("ButtonComponentSolver");
+        modInfo = ComponentSolverFactory.GetModuleInfo("NeedyDischargeComponentSolver");
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

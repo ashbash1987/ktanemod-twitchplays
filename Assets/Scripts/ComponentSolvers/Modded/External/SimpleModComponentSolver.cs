@@ -6,12 +6,12 @@ using UnityEngine;
 
 public class SimpleModComponentSolver : ComponentSolver
 {
-    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent, ModuleInformation info) :
+    public SimpleModComponentSolver(BombCommander bombCommander, MonoBehaviour bombComponent, IRCConnection ircConnection, CoroutineCanceller canceller, MethodInfo processMethod, Component commandComponent) :
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         ProcessMethod = processMethod;
         CommandComponent = commandComponent;
-        modInfo = info;
+        modInfo = ComponentSolverFactory.GetModuleInfo(GetModuleType());
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

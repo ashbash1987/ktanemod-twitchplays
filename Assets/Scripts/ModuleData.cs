@@ -9,17 +9,33 @@ public class ModuleInformation
 {
     public string moduleDisplayName = string.Empty;
     public string moduleID;
+
+    public bool helpTextOverride;
     public string helpText;
+
+    public bool manualCodeOverride;
     public string manualCode;
+
+    public bool statusLightOverride;
     public bool statusLightLeft;
     public bool statusLightDown;
     public float chatRotation;
+
+    public bool validCommandsOverride;
     public string[] validCommands;
     public bool DoesTheRightThing;
-    public bool helpTextOverride;
-    public bool manualCodeOverride;
-    public bool statusLightOverride;
-    public bool validCommandsOverride;
+
+    public bool builtIntoTwitchPlays;
+
+
+    public bool ShouldSerializebuiltIntoTwitchPlays(){return false;}
+    public bool ShouldSerializevalidCommands(){return !builtIntoTwitchPlays;}
+    public bool ShouldSerializeDoesTheRightThing() { return !builtIntoTwitchPlays; }
+    public bool ShouldSerializehelpTextOverride() { return !builtIntoTwitchPlays; }
+    public bool ShouldSerializemanualCodeOverride() { return !builtIntoTwitchPlays; }
+    public bool ShouldSerializestatusLightOverride() { return !builtIntoTwitchPlays; }
+    public bool ShouldSerializevalidCommandsOverride() { return !builtIntoTwitchPlays; }
+
 }
 
 public static class ModuleData

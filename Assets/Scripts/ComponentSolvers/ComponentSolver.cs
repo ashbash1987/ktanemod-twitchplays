@@ -205,23 +205,6 @@ public abstract class ComponentSolver : ICommandResponder
         _currentUserNickName = null;
         _processingTwitchCommand = false;
     }
-
-    public void UpdateModuleInformation(ModuleInformation info)
-    {
-        if (info == null) return;
-        modInfo = info;
-    }
-
-    protected string GetModuleType()
-    {
-        KMBombModule bombModule = BombComponent.GetComponent<KMBombModule>();
-        if (bombModule != null)
-            return bombModule.ModuleType;
-        KMNeedyModule needyModule = BombComponent.GetComponent<KMNeedyModule>();
-        if (needyModule != null)
-            return needyModule.ModuleType;
-        return null;
-    }
     #endregion
 
     #region Abstract Interface
@@ -240,6 +223,17 @@ public abstract class ComponentSolver : ICommandResponder
         MonoBehaviour selectable = (MonoBehaviour)interactable.GetComponent(_selectableType);
         _interactEndedMethod.Invoke(selectable, null);
         _setHighlightMethod.Invoke(selectable, new object[] { false });
+    }
+
+    protected string GetModuleType()
+    {
+        KMBombModule bombModule = BombComponent.GetComponent<KMBombModule>();
+        if (bombModule != null)
+            return bombModule.ModuleType;
+        KMNeedyModule needyModule = BombComponent.GetComponent<KMNeedyModule>();
+        if (needyModule != null)
+            return needyModule.ModuleType;
+        return null;
     }
     #endregion
 

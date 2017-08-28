@@ -11,7 +11,7 @@ public class SimonComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
-        modInfo = ComponentSolverFactory.GetModuleInfo("ButtonComponentSolver");
+        modInfo = ComponentSolverFactory.GetModuleInfo("SimonComponentSolver");
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)
