@@ -47,8 +47,10 @@ public class TwitchBombHandle : MonoBehaviour
 
     private void Start()
     {
-        if(bombID > -1)
+        if (bombID > -1)
+        {
             _code = "bomb" + (bombID + 1);
+        }
 
         idText.text = string.Format("!{0}", _code);
 
@@ -89,40 +91,46 @@ public class TwitchBombHandle : MonoBehaviour
         }
 
         //Respond instantly to these commands without dropping "The Bomb", should the command be for "The Other Bomb" and vice versa.
-        ICommandResponseNotifier icrn = message;
-        if (internalCommand.Equals("timestamp", StringComparison.InvariantCultureIgnoreCase) ||
+        ICommandResponseNotifier notifier = message;
+        if (internalCommand.Equals("timestamp", StringComparison.InvariantCultureIgnoreCase) || 
             internalCommand.Equals("date", StringComparison.InvariantCultureIgnoreCase))
         {
             //Some modules depend on the date/time the bomb, and therefore that Module instance has spawned, in the bomb defusers timezone.
 
-            icrn.ProcessResponse(CommandResponse.Start);
+            notifier.ProcessResponse(CommandResponse.Start);
 
             StringBuilder sb = new StringBuilder();
             sb.Append("The Date/Time this bomb started is ");
             sb.Append(string.Format("{0:F}", bombCommander.BombTimeStamp));
             ircConnection.SendMessage(sb.ToString());
 
-            icrn.ProcessResponse(CommandResponse.EndNotComplete);
+            notifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
         else if (internalCommand.Equals("help", StringComparison.InvariantCultureIgnoreCase))
         {
-            icrn.ProcessResponse(CommandResponse.Start);
+            notifier.ProcessResponse(CommandResponse.Start);
 
             ircConnection.SendMessage("The Bomb: !bomb hold [pick up] | !bomb drop | !bomb turn [turn to the other side] | !bomb edgework [show the widgets on the sides] | !bomb top [show one side; sides are Top/Bottom/Left/Right | !bomb time [time remaining] | !bomb timestamp [bomb start time]");
 
-            icrn.ProcessResponse(CommandResponse.EndNotComplete);
+            notifier.ProcessResponse(CommandResponse.EndNotComplete);
         }
-
         else if (internalCommand.Equals("time", StringComparison.InvariantCultureIgnoreCase) ||
                  internalCommand.Equals("timer", StringComparison.InvariantCultureIgnoreCase) ||
                  internalCommand.Equals("clock", StringComparison.InvariantCultureIgnoreCase))
         {
-            icrn.ProcessResponse(CommandResponse.Start);
+            notifier.ProcessResponse(CommandResponse.Start);
 
-            ircConnection.SendMessage(string.Format("panicBasket [{0}]",
-                bombCommander.GetFullFormattedTime));
+            ircConnection.SendMessage(string.Format("panicBasket [{0}]", bombCommander.GetFullFormattedTime));
 
-            icrn.ProcessResponse(CommandResponse.EndNotComplete);
+            notifier.ProcessResponse(CommandResponse.EndNotComplete);
+        }
+        else if (UserAccess.HasAccess(userNickName, AccessLevel.Mod))
+        {
+            if (internalCommand.Equals("explode", StringComparison.InvariantCultureIgnoreCase) ||
+                internalCommand.Equals("detonate", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return DelayBombExplosionCoroutine(notifier);
+            }
         }
         else
         {
@@ -134,6 +142,18 @@ public class TwitchBombHandle : MonoBehaviour
     #endregion
 
     #region Private Methods
+    private IEnumerator DelayBombExplosionCoroutine(ICommandResponseNotifier notifier)
+    {
+        notifier.ProcessResponse(CommandResponse.Start);
+
+        ircConnection.SendMessage("panicBasket This bomb's gonna blow!");
+        yield return new WaitForSeconds(1.0f);
+
+        bombCommander.CauseStrikesToExplosion("Explosions!");
+
+        notifier.ProcessResponse(CommandResponse.EndNotComplete);
+    }
+
     private IEnumerator RespondToCommandCoroutine(string userNickName, string internalCommand, ICommandResponseNotifier message, float fadeDuration = 0.1f)
     {
         float time = Time.time;

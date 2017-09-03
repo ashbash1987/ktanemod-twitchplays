@@ -275,8 +275,8 @@ public class ModuleCameras : MonoBehaviour
     {
         if (currentBomb != null)
         {
-            currentSolves = currentBomb._bombSolvedModules;
-            string solves = currentSolves.ToString().PadLeft(currentBomb._bombSolvableModules.ToString().Length, Char.Parse("0"));
+            currentSolves = currentBomb.bombSolvedModules;
+            string solves = currentSolves.ToString().PadLeft(currentBomb.bombSolvableModules.ToString().Length, Char.Parse("0"));
             Debug.Log(LogPrefix + "Updating solves to " + solves);
             solvesPrefab.text = solves;
         }
@@ -286,7 +286,7 @@ public class ModuleCameras : MonoBehaviour
     {
         if (currentBomb != null)
         {
-            currentTotalModules = currentBomb._bombSolvableModules;
+            currentTotalModules = currentBomb.bombSolvableModules;
             string total = currentTotalModules.ToString();
             Debug.Log(LogPrefix + "Updating total modules to " + total);
             totalModulesPrefab.text = "/" + total;
@@ -559,7 +559,7 @@ public class ModuleCameras : MonoBehaviour
             float timeMax = 0.2f;
 
             float timeRemaining = currentBomb.CurrentTimer;
-            float totalTime = currentBomb._bombStartingTimer;
+            float totalTime = currentBomb.bombStartingTimer;
 
             int strikesAvailable = (currentTotalStrikes - 1) - currentStrikes; // Strikes without exploding
 

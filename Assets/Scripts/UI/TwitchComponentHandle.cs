@@ -108,7 +108,7 @@ public class TwitchComponentHandle : MonoBehaviour
         canvasGroup.alpha = 0.0f;
         highlightGroup.alpha = 0.0f;
 
-        canvasGroupMultiDecker.alpha = bombCommander._multiDecker ? 1.0f : 0.0f;
+        canvasGroupMultiDecker.alpha = bombCommander.multiDecker ? 1.0f : 0.0f;
 
         unclaimedBackgroundColor = idBannerPrefab.GetComponent<Image>().color;
 
@@ -202,7 +202,7 @@ public class TwitchComponentHandle : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!bombCommander._multiDecker)
+        if (!bombCommander.multiDecker)
         {
             Vector3 cameraForward = Camera.main.transform.forward;
             Vector3 componentForward = transform.up;

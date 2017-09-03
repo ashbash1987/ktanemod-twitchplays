@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 public class MiscellaneousMessageResponder : MessageResponder
 {
@@ -35,7 +34,7 @@ public class MiscellaneousMessageResponder : MessageResponder
             {
                 string[] parts = text.Split(' ');
                 int desiredRank;
-                if ( parts[1].Equals("solo", StringComparison.InvariantCultureIgnoreCase) && int.TryParse(parts[2], out desiredRank) )
+                if (parts[1].Equals("solo", StringComparison.InvariantCultureIgnoreCase) && int.TryParse(parts[2], out desiredRank))
                 {
                     leaderboard.GetSoloRank(desiredRank, out entry);
                 }
@@ -75,19 +74,14 @@ public class MiscellaneousMessageResponder : MessageResponder
             }
             return;
         }
-        else if ( (text.Equals("!log", StringComparison.InvariantCultureIgnoreCase)) ||
-            (text.Equals("!analysis", StringComparison.InvariantCultureIgnoreCase)) )
+        else if (text.Equals("!log", StringComparison.InvariantCultureIgnoreCase) || text.Equals("!analysis", StringComparison.InvariantCultureIgnoreCase))
         {
             TwitchPlaysService.logUploader.PostToChat("Analysis for the previous bomb: {0}");
             return;
         }
         else if (text.Equals("!shorturl", StringComparison.InvariantCultureIgnoreCase))
         {
-            _ircConnection.SendMessage(
-                (TwitchPlaysService.urlHelper.ToggleMode()) ?
-                "Enabling shortened URLs" :
-                "Disabling shortened URLs"
-            );
+            _ircConnection.SendMessage((TwitchPlaysService.urlHelper.ToggleMode()) ? "Enabling shortened URLs" : "Disabling shortened URLs");
         }
         else if (text.Equals("!about", StringComparison.InvariantCultureIgnoreCase))
         {

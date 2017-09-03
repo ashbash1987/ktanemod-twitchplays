@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -40,15 +39,29 @@ public class BombCommander : ICommandResponder
         _getBaseHeldObjectTransformMethod = _selectableManagerType.GetMethod("GetBaseHeldObjectTransform", BindingFlags.Public | BindingFlags.Instance);
         _handleFaceSelectionMethod = _selectableManagerType.GetMethod("HandleFaceSelection", BindingFlags.Public | BindingFlags.Instance);
 
+        _recordManagerType = ReflectionHelper.FindType("Assets.Scripts.Records.RecordManager");
+        _recordManagerInstanceProperty = _recordManagerType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+        _recordStrikeMethod = _recordManagerType.GetMethod("RecordStrike", BindingFlags.Public | BindingFlags.Instance);
+        
+        _strikeSourceType = ReflectionHelper.FindType("Assets.Scripts.Records.StrikeSource");
+        _componentTypeField = _strikeSourceType.GetField("ComponentType", BindingFlags.Public | BindingFlags.Instance);
+        _componentNameField = _strikeSourceType.GetField("ComponentName", BindingFlags.Public | BindingFlags.Instance);
+        _interactionTypeField = _strikeSourceType.GetField("InteractionType", BindingFlags.Public | BindingFlags.Instance);
+        _timeField = _strikeSourceType.GetField("Time", BindingFlags.Public | BindingFlags.Instance);
+
+        _interactionTypeEnumType = ReflectionHelper.FindType("Assets.Scripts.Records.InteractionTypeEnum");
+
         _inputManagerType = ReflectionHelper.FindType("KTInputManager");
         if (_inputManagerType == null)
         {
             return;
         }
-        _instanceProperty = _inputManagerType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+        _inputManagerInstanceProperty = _inputManagerType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
         _selectableManagerProperty = _inputManagerType.GetProperty("SelectableManager", BindingFlags.Public | BindingFlags.Instance);
 
-        _inputManager = (MonoBehaviour)_instanceProperty.GetValue(null, null);
+        _inputManager = (MonoBehaviour)_inputManagerInstanceProperty.GetValue(null, null);
+
+        _onStrikeMethod = CommonReflectedTypeInfo.BombType.GetMethod("OnStrike", BindingFlags.Public | BindingFlags.Instance);
     }
 
     public BombCommander(MonoBehaviour bomb)
@@ -58,7 +71,7 @@ public class BombCommander : ICommandResponder
         FloatingHoldable = (MonoBehaviour)Bomb.GetComponent(_floatingHoldableType);
         SelectableManager = (MonoBehaviour)_selectableManagerProperty.GetValue(_inputManager, null);
         BombTimeStamp = DateTime.Now;
-        _bombStartingTimer = CurrentTimer;
+        bombStartingTimer = CurrentTimer;
     }
     #endregion
 
@@ -124,12 +137,12 @@ public class BombCommander : ICommandResponder
         }
         else if (message.Equals("unview", StringComparison.InvariantCultureIgnoreCase))
         {
-            BombMessageResponder.moduleCameras.DetachFromModule(_timerComponent);
+            BombMessageResponder.moduleCameras.DetachFromModule(timerComponent);
         }
         else if (message.StartsWith("view", StringComparison.InvariantCultureIgnoreCase))
         {
             int priority = (message.Equals("view pin", StringComparison.InvariantCultureIgnoreCase)) ? ModuleCameras.CameraPinned : ModuleCameras.CameraPrioritised;
-            BombMessageResponder.moduleCameras.AttachToModule(_timerComponent, null, priority);
+            BombMessageResponder.moduleCameras.AttachToModule(timerComponent, null, priority);
         }
         else
         {
@@ -368,6 +381,28 @@ public class BombCommander : ICommandResponder
         _handleFaceSelectionMethod.Invoke(SelectableManager, null);
     }
 
+    public void CauseStrikesToExplosion(string reason)
+    {
+        for (int strikesToMake = StrikeLimit - StrikeCount; strikesToMake > 0; --strikesToMake)
+        {
+            CauseStrike(reason);
+        }
+    }
+
+    public void CauseStrike(string reason)
+    {
+        object strikeSource = Activator.CreateInstance(_strikeSourceType);
+        _componentTypeField.SetValue(strikeSource, Enum.ToObject(CommonReflectedTypeInfo.ComponentTypeEnumType, (int)ComponentTypeEnum.Mod));
+        _interactionTypeField.SetValue(strikeSource, Enum.ToObject(_interactionTypeEnumType, (int)InteractionTypeEnum.Other));
+        _timeField.SetValue(strikeSource, CurrentTimerElapsed);
+        _componentNameField.SetValue(strikeSource, reason);
+
+        object recordManager = _recordManagerInstanceProperty.GetValue(null, null);
+        _recordStrikeMethod.Invoke(recordManager, new object[] { strikeSource });
+
+        _onStrikeMethod.Invoke(Bomb, new object[] { null });
+    }
+
     private void SelectObject(MonoBehaviour selectable)
     {
         _handleSelectMethod.Invoke(selectable, new object[] { true });
@@ -434,6 +469,15 @@ public class BombCommander : ICommandResponder
         RotateByLocalQuaternion(target);
     }
 
+    public float CurrentTimerElapsed
+    {
+        get
+        {
+            MonoBehaviour timerComponent = (MonoBehaviour)CommonReflectedTypeInfo.GetTimerMethod.Invoke(Bomb, null);
+            return (float)CommonReflectedTypeInfo.TimeElapsedProperty.GetValue(timerComponent, null);
+        }
+    }
+
     public float CurrentTimer
     {
         get
@@ -464,12 +508,30 @@ public class BombCommander : ICommandResponder
             return formattedTime;
         }
     }
+
+    public int StrikeCount
+    {
+        get
+        {
+            return (int)CommonReflectedTypeInfo.NumStrikesField.GetValue(Bomb);
+        }
+    }
+
+    public int StrikeLimit
+    {
+        get
+        {
+            return (int)CommonReflectedTypeInfo.NumStrikesToLoseField.GetValue(Bomb);
+        }
+    }
     #endregion
 
     #region Readonly Fields
     public readonly MonoBehaviour Bomb = null;
     public readonly MonoBehaviour Selectable = null;
     public readonly MonoBehaviour FloatingHoldable = null;
+    public readonly DateTime BombTimeStamp;
+
     private readonly MonoBehaviour SelectableManager = null;
     #endregion
 
@@ -496,19 +558,32 @@ public class BombCommander : ICommandResponder
     private static MethodInfo _getBaseHeldObjectTransformMethod = null;
     private static MethodInfo _handleFaceSelectionMethod = null;
 
+    private static Type _recordManagerType = null;
+    private static PropertyInfo _recordManagerInstanceProperty = null;
+    private static MethodInfo _recordStrikeMethod = null;
+
+    private static Type _strikeSourceType = null;
+    private static FieldInfo _componentTypeField = null;
+    private static FieldInfo _componentNameField = null;
+    private static FieldInfo _interactionTypeField = null;
+    private static FieldInfo _timeField = null;
+
+    private static Type _interactionTypeEnumType = null;
+
+    private static MethodInfo _onStrikeMethod = null;
+
     private static Type _inputManagerType = null;
-    private static PropertyInfo _instanceProperty = null;
+    private static PropertyInfo _inputManagerInstanceProperty = null;
     private static PropertyInfo _selectableManagerProperty = null;
 
     private static MonoBehaviour _inputManager = null;
     #endregion
 
-    private bool _heldFrontFace = true;
-    public int _bombSolvableModules;
-    public int _bombSolvedModules;
-    public float _bombStartingTimer;
-    public bool _multiDecker = false;
-    public MonoBehaviour _timerComponent = null;
-    public DateTime BombTimeStamp;
-}
+    public MonoBehaviour timerComponent = null;
+    public int bombSolvableModules;
+    public int bombSolvedModules;
+    public float bombStartingTimer;
+    public bool multiDecker = false;
 
+    private bool _heldFrontFace = true;
+}

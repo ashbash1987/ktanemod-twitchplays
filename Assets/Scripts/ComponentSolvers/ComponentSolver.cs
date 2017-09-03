@@ -257,7 +257,7 @@ public abstract class ComponentSolver : ICommandResponder
             AwardSolve(_currentUserNickName, _currentResponseNotifier);
         }
 
-        BombCommander._bombSolvedModules++;
+        BombCommander.bombSolvedModules++;
         BombMessageResponder.moduleCameras.UpdateSolves();
 
         if (_turnQueued)
@@ -426,7 +426,7 @@ public abstract class ComponentSolver : ICommandResponder
             {
                 cameraPriority = (inputCommand.Equals("view pin", StringComparison.InvariantCultureIgnoreCase)) ? ModuleCameras.CameraPinned : ModuleCameras.CameraPrioritised;
             }
-            if ( (BombCommander._multiDecker) || (cameraPriority > ModuleCameras.CameraNotInUse) )
+            if ( (BombCommander.multiDecker) || (cameraPriority > ModuleCameras.CameraNotInUse) )
             {
                 BombMessageResponder.moduleCameras.AttachToModule(BombComponent, ComponentHandle, Math.Max(cameraPriority, ModuleCameras.CameraInUse));
             }

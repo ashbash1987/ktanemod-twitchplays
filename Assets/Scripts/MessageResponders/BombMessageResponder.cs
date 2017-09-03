@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using UnityEditor;
 using UnityEngine;
-using ADBannerView = UnityEngine.iOS.ADBannerView;
 
 public class BombMessageResponder : MessageResponder
 {
@@ -81,7 +79,7 @@ public class BombMessageResponder : MessageResponder
             HasDetonated |= (bool) CommonReflectedTypeInfo.HasDetonatedProperty.GetValue(commander.Bomb, null);
             if (timeRemaining > commander.CurrentTimer)
             {
-                timeStarting = commander._bombStartingTimer;
+                timeStarting = commander.bombStartingTimer;
                 timeRemaining = commander.CurrentTimer;
             }
 
@@ -268,12 +266,15 @@ public class BombMessageResponder : MessageResponder
             }
         }
 
-        foreach (var handle in _bombHandles)
+        foreach (TwitchBombHandle handle in _bombHandles)
         {
             if (handle != null)
             {
                 IEnumerator onMessageReceived = handle.OnMessageReceived(userNickName, userColorCode, text);
-                if (onMessageReceived == null) continue;
+                if (onMessageReceived == null)
+                {
+                    continue;
+                }
 
                 if (_currentBomb != handle.bombID)
                 {
@@ -318,7 +319,7 @@ public class BombMessageResponder : MessageResponder
 
         if (bombComponents.Count > 12)
         {
-            _bombCommanders[_bombCommanders.Count - 1]._multiDecker = true;
+            _bombCommanders[_bombCommanders.Count - 1].multiDecker = true;
         }
 
         foreach (MonoBehaviour bombComponent in bombComponents)
@@ -333,7 +334,7 @@ public class BombMessageResponder : MessageResponder
                     continue;
 
                 case ComponentTypeEnum.Timer:
-                    _bombCommanders[_bombCommanders.Count - 1]._timerComponent = bombComponent;
+                    _bombCommanders[_bombCommanders.Count - 1].timerComponent = bombComponent;
                     continue;
 
                 default:
@@ -356,7 +357,7 @@ public class BombMessageResponder : MessageResponder
             handle.basePosition = handle.transform.localPosition;
             handle.idealHandlePositionOffset = bombComponent.transform.parent.InverseTransformDirection(idealOffset);
 
-            handle.bombCommander._bombSolvableModules++;
+            handle.bombCommander.bombSolvableModules++;
 
             _componentHandles.Add(handle);
         }
