@@ -120,14 +120,14 @@ public class TwitchComponentHandle : MonoBehaviour
                 _solver.Code = _code;
                 _solver.ComponentHandle = this;
                 Vector3 pos = canvasGroupMultiDecker.transform.localPosition;
-                canvasGroupMultiDecker.transform.localPosition = new Vector3(_solver.statusLightLeft ? -pos.x : pos.x, pos.y, _solver.statusLightBottom ? -pos.z : pos.z);
-                /*
-                Vector3 angle = canvasGroupMultiDecker.transform.eulerAngles;
-                canvasGroupMultiDecker.transform.localEulerAngles = new Vector3(angle.x, _solver.IDRotation, angle.z);
+                canvasGroupMultiDecker.transform.localPosition = new Vector3(_solver.modInfo.statusLightLeft ? -pos.x : pos.x, pos.y, _solver.modInfo.statusLightDown ? -pos.z : pos.z);
+                
+                /*Vector3 angle = canvasGroupMultiDecker.transform.eulerAngles;
+                canvasGroupMultiDecker.transform.localEulerAngles = new Vector3(angle.x, _solver.modInfo.chatRotation, angle.z);
                 angle = canvasGroupMultiDecker.transform.localEulerAngles;
-                canvasGroup.transform.localEulerAngles = new Vector3(angle.x, _solver.IDRotation, angle.z);
+                canvasGroup.transform.localEulerAngles = new Vector3(angle.x, _solver.modInfo.chatRotation, angle.z);
 
-                switch ((int) _solver.IDRotation)
+                switch ((int) _solver.modInfo.chatRotation)
                 {
                     case 90:
                     case -270:
@@ -241,12 +241,12 @@ public class TwitchComponentHandle : MonoBehaviour
         
         string messageOut = null;
         if (internalCommand.Equals("help", StringComparison.InvariantCultureIgnoreCase)) {
-            if (_solver.helpMessage == null) {
+            if (string.IsNullOrEmpty(_solver.modInfo.helpText)) {
                 bool moddedModule = ( (componentType == ComponentTypeEnum.Mod) || (componentType == ComponentTypeEnum.NeedyMod) );
                 messageOut = "No help message for {1}! Try here: " + TwitchPlaysService.urlHelper.Reference(moddedModule);
             }
             else {
-                messageOut = string.Format("{0}: {1}", headerText.text, _solver.helpMessage);
+                messageOut = string.Format("{0}: {1}", headerText.text, _solver.modInfo.helpText);
             }
         }
         else if (internalCommand.StartsWith("manual", StringComparison.InvariantCultureIgnoreCase)) {
@@ -256,11 +256,11 @@ public class TwitchComponentHandle : MonoBehaviour
             {
                 manualType = "pdf";
             }
-            if (_solver.manualCode == null) {
+            if (string.IsNullOrEmpty(_solver.modInfo.manualCode)) {
                 manualText = headerText.text;
             }
             else {
-                manualText = _solver.manualCode;
+                manualText = _solver.modInfo.manualCode;
             }
             if (manualText.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase) ||
                 manualText.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))

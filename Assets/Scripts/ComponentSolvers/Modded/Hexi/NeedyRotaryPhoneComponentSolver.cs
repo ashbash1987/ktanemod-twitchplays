@@ -19,9 +19,7 @@ public class NeedyRotaryPhoneComponentSolver : ComponentSolver
         _buttons[7] = (MonoBehaviour)_button7Field.GetValue(bombComponent.GetComponent(_componentSolverType));
         _buttons[8] = (MonoBehaviour)_button8Field.GetValue(bombComponent.GetComponent(_componentSolverType));
         _buttons[9] = (MonoBehaviour)_button9Field.GetValue(bombComponent.GetComponent(_componentSolverType));
-
-        helpMessage = "Respond to the phone call with !{0} press 8 4 9.";
-        manualCode = "Rotary%20Phone";
+        modInfo = ComponentSolverFactory.GetModuleInfo(GetModuleType());
     }
 
     private static float[] delayTimes = new float[]{

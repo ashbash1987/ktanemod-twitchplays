@@ -11,8 +11,7 @@ public class TurnTheKeyAdvancedComponentSolver : ComponentSolver
     {
         _leftKey = (MonoBehaviour)_leftKeyField.GetValue(bombComponent.GetComponent(_componentType));
         _rightKey = (MonoBehaviour)_rightKeyField.GetValue(bombComponent.GetComponent(_componentType));
-
-        helpMessage = "Turn the left key with !{0} turn left. Turn the right key with !{0} turn right.";
+        modInfo = ComponentSolverFactory.GetModuleInfo(GetModuleType());
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

@@ -13,7 +13,7 @@ public class ListeningComponentSolver : ComponentSolver
     {
         _bc = bombComponent.GetComponent(_componentType);
         _buttons = new MonoBehaviour[4];
-        helpMessage = "Listen to the sound with !{0} press play. Enter the response with !{0} press $ & * * #.";
+        modInfo = ComponentSolverFactory.GetModuleInfo(GetModuleType());
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

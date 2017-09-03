@@ -67,6 +67,9 @@ public class TwitchPlaysService : MonoBehaviour
         _leaderboard = new Leaderboard();
         _leaderboard.LoadDataFromFile();
 
+        ModuleData.LoadDataFromFile();
+        ModuleData.WriteDataToFile();
+
         SetupResponder(bombMessageResponder);
         SetupResponder(postGameMessageResponder);
         SetupResponder(missionMessageResponder);
@@ -151,6 +154,10 @@ public class TwitchPlaysService : MonoBehaviour
 
             case KMGameInfo.State.PostGame:
                 return postGameMessageResponder;
+
+            case KMGameInfo.State.Transitioning:
+                ModuleData.LoadDataFromFile();
+                return null;
 
             default:
                 return null;

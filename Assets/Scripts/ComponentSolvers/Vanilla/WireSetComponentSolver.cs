@@ -9,8 +9,7 @@ public class WireSetComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _wires = (IList)_wiresField.GetValue(bombComponent);
-        
-        helpMessage = "!{0} cut 3 [cut wire 3] | Wires are ordered from top to bottom | Empty spaces are not counted";
+        modInfo = ComponentSolverFactory.GetModuleInfo("WireSetComponentSolver");
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

@@ -11,8 +11,7 @@ public class SimonComponentSolver : ComponentSolver
         base(bombCommander, bombComponent, ircConnection, canceller)
     {
         _buttons = (Array)_buttonsField.GetValue(bombComponent);
-        
-        helpMessage = "!{0} press red green blue yellow, !{0} press rgby [press a sequence of colours] | You must include the input from any previous stages";
+        modInfo = ComponentSolverFactory.GetModuleInfo("SimonComponentSolver");
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

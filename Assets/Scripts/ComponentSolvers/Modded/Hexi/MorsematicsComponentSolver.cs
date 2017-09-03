@@ -13,7 +13,7 @@ public class MorsematicsComponentSolver : ComponentSolver
         _component = bombComponent.GetComponent(_componentType);
         _transmit = (KMSelectable)_transmitField.GetValue(_component);
         _switch = (KMSelectable)_switchField.GetValue(_component);
-        helpMessage = "Turn the lights off with !{0} lights off. Turn the lights on with !{0} lights on. Tranmit the answer with !{0} transmit -..-";
+        modInfo = ComponentSolverFactory.GetModuleInfo(GetModuleType());
     }
 
     protected override IEnumerator RespondToCommandInternal(string inputCommand)

@@ -224,6 +224,17 @@ public abstract class ComponentSolver : ICommandResponder
         _interactEndedMethod.Invoke(selectable, null);
         _setHighlightMethod.Invoke(selectable, new object[] { false });
     }
+
+    protected string GetModuleType()
+    {
+        KMBombModule bombModule = BombComponent.GetComponent<KMBombModule>();
+        if (bombModule != null)
+            return bombModule.ModuleType;
+        KMNeedyModule needyModule = BombComponent.GetComponent<KMNeedyModule>();
+        if (needyModule != null)
+            return needyModule.ModuleType;
+        return null;
+    }
     #endregion
 
     #region Private Methods
@@ -469,17 +480,15 @@ public abstract class ComponentSolver : ICommandResponder
     private ICommandResponseNotifier _currentResponseNotifier = null;
     private string _currentUserNickName = null;
     #endregion
-    
-    public string helpMessage = null;
-    public string manualCode = null;
-    public bool statusLightLeft = false;
-    public bool statusLightBottom = false;
-    public float IDRotation = 0;
+
+
+    public ModuleInformation modInfo = null;
     public int cameraPriority = ModuleCameras.CameraNotInUse;
 
     public bool _turnQueued = false;
     private bool _readyToTurn = false;
     private bool _processingTwitchCommand = false;
+    
    
 
     public TwitchComponentHandle ComponentHandle = null;
