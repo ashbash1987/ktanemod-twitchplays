@@ -79,7 +79,13 @@ public class ModuleCameras : MonoBehaviour
                 SetRenderLayer(newLayer);
                 cameraInstance.transform.SetParent(module.component.transform, false);
                 cameraInstance.gameObject.SetActive(true);
+
                 Debug.LogFormat("[ModuleCameras] Component's layer is {0}. Camera's bitmask is {1}", module.component.gameObject.layer, cameraInstance.cullingMask);
+
+                Vector3 lossyScale = cameraInstance.transform.lossyScale;
+                cameraInstance.nearClipPlane = 1.0f * lossyScale.y;
+                cameraInstance.farClipPlane = 3.0f * lossyScale.y;
+                Debug.LogFormat("[ModuleCameras] Camera's lossyScale is {0}; Setting near plane to {1}, far plane to {2}", lossyScale, cameraInstance.nearClipPlane, cameraInstance.farClipPlane);
             }
         }
 
