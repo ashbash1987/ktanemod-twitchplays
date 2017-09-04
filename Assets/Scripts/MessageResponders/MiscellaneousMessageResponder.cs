@@ -102,45 +102,46 @@ public class MiscellaneousMessageResponder : MessageResponder
 
 		if (ProfileManager.ProfilesManagable)
 		{
-			if (text.Equals("!profile", StringComparison.InvariantCultureIgnoreCase))
+			if (text.StartsWith("!profile", StringComparison.InvariantCultureIgnoreCase))
 			{
 				string[] parts = text.ToLowerInvariant().Split(new[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);
+
 				if (parts[1] == null)
 				{
 					string profileName = "tp" + userNickName.ToLowerInvariant();
 					if (ProfileManager.ActiveProfiles.Contains(profileName))
 					{
-						_ircConnection.SendMessage(string.Format("/me Your profile is already on, {0}.", userNickName));
+						_ircConnection.SendMessage(string.Format("Your profile is already on, {0}.", userNickName));
 						return;
 					}
 
 					if (ProfileManager.ProfileExists(profileName))
 					{
 						ProfileManager.AddProfile(profileName);
-						_ircConnection.SendMessage(string.Format("/me Your profile is now on, {0}.", userNickName));
+						_ircConnection.SendMessage(string.Format("Your profile is now on, {0}.", userNickName));
 					}
 					else
 					{
-						_ircConnection.SendMessage(string.Format("/me Unable to find a loaded profile for you, {0}. You can follow instructions at https://goo.gl/RnS2kQ to create and upload a profile for use in this channel.  Please note, the profile must be manually verified, and may not be immediately available for use.", userNickName));
+						_ircConnection.SendMessage(string.Format("Unable to find a loaded profile for you, {0}. You can follow instructions at https://goo.gl/RnS2kQ to create and upload a profile for use in this channel.  Please note, the profile must be manually verified, and may not be immediately available for use.", userNickName));
 					}
 				}
 				else
 				{
-					string profileName = parts[1];
+					string profileName = text.Substring(9);
 					if (ProfileManager.ActiveProfiles.Contains(profileName))
 					{
-						_ircConnection.SendMessage("/me That profile is already on.");
+						_ircConnection.SendMessage("That profile is already on.");
 						return;
 					}
 
 					if (ProfileManager.ProfileExists(profileName))
 					{
 						ProfileManager.AddProfile(profileName);
-						_ircConnection.SendMessage("/me Profile found and activated.");
+						_ircConnection.SendMessage("Profile found and activated.");
 					}
 					else
 					{
-						_ircConnection.SendMessage("/me Unable to find a loaded profile by that name.");
+						_ircConnection.SendMessage("Unable to find a loaded profile by that name.");
 					}
 				}
 
@@ -148,14 +149,14 @@ public class MiscellaneousMessageResponder : MessageResponder
 			}
 			else if (text.Equals("!checkprofiles", StringComparison.InvariantCultureIgnoreCase))
 			{
-				_ircConnection.SendMessage(string.Format("/me The following profiles are active: {0}.", string.Join(", ", ProfileManager.ActiveProfiles.ToArray())));
+				_ircConnection.SendMessage(string.Format("The following profiles are active: {0}.", string.Join(", ", ProfileManager.ActiveProfiles.ToArray())));
 				return;
 			}
 			else if (text.Equals("!clearprofiles", StringComparison.InvariantCultureIgnoreCase))
 			{
 				ProfileManager.ActiveProfiles.Clear();
 				ProfileManager.UpdateActiveProfiles();
-				_ircConnection.SendMessage("/me All profiles are now disabled.");
+				_ircConnection.SendMessage("All profiles are now disabled.");
 				return;
 			}
 		}
