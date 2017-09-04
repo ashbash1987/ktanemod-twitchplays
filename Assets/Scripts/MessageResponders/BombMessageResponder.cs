@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using UnityEditor;
 using UnityEngine;
-using ADBannerView = UnityEngine.iOS.ADBannerView;
 
 public class BombMessageResponder : MessageResponder
 {
