@@ -122,7 +122,7 @@ public class MiscellaneousMessageResponder : MessageResponder
 					}
 					else
 					{
-						_ircConnection.SendMessage(string.Format("Unable to find a loaded profile for you, {0}. You can follow instructions at https://goo.gl/RnS2kQ to create and upload a profile for use in this channel.  Please note, the profile must be manually verified, and may not be immediately available for use.", userNickName));
+						_ircConnection.SendMessage(string.Format("Unable to find a loaded profile for you, {0}.", userNickName));
 					}
 				}
 				else
