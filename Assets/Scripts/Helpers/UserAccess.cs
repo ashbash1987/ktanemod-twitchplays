@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using UnityEngine;
 
 [Flags()]
 public enum AccessLevel
@@ -13,7 +17,7 @@ public enum AccessLevel
 
 public static class UserAccess
 { 
-    private static readonly Dictionary<string, AccessLevel> AccessLevels = new Dictionary<string, AccessLevel>();
+    private static Dictionary<string, AccessLevel> AccessLevels = new Dictionary<string, AccessLevel>();
 
     static UserAccess()
     {
@@ -26,9 +30,46 @@ public static class UserAccess
          * TODO: Extend this to a JSON-serializable type, and/or inspect the decorated PRIVMSG lines from IRC to infer moderator status from the Twitch Chat moderator flag.
          */
 
-        //AccessLevels["UserNickName"] = AccessLevel.SuperUser | AccessLevel.Admin | AccessLevel.Mod;
-        //AccessLevels["UserNickName"] = AccessLevel.Mod;
+        //Twitch Usernames can't actually begin with an underscore, so these are safe to include as examples
+        AccessLevels["_UserNickName1"] = AccessLevel.SuperUser | AccessLevel.Admin | AccessLevel.Mod;
+        AccessLevels["_UserNickName2"] = AccessLevel.Mod;
+
+        LoadAccessList();
     }
+
+    public static void WriteAccessList()
+    {
+        string path = Path.Combine(Application.persistentDataPath, usersSavePath);
+        try
+        {
+            Debug.Log("UserAccess: Writing User Access information data to file: " + path);
+            File.WriteAllText(path, JsonConvert.SerializeObject(AccessLevels,Formatting.Indented,new StringEnumConverter()));
+        }
+        catch (Exception ex)
+        {
+            Debug.LogException(ex);
+        }
+    }
+
+    public static void LoadAccessList()
+    {
+        string path = Path.Combine(Application.persistentDataPath, usersSavePath);
+        try
+        {
+            Debug.Log("UserAccess: Loading User Access information data from file: " + path);
+            AccessLevels = JsonConvert.DeserializeObject<Dictionary<string, AccessLevel>>(File.ReadAllText(path), new StringEnumConverter());
+        }
+        catch (FileNotFoundException)
+        {
+            Debug.LogWarningFormat("UserAccess: File {0} was not found.", path);
+            WriteAccessList();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogException(ex);
+        }
+    }
+    public static string usersSavePath = "AccessLevels.json";
 
     public static bool HasAccess(string userNickName, AccessLevel accessLevel)
     {
