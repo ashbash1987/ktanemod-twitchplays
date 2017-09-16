@@ -107,7 +107,7 @@ public class TwitchComponentHandle : MonoBehaviour
 
         canvasGroup.alpha = 0.0f;
         highlightGroup.alpha = 0.0f;
-
+		
         canvasGroupMultiDecker.alpha = bombCommander._multiDecker ? 1.0f : 0.0f;
 
         unclaimedBackgroundColor = idBannerPrefab.GetComponent<Image>().color;
@@ -194,7 +194,11 @@ public class TwitchComponentHandle : MonoBehaviour
             unsupportedPrefab.gameObject.SetActive(true);
             idBannerPrefab.gameObject.SetActive(false);
             canvasGroupMultiDecker.alpha = 0.0f;
-        }
+
+			Debug.Log("[TwitchPlays] An unimplemented module was added to a bomb, solving module.");
+			bombCommander.RemoveSolveBasedModules();
+			CommonReflectedTypeInfo.HandlePassMethod.Invoke(bombComponent, null);
+		}
 
         Arrow.gameObject.SetActive(true);
         HighlightArrow.gameObject.SetActive(true);

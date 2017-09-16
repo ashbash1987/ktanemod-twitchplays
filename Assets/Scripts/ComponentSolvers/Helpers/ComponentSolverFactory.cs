@@ -56,10 +56,23 @@ public static class ComponentSolverFactory
         //Kaneb Modules
         ModComponentSolverCreators["TwoBits"] = (bombCommander, bombComponent, ircConnection, canceller) => new TwoBitsComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
+		//Asimir Modules
+		ModComponentSolverCreators["shapeshift"] = (bombCommander, bombComponent, ircConnection, canceller) => new ShapeShiftComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+		ModComponentSolverCreators["SeaShells"] = (bombCommander, bombComponent, ircConnection, canceller) => new SeaShellsComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
 
-        //Help Messages
-        //ModComponentSolverHelpMessages["spwiz3DMaze"] = "";
-        ModComponentSolverHelpMessages["AdjacentLettersModule"] = "Set the Letters with !{0} set W D J S.  (warning, this will unset ALL letters not specified.)  Submit your answer with !{0} submit.";
+		//Spare Wizard Modules
+		ModComponentSolverCreators["spwiz3DMaze"] = (bombCommander, bombComponent, ircConnection, canceller) => new ThreeDMazeComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+
+		//Misc Modules
+		ModComponentSolverCreators["NumberPad"] = (bombCommander, bombComponent, ircConnection, canceller) => new NumberPadComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+		ModComponentSolverCreators["switchModule"] = (bombCommander, bombComponent, ircConnection, canceller) => new SwitchesComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+		ModComponentSolverCreators["resistors"] = (bombCommander, bombComponent, ircConnection, canceller) => new ResistorsComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+		ModComponentSolverCreators["Microcontroller"] = (bombCommander, bombComponent, ircConnection, canceller) => new MicrocontrollerComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+		ModComponentSolverCreators["ChordQualities"] = (bombCommander, bombComponent, ircConnection, canceller) => new ChordQualitiesComponentSolver(bombCommander, bombComponent, ircConnection, canceller);
+		
+		//Help Messages
+		//ModComponentSolverHelpMessages["spwiz3DMaze"] = "";
+		ModComponentSolverHelpMessages["AdjacentLettersModule"] = "Set the Letters with !{0} set W D J S.  (warning, this will unset ALL letters not specified.)  Submit your answer with !{0} submit.";
         ModComponentSolverHelpMessages["spwizAdventureGame"] = "Cycle the stats with !{0} cycle stats.  Cycle the Weapons/Items with !{0} cycle items. Use weapons/Items with !{0} use potion. (spell out the item name completely. not case sensitive)";
         //ModComponentSolverHelpMessages["alphabet"] = "";
         //ModComponentSolverHelpMessages["AnagramsModule"] = "";
@@ -150,18 +163,23 @@ public static class ComponentSolverFactory
         ModComponentSolverManualCodes["BitOps"] = "Bitwise Operators";
         ModComponentSolverManualCodes["RubiksCubeModule"] = "Rubik%E2%80%99s Cube";
 
-        //Status Light Locations.
-        //For most modules, the Status light is in the Top Right corner.  However, there is the odd module where the status
-        //light might be in the Top left, Bottom right, or Bottom left corner.  In these cases, the ID number for multi-decker
-        //should be moved accordingly.  //Use this only in cases where the location detection code results in incorrect placement
-        //of the ID location.
-        /*ModComponentSolverStatusLightLeft["ThirdBase"] = true;
+		//Status Light Locations.
+		//For most modules, the Status light is in the Top Right corner.  However, there is the odd module where the status
+		//light might be in the Top left, Bottom right, or Bottom left corner.  In these cases, the ID number for multi-decker
+		//should be moved accordingly.  //Use this only in cases where the location detection code results in incorrect placement
+		//of the ID location.
+		/*ModComponentSolverStatusLightLeft["ThirdBase"] = true;
         ModComponentSolverStatusLightBottom["ThirdBase"] = true;*/
+		ModComponentSolverStatusLightLeft["ModuleAgainstHumanity"] = false;
+		ModComponentSolverStatusLightBottom["ModuleAgainstHumanity"] = false;
 
-        //Chat Rotation
-        //Most modules behave correctly, and have NOT rotated the StatusLightParent needlessly.  There are a few that have done exactly that.
+		ModComponentSolverStatusLightLeft["DoubleOhModule"] = false;
+		ModComponentSolverStatusLightBottom["DoubleOhModule"] = false;
 
-    }
+		//Chat Rotation
+		//Most modules behave correctly, and have NOT rotated the StatusLightParent needlessly.  There are a few that have done exactly that.
+
+	}
 
     public static ComponentSolver CreateSolver(BombCommander bombCommander, MonoBehaviour bombComponent, ComponentTypeEnum componentType, IRCConnection ircConnection, CoroutineCanceller canceller)
     {
