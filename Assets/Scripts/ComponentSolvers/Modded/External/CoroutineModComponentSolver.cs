@@ -27,8 +27,7 @@ public class CoroutineModComponentSolver : ComponentSolver
             Debug.LogError("A declared TwitchPlays CoroutineModComponentSolver process method is <null>, yet a component solver has been created; command invokation will not continue.");
             yield break;
         }
-
-        int beforeStrikeCount = StrikeCount;
+		
         IEnumerator responseCoroutine = null;
 
         try
@@ -53,7 +52,7 @@ public class CoroutineModComponentSolver : ComponentSolver
         //I'd rather have interactions that are not broken by timing mismatches, even if the tradeoff is that it looks like it accepted invalid commands.
         yield return "modcoroutine";
 
-        while (beforeStrikeCount == StrikeCount && !Solved)
+        while (true)
         {
             try
             {
@@ -89,11 +88,8 @@ public class CoroutineModComponentSolver : ComponentSolver
                 KMSelectable[] selectables = (KMSelectable[]) currentObject;
                 foreach (KMSelectable selectable in selectables)
                 {
-                    DoInteractionStart(selectable);
-                    yield return new WaitForSeconds(0.1f);
-                    DoInteractionEnd(selectable);
-                    if (beforeStrikeCount != StrikeCount || Canceller.ShouldCancel || Solved)
-                        break;
+                    DoInteractionClick(selectable);
+					yield return new WaitForSeconds(0.1f);
                 }
             }
             if (currentObject is string)

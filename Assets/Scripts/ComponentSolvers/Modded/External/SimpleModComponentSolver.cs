@@ -44,8 +44,6 @@ public class SimpleModComponentSolver : ComponentSolver
         
         yield return "modsequence";
 
-        int beforeInteractionStrikeCount = StrikeCount;
-
         for(int selectableIndex = 0; selectableIndex < selectableSequence.Length; ++selectableIndex)
         {
             if (Canceller.ShouldCancel)
@@ -61,16 +59,8 @@ public class SimpleModComponentSolver : ComponentSolver
                 continue;
             }
 
-            DoInteractionStart(selectable);
-            yield return new WaitForSeconds(0.1f);
-            DoInteractionEnd(selectable);
-
-            //Escape the sequence if a part of the given sequence is wrong, or if part of the sequence solved the module.
-            //This means it is no longer possible to death warp a bomb in twitch plays. Kappa Keepo
-            if (StrikeCount != beforeInteractionStrikeCount || Solved)
-            {
-                yield break;
-            }
+            DoInteractionClick(selectable);
+			yield return new WaitForSeconds(0.1f);
         }
     }
 

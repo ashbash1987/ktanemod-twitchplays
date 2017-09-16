@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -464,10 +464,25 @@ public class BombCommander : ICommandResponder
             return formattedTime;
         }
     }
-    #endregion
 
-    #region Readonly Fields
-    public readonly MonoBehaviour Bomb = null;
+	private static string[] solveBased = new string[] { "MemoryV2", "SouvenirModule", "TurnTheKeyAdvanced" };
+	private static bool removedSolveBasedModules = false;
+	public void RemoveSolveBasedModules()
+	{
+		if (removedSolveBasedModules) return;
+		removedSolveBasedModules = true;
+
+		foreach (KMBombModule module in MonoBehaviour.FindObjectsOfType<KMBombModule>())
+		{
+			if (solveBased.Contains(module.ModuleType)) {
+				module.HandlePass();
+			}
+		}
+	}
+	#endregion
+
+	#region Readonly Fields
+	public readonly MonoBehaviour Bomb = null;
     public readonly MonoBehaviour Selectable = null;
     public readonly MonoBehaviour FloatingHoldable = null;
     private readonly MonoBehaviour SelectableManager = null;

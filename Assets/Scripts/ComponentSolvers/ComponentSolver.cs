@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Linq;
 using System.Reflection;
+using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -38,6 +37,7 @@ public abstract class ComponentSolver : ICommandResponder
     #region Interface Implementation
     public IEnumerator RespondToCommand(string userNickName, string message, ICommandResponseNotifier responseNotifier)
     {
+		_responded = false;
         _processingTwitchCommand = true;
         if (Solved)
         {
@@ -49,10 +49,9 @@ public abstract class ComponentSolver : ICommandResponder
         _currentResponseNotifier = responseNotifier;
         _currentUserNickName = userNickName;
 
-
         int beforeStrikeCount = StrikeCount;
 
-        IEnumerator subcoroutine = null;
+		IEnumerator subcoroutine = null;
         if (message.StartsWith("send to module ", StringComparison.InvariantCultureIgnoreCase))
         {
             message = message.Substring(15);
@@ -64,8 +63,31 @@ public abstract class ComponentSolver : ICommandResponder
 
         if (subcoroutine == null || !subcoroutine.MoveNext())
         {
-            subcoroutine = RespondToCommandInternal(message);
-            if (subcoroutine == null || !subcoroutine.MoveNext() || Solved || beforeStrikeCount != StrikeCount)
+			try
+			{
+				subcoroutine = RespondToCommandInternal(message);
+			}
+			catch (Exception e)
+			{
+				HandleModuleException(e);
+				yield break;
+			}
+
+			bool moved = false;
+			if (subcoroutine != null)
+			{
+				try
+				{
+					moved = subcoroutine.MoveNext();
+				}
+				catch (Exception e)
+				{
+					HandleModuleException(e);
+					yield break;
+				}
+			}
+
+            if (subcoroutine == null || !moved || Solved || beforeStrikeCount != StrikeCount)
             {
                 if (Solved || beforeStrikeCount != StrikeCount)
                 {
@@ -86,7 +108,11 @@ public abstract class ComponentSolver : ICommandResponder
                     yield return new WaitForSeconds(0.5f);
                 }
                 else
-                    responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+				{
+					IRCConnection.SendMessage(string.Format("Sorry @{0}, that command is invalid.", userNickName));
+
+					responseNotifier.ProcessResponse(CommandResponse.NoResponse);
+				}
 
                 _currentResponseNotifier = null;
                 _currentUserNickName = null;
@@ -108,9 +134,28 @@ public abstract class ComponentSolver : ICommandResponder
         int previousStrikeCount = StrikeCount;
         bool parseError = false;
         bool needQuaternionReset = false;
-
-        while (subcoroutine.MoveNext())
+		bool exceptionThrown = false;
+		
+        while (previousStrikeCount == StrikeCount && !Solved)
         {
+			try
+			{
+				if (!subcoroutine.MoveNext())
+				{
+					break;
+				}
+				else
+				{
+					_responded = true;
+				}
+			}
+			catch (Exception e)
+			{
+				exceptionThrown = true;
+				HandleModuleException(e);
+				break;
+			}
+
             object currentValue = subcoroutine.Current;
             if (currentValue is string)
             {
@@ -167,6 +212,11 @@ public abstract class ComponentSolver : ICommandResponder
             }
             else if (currentValue is Quaternion)
             {
+				if (!needQuaternionReset)
+				{
+					BombMessageResponder.moduleCameras.Hide();
+				}
+
                 Quaternion localQuaternion = (Quaternion)currentValue;
                 BombCommander.RotateByLocalQuaternion(localQuaternion);
                 needQuaternionReset = true;
@@ -174,10 +224,16 @@ public abstract class ComponentSolver : ICommandResponder
             yield return currentValue;
         }
 
+		if (!_responded && !exceptionThrown)
+		{
+			IRCConnection.SendMessage(string.Format("Sorry @{0}, that command is invalid.", userNickName));
+		}
+
         if (needQuaternionReset)
         {
             BombCommander.RotateByLocalQuaternion(Quaternion.identity);
-        }
+			BombMessageResponder.moduleCameras.Show();
+		}
 
         if (parseError)
         {
@@ -224,10 +280,29 @@ public abstract class ComponentSolver : ICommandResponder
         _interactEndedMethod.Invoke(selectable, null);
         _setHighlightMethod.Invoke(selectable, new object[] { false });
     }
-    #endregion
 
-    #region Private Methods
-    private void HookUpEvents()
+	protected void DoInteractionClick(MonoBehaviour interactable)
+	{
+		DoInteractionStart(interactable);
+		DoInteractionEnd(interactable);
+	}
+
+	protected void HandleModuleException(Exception e)
+	{
+		Debug.Log("[TwitchPlays] While solving a module an exception has occurred! Here's the error:");
+		Debug.LogException(e);
+
+		IRCConnection.SendMessage("Looks like a module ran into a problem while running a command, automatically solving module. Some other modules may also be solved to prevent problems.");
+
+		_currentUserNickName = null;
+		_delegatedSolveUserNickName = null;
+		BombCommander.RemoveSolveBasedModules();
+		CommonReflectedTypeInfo.HandlePassMethod.Invoke(BombComponent, null);
+	}
+	#endregion
+
+	#region Private Methods
+	private void HookUpEvents()
     {
         Delegate gameOnPassDelegate = (Delegate)CommonReflectedTypeInfo.OnPassField.GetValue(BombComponent);
         Delegate internalOnPassDelegate = Delegate.CreateDelegate(CommonReflectedTypeInfo.PassEventType, this, _onPassInternalMethod);
@@ -364,14 +439,14 @@ public abstract class ComponentSolver : ICommandResponder
 
     private int _strikeCount = 0;
     protected int StrikeCount
-    {
-        get
-        {
+	{
+		get
+		{
             return _strikeCount;
-        }
-    }
+		}
+	}
 
-    protected float FocusDistance
+	protected float FocusDistance
     {
         get
         {
@@ -419,13 +494,15 @@ public abstract class ComponentSolver : ICommandResponder
         {
             cameraPriority = ModuleCameras.CameraNotInUse;
             BombMessageResponder.moduleCameras.DetachFromModule(BombComponent);
+			_responded = true;
         }
         else
         {
             if (inputCommand.StartsWith("view", StringComparison.InvariantCultureIgnoreCase))
             {
                 cameraPriority = (inputCommand.Equals("view pin", StringComparison.InvariantCultureIgnoreCase)) ? ModuleCameras.CameraPinned : ModuleCameras.CameraPrioritised;
-            }
+				_responded = true;
+			}
             if ( (BombCommander._multiDecker) || (cameraPriority > ModuleCameras.CameraNotInUse) )
             {
                 BombMessageResponder.moduleCameras.AttachToModule(BombComponent, ComponentHandle, Math.Max(cameraPriority, ModuleCameras.CameraInUse));
@@ -433,8 +510,8 @@ public abstract class ComponentSolver : ICommandResponder
         }
 
         if (inputCommand.Equals("show", StringComparison.InvariantCultureIgnoreCase))
-        {
-            yield return "show";
+		{
+			yield return "show";
             yield return null;
         }
     }
@@ -480,7 +557,7 @@ public abstract class ComponentSolver : ICommandResponder
     public bool _turnQueued = false;
     private bool _readyToTurn = false;
     private bool _processingTwitchCommand = false;
-   
+	private bool _responded = false;
 
-    public TwitchComponentHandle ComponentHandle = null;
+	public TwitchComponentHandle ComponentHandle = null;
 }
