@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Linq;
 using System.Reflection;
+using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -38,6 +37,7 @@ public abstract class ComponentSolver : ICommandResponder
     #region Interface Implementation
     public IEnumerator RespondToCommand(string userNickName, string message, ICommandResponseNotifier responseNotifier)
     {
+		_responded = false;
         _processingTwitchCommand = true;
         if (Solved)
         {
@@ -49,10 +49,9 @@ public abstract class ComponentSolver : ICommandResponder
         _currentResponseNotifier = responseNotifier;
         _currentUserNickName = userNickName;
 
-
         int beforeStrikeCount = StrikeCount;
 
-        IEnumerator subcoroutine = null;
+		IEnumerator subcoroutine = null;
         if (message.StartsWith("send to module ", StringComparison.InvariantCultureIgnoreCase))
         {
             message = message.Substring(15);
@@ -135,7 +134,6 @@ public abstract class ComponentSolver : ICommandResponder
         int previousStrikeCount = StrikeCount;
         bool parseError = false;
         bool needQuaternionReset = false;
-		bool responded = false;
 		bool exceptionThrown = false;
 		
         while (previousStrikeCount == StrikeCount && !Solved)
@@ -148,7 +146,7 @@ public abstract class ComponentSolver : ICommandResponder
 				}
 				else
 				{
-					responded = true;
+					_responded = true;
 				}
 			}
 			catch (Exception e)
@@ -226,7 +224,7 @@ public abstract class ComponentSolver : ICommandResponder
             yield return currentValue;
         }
 
-		if (!responded && !exceptionThrown)
+		if (!_responded && !exceptionThrown)
 		{
 			IRCConnection.SendMessage(string.Format("Sorry @{0}, that command is invalid.", userNickName));
 		}
@@ -496,13 +494,15 @@ public abstract class ComponentSolver : ICommandResponder
         {
             cameraPriority = ModuleCameras.CameraNotInUse;
             BombMessageResponder.moduleCameras.DetachFromModule(BombComponent);
+			_responded = true;
         }
         else
         {
             if (inputCommand.StartsWith("view", StringComparison.InvariantCultureIgnoreCase))
             {
                 cameraPriority = (inputCommand.Equals("view pin", StringComparison.InvariantCultureIgnoreCase)) ? ModuleCameras.CameraPinned : ModuleCameras.CameraPrioritised;
-            }
+				_responded = true;
+			}
             if ( (BombCommander._multiDecker) || (cameraPriority > ModuleCameras.CameraNotInUse) )
             {
                 BombMessageResponder.moduleCameras.AttachToModule(BombComponent, ComponentHandle, Math.Max(cameraPriority, ModuleCameras.CameraInUse));
@@ -510,8 +510,8 @@ public abstract class ComponentSolver : ICommandResponder
         }
 
         if (inputCommand.Equals("show", StringComparison.InvariantCultureIgnoreCase))
-        {
-            yield return "show";
+		{
+			yield return "show";
             yield return null;
         }
     }
@@ -557,7 +557,7 @@ public abstract class ComponentSolver : ICommandResponder
     public bool _turnQueued = false;
     private bool _readyToTurn = false;
     private bool _processingTwitchCommand = false;
-   
+	private bool _responded = false;
 
-    public TwitchComponentHandle ComponentHandle = null;
+	public TwitchComponentHandle ComponentHandle = null;
 }
